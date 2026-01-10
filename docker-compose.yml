@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: dhakersg/zaydo-front:latest
+    restart: always
+    ports:
+      - "80:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://51.77.146.43:3000/api
+      NEXT_PUBLIC_APP_NAME: Zaydo
+      NEXT_PUBLIC_APP_URL: http://51.77.146.43
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
