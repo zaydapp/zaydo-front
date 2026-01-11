@@ -7,6 +7,9 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+ENV NEXT_PUBLIC_API_BASE_URL=http://51.77.146.43:3000/api
+ENV NEXT_PUBLIC_APP_URL=http://51.77.146.43
+ENV NEXT_PUBLIC_APP_NAME=Zaydo
 RUN npm run build
 
 # Production stage
