@@ -5,6 +5,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { suppliersApi } from '@/lib/api';
 import { Supplier } from '@/types';
+
+interface TenantSetting {
+  id: string;
+  key: string;
+  value: unknown;
+  category: string;
+  description?: string;
+  isSystem: boolean;
+}
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Pencil, Trash2, Eye, Truck } from 'lucide-react';
@@ -27,24 +36,30 @@ export default function SuppliersPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  
+
   // Fetch supplier types from tenant settings
   const { data: settingsData } = useTenantSettings('suppliers');
-  const supplierTypesSetting = settingsData?.find((s: any) => s.key === 'suppliers.types');
-  const supplierTypes = (supplierTypesSetting?.value as Array<{ value: string; label: string }>) || [
+  const supplierTypesSetting = settingsData?.find(
+    (s: TenantSetting) => s.key === 'suppliers.types'
+  );
+  const supplierTypes = (supplierTypesSetting?.value as Array<{
+    value: string;
+    label: string;
+  }>) || [
     { value: 'RAW_MATERIAL', label: 'Raw Materials' },
     { value: 'PACKAGING', label: 'Packaging' },
   ];
-  
+
   const [activeTab, setActiveTab] = useState<string>('ALL');
 
   const { data, isLoading } = useQuery({
     queryKey: ['suppliers', search, activeTab],
-    queryFn: () => suppliersApi.getAll({ 
-      search, 
-      type: activeTab !== 'ALL' ? activeTab : undefined,
-      take: 50 
-    }),
+    queryFn: () =>
+      suppliersApi.getAll({
+        search,
+        type: activeTab !== 'ALL' ? activeTab : undefined,
+        take: 50,
+      }),
   });
 
   const deleteMutation = useMutation({
@@ -76,7 +91,11 @@ export default function SuppliersPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t('suppliers.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('suppliers.subtitle')}</p>
         </div>
-        <Button onClick={() => router.push('/dashboard/suppliers/new')} size="default" className="shadow-sm">
+        <Button
+          onClick={() => router.push('/dashboard/suppliers/new')}
+          size="default"
+          className="shadow-sm"
+        >
           <Plus className="mr-2 h-4 w-4" />
           {t('suppliers.addSupplier')}
         </Button>
@@ -89,9 +108,7 @@ export default function SuppliersPage() {
             <button
               onClick={() => setActiveTab('ALL')}
               className={`relative px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap rounded-t-lg ${
-                activeTab === 'ALL'
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
+                activeTab === 'ALL' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <span className="relative z-10">{t('common.all')}</span>
@@ -104,15 +121,13 @@ export default function SuppliersPage() {
               const translationKey = `settings.settingValues.suppliers.${valueKey}`;
               const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
               const isActive = activeTab === type.value;
-              
+
               return (
                 <button
                   key={type.value}
                   onClick={() => setActiveTab(type.value)}
                   className={`relative px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap rounded-t-lg ${
-                    isActive
-                      ? 'text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
+                    isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <span className="relative z-10">{label}</span>
@@ -125,7 +140,7 @@ export default function SuppliersPage() {
           </div>
         </div>
 
-        {['ALL', ...supplierTypes.map(t => t.value)].map((tabValue) => (
+        {['ALL', ...supplierTypes.map((t) => t.value)].map((tabValue) => (
           <TabsContent key={tabValue} value={tabValue} className="space-y-6 mt-6">
             {/* Search Bar */}
             <div className="flex items-center gap-4">
@@ -139,7 +154,8 @@ export default function SuppliersPage() {
                 />
               </div>
               <div className="text-sm text-muted-foreground">
-                {data?.pagination.total || 0} {t('common.results', { count: data?.pagination.total || 0 })}
+                {data?.pagination.total || 0}{' '}
+                {t('common.results', { count: data?.pagination.total || 0 })}
               </div>
             </div>
 
@@ -165,10 +181,17 @@ interface SuppliersTableProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
-  deleteMutation: any;
+  deleteMutation: { isPending?: boolean; mutate: (id: string) => void };
 }
 
-function SuppliersTable({ suppliers, isLoading, onEdit, onDelete, onView, deleteMutation }: SuppliersTableProps) {
+function SuppliersTable({
+  suppliers,
+  isLoading,
+  onEdit,
+  onDelete,
+  onView,
+  deleteMutation,
+}: SuppliersTableProps) {
   const { t } = useTranslation();
 
   return (
@@ -225,11 +248,13 @@ function SuppliersTable({ suppliers, isLoading, onEdit, onDelete, onView, delete
                     })()}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{supplier.contactPerson || '-'}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {supplier.contactPerson || '-'}
+                </TableCell>
                 <TableCell className="text-muted-foreground">{supplier.phone || '-'}</TableCell>
                 <TableCell className="text-muted-foreground">{supplier.city || '-'}</TableCell>
                 <TableCell>
-                  <Badge 
+                  <Badge
                     variant={supplier.status === 'ACTIVE' ? 'default' : 'secondary'}
                     className="font-normal"
                   >

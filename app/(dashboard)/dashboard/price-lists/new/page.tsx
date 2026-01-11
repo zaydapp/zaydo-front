@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { priceListsApi, productsApi } from '@/lib/api';
+import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -69,18 +70,18 @@ export default function NewPriceListPage() {
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const updateItem = (index: number, field: keyof PriceListItem, value: any) => {
+  const updateItem = (index: number, field: keyof PriceListItem, value: string | number) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
-    
+
     // If product is selected, add product name
     if (field === 'productId') {
-      const product = products.find((p: any) => p.id === value);
+      const product = products.find((p: Product) => p.id === value);
       if (product) {
         newItems[index].productName = product.name;
       }
     }
-    
+
     setItems(newItems);
   };
 
@@ -93,8 +94,10 @@ export default function NewPriceListPage() {
     }
 
     // Validate all items have product and price
-    if (items.some(item => !item.productId || item.price <= 0)) {
-      toast.error(t('priceLists.itemsValidationError') || 'All items must have a product and valid price');
+    if (items.some((item) => !item.productId || item.price <= 0)) {
+      toast.error(
+        t('priceLists.itemsValidationError') || 'All items must have a product and valid price'
+      );
       return;
     }
 
@@ -110,7 +113,7 @@ export default function NewPriceListPage() {
     });
   };
 
-  const productOptions = products.map((product: any) => ({
+  const productOptions = products.map((product: Product) => ({
     value: product.id,
     label: `${product.name} (${product.unit})`,
   }));
@@ -123,9 +126,7 @@ export default function NewPriceListPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">
-            {t('priceLists.newPriceList') || 'New Price List'}
-          </h1>
+          <h1 className="text-3xl font-bold">{t('priceLists.newPriceList') || 'New Price List'}</h1>
           <p className="text-muted-foreground mt-1">
             {t('priceLists.newDescription') || 'Create a new price list for specific period'}
           </p>
@@ -184,7 +185,8 @@ export default function NewPriceListPage() {
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate">
-                  {t('priceLists.startDate') || 'Start Date'} <span className="text-destructive">*</span>
+                  {t('priceLists.startDate') || 'Start Date'}{' '}
+                  <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="startDate"
@@ -212,11 +214,7 @@ export default function NewPriceListPage() {
               <div className="space-y-2">
                 <Label htmlFor="isActive">{t('priceLists.active') || 'Active'}</Label>
                 <div className="flex items-center space-x-2 h-10">
-                  <Switch
-                    id="isActive"
-                    checked={isActive}
-                    onCheckedChange={setIsActive}
-                  />
+                  <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
                   <Label htmlFor="isActive" className="cursor-pointer">
                     {isActive ? t('common.yes') || 'Yes' : t('common.no') || 'No'}
                   </Label>
@@ -230,7 +228,9 @@ export default function NewPriceListPage() {
                 id="clientGroup"
                 value={clientGroup}
                 onChange={(e) => setClientGroup(e.target.value)}
-                placeholder={t('priceLists.clientGroupPlaceholder') || 'Optional: for future segmentation'}
+                placeholder={
+                  t('priceLists.clientGroupPlaceholder') || 'Optional: for future segmentation'
+                }
               />
             </div>
           </CardContent>
@@ -264,7 +264,8 @@ export default function NewPriceListPage() {
                 <div key={index} className="flex gap-4 items-start">
                   <div className="flex-1 space-y-2">
                     <Label>
-                      {t('priceLists.product') || 'Product'} <span className="text-destructive">*</span>
+                      {t('priceLists.product') || 'Product'}{' '}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <SearchableSelect
                       value={item.productId}
@@ -308,11 +309,7 @@ export default function NewPriceListPage() {
 
         {/* Actions */}
         <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
+          <Button type="button" variant="outline" onClick={() => router.back()}>
             {t('common.cancel') || 'Cancel'}
           </Button>
           <Button type="submit" disabled={createMutation.isPending}>

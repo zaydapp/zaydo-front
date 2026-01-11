@@ -8,7 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Save } from 'lucide-react';
 
@@ -27,8 +33,17 @@ export function CurrencySettings() {
   const updateSetting = useUpdateSetting();
   const { refreshTenant, tenant } = useTenant();
 
-  const currencySetting = settings?.find((s: any) => s.key === 'finance.currency');
-  const initialValue: CurrencySettings = currencySetting?.value || {
+  interface TenantSetting {
+    id: string;
+    key: string;
+    value: unknown;
+    category: string;
+    description?: string;
+    isSystem: boolean;
+  }
+
+  const currencySetting = settings?.find((s: TenantSetting) => s.key === 'finance.currency');
+  const defaultCurrencySettings: CurrencySettings = {
     code: tenant?.settings?.currency || 'USD',
     symbol: '$',
     position: 'after',
@@ -36,6 +51,8 @@ export function CurrencySettings() {
     thousandSeparator: ' ',
     decimals: 2,
   };
+  const initialValue: CurrencySettings =
+    (currencySetting?.value as CurrencySettings | undefined) || defaultCurrencySettings;
 
   const [formData, setFormData] = useState<CurrencySettings>(initialValue);
 
@@ -66,21 +83,24 @@ export function CurrencySettings() {
   const formatted = new Intl.NumberFormat('en', {
     minimumFractionDigits: formData.decimals,
     maximumFractionDigits: formData.decimals,
-  }).format(exampleNumber)
+  })
+    .format(exampleNumber)
     .replace(/,/g, '###THOUSAND###')
     .replace(/\./g, formData.decimalSeparator)
     .replace(/###THOUSAND###/g, formData.thousandSeparator);
 
-  const displayAmount = formData.position === 'before' 
-    ? `${formData.symbol}${formatted}` 
-    : `${formatted}${formData.symbol}`;
+  const displayAmount =
+    formData.position === 'before'
+      ? `${formData.symbol}${formatted}`
+      : `${formatted}${formData.symbol}`;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t('settings.finance.currencySettings') || 'Currency & Formatting'}</CardTitle>
         <CardDescription>
-          {t('settings.finance.currencyDescription') || 'Configure how monetary values are displayed'}
+          {t('settings.finance.currencyDescription') ||
+            'Configure how monetary values are displayed'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -94,12 +114,15 @@ export function CurrencySettings() {
               className="bg-muted cursor-not-allowed"
             />
             <p className="text-xs text-muted-foreground">
-              {t('settings.finance.currencyCodeManaged') || 'Currency code is managed by your system administrator'}
+              {t('settings.finance.currencyCodeManaged') ||
+                'Currency code is managed by your system administrator'}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="symbol">{t('settings.finance.currencySymbol') || 'Currency Symbol'}</Label>
+            <Label htmlFor="symbol">
+              {t('settings.finance.currencySymbol') || 'Currency Symbol'}
+            </Label>
             <Input
               id="symbol"
               value={formData.symbol}
@@ -110,21 +133,35 @@ export function CurrencySettings() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="position">{t('settings.finance.symbolPosition') || 'Symbol Position'}</Label>
-            <Select value={formData.position} onValueChange={(value: 'before' | 'after') => setFormData({ ...formData, position: value })}>
+            <Label htmlFor="position">
+              {t('settings.finance.symbolPosition') || 'Symbol Position'}
+            </Label>
+            <Select
+              value={formData.position}
+              onValueChange={(value: 'before' | 'after') =>
+                setFormData({ ...formData, position: value })
+              }
+            >
               <SelectTrigger id="position">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="before">{t('settings.finance.before') || 'Before amount ($100)'}</SelectItem>
-                <SelectItem value="after">{t('settings.finance.after') || 'After amount (100€)'}</SelectItem>
+                <SelectItem value="before">
+                  {t('settings.finance.before') || 'Before amount ($100)'}
+                </SelectItem>
+                <SelectItem value="after">
+                  {t('settings.finance.after') || 'After amount (100€)'}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="decimals">{t('settings.finance.decimals') || 'Decimal Places'}</Label>
-            <Select value={formData.decimals.toString()} onValueChange={(value) => setFormData({ ...formData, decimals: parseInt(value) })}>
+            <Select
+              value={formData.decimals.toString()}
+              onValueChange={(value) => setFormData({ ...formData, decimals: parseInt(value) })}
+            >
               <SelectTrigger id="decimals">
                 <SelectValue />
               </SelectTrigger>
@@ -137,8 +174,13 @@ export function CurrencySettings() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="decimalSeparator">{t('settings.finance.decimalSeparator') || 'Decimal Separator'}</Label>
-            <Select value={formData.decimalSeparator} onValueChange={(value) => setFormData({ ...formData, decimalSeparator: value })}>
+            <Label htmlFor="decimalSeparator">
+              {t('settings.finance.decimalSeparator') || 'Decimal Separator'}
+            </Label>
+            <Select
+              value={formData.decimalSeparator}
+              onValueChange={(value) => setFormData({ ...formData, decimalSeparator: value })}
+            >
               <SelectTrigger id="decimalSeparator">
                 <SelectValue />
               </SelectTrigger>
@@ -150,8 +192,15 @@ export function CurrencySettings() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="thousandSeparator">{t('settings.finance.thousandSeparator') || 'Thousand Separator'}</Label>
-            <Select value={formData.thousandSeparator || 'none'} onValueChange={(value) => setFormData({ ...formData, thousandSeparator: value === 'none' ? '' : value })}>
+            <Label htmlFor="thousandSeparator">
+              {t('settings.finance.thousandSeparator') || 'Thousand Separator'}
+            </Label>
+            <Select
+              value={formData.thousandSeparator || 'none'}
+              onValueChange={(value) =>
+                setFormData({ ...formData, thousandSeparator: value === 'none' ? '' : value })
+              }
+            >
               <SelectTrigger id="thousandSeparator">
                 <SelectValue />
               </SelectTrigger>
@@ -170,9 +219,7 @@ export function CurrencySettings() {
           <Label className="text-sm text-muted-foreground mb-2 block">
             {t('settings.finance.preview') || 'Preview'}
           </Label>
-          <div className="text-2xl font-semibold">
-            {displayAmount}
-          </div>
+          <div className="text-2xl font-semibold">{displayAmount}</div>
         </div>
 
         <Button onClick={handleSave} disabled={updateSetting.isPending}>

@@ -92,7 +92,9 @@ export function SuperAdminTopbar() {
           <DropdownMenuTrigger className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted">
             <Avatar className="h-8 w-8">
               <AvatarImage src={currentUser?.avatar} alt={currentUser?.firstName} />
-              <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div className="hidden min-w-[100px] text-sm leading-tight lg:block">
               <p className="font-medium text-foreground">
@@ -106,9 +108,7 @@ export function SuperAdminTopbar() {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel>
-              {currentUser?.email || 'Super Admin'}
-            </DropdownMenuLabel>
+            <DropdownMenuLabel>{currentUser?.email || 'Super Admin'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer">
               <span>Profile</span>
@@ -127,5 +127,3 @@ export function SuperAdminTopbar() {
     </header>
   );
 }
-
-

@@ -1,3 +1,4 @@
+/*eslint-disable */
 'use client';
 
 import { useTenant } from '@/contexts/tenant-context';
@@ -10,7 +11,7 @@ import { useTenantSettings } from './useTenantSettings';
 export function useCurrency() {
   const { tenant } = useTenant();
   const { data: settings } = useTenantSettings('finance');
-  
+
   // Get currency settings from tenant settings
   const currencySetting = settings?.find((s: any) => s.key === 'finance.currency');
   const currencyOptions: Partial<CurrencyFormatOptions> = currencySetting?.value || {

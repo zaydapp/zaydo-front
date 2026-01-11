@@ -7,6 +7,7 @@ Your modern SaaS platform for commercial and industrial project management is re
 ## 🚀 What's Included
 
 ### Core Infrastructure
+
 ✅ Next.js 14 with App Router
 ✅ TypeScript for type safety
 ✅ TailwindCSS for styling
@@ -15,6 +16,7 @@ Your modern SaaS platform for commercial and industrial project management is re
 ✅ Responsive design
 
 ### Authentication & Authorization
+
 ✅ JWT-based authentication
 ✅ Automatic token refresh
 ✅ Auth context and protected routes
@@ -22,34 +24,40 @@ Your modern SaaS platform for commercial and industrial project management is re
 ✅ Multi-tenant support
 
 ### Implemented Pages
+
 ✅ **Dashboard Overview**
-   - Sales and order statistics
-   - Interactive charts (Recharts)
-   - Low stock alerts
-   - Recent orders table
-   
+
+- Sales and order statistics
+- Interactive charts (Recharts)
+- Low stock alerts
+- Recent orders table
+
 ✅ **Products Management**
-   - Product listing with search/filters
-   - CRUD operations
-   - Stock tracking
-   - Product categories
-   
+
+- Product listing with search/filters
+- CRUD operations
+- Stock tracking
+- Product categories
+
 ✅ **Inventory Management**
-   - Stock level monitoring
-   - Stock in/out transactions
-   - Low stock alerts
-   - Transaction history
+
+- Stock level monitoring
+- Stock in/out transactions
+- Low stock alerts
+- Transaction history
 
 ✅ **Placeholder Pages (Ready to Implement)**
-   - Clients
-   - Suppliers
-   - Orders
-   - Invoices
-   - HR Module
-   - Settings
-   - Profile
+
+- Clients
+- Suppliers
+- Orders
+- Invoices
+- HR Module
+- Settings
+- Profile
 
 ### Components & Layout
+
 ✅ Collapsible sidebar navigation
 ✅ Header with search, notifications, theme toggle
 ✅ Reusable stats cards
@@ -58,12 +66,14 @@ Your modern SaaS platform for commercial and industrial project management is re
 ✅ Dialogs and modals
 
 ### State Management
+
 ✅ React Query for server state
 ✅ Context API for global state
 ✅ React Hook Form for forms
 ✅ Zod for validation
 
 ### API Integration
+
 ✅ Axios client with interceptors
 ✅ Automatic JWT injection
 ✅ Token refresh handling
@@ -108,18 +118,22 @@ zaydo/
 ## 🎯 Quick Start
 
 ### 1. Start Development Server
+
 ```bash
 npm run dev
 ```
 
 ### 2. Open Browser
+
 Navigate to: http://localhost:3000
 
 ### 3. Login with Demo Credentials
+
 - Email: `admin@demo.com`
 - Password: `demo123`
 
 ### 4. Explore Features
+
 - Dashboard with charts and statistics
 - Products page with CRUD operations
 - Inventory management
@@ -133,16 +147,19 @@ The frontend is ready to connect to your NestJS backend!
 ### API Endpoint Structure Expected:
 
 **Authentication**
+
 - `POST /api/auth/login` - User login
 - `POST /api/auth/refresh` - Refresh token
 - `GET /api/auth/me` - Current user
 
 **Dashboard**
+
 - `GET /api/dashboard/stats` - Statistics
 - `GET /api/dashboard/sales-chart` - Chart data
 - `GET /api/dashboard/production-chart` - Chart data
 
 **Resources (CRUD)**
+
 - Products: `/api/products`
 - Inventory: `/api/inventory`
 - Clients: `/api/clients`
@@ -152,7 +169,9 @@ The frontend is ready to connect to your NestJS backend!
 - Employees: `/api/employees`
 
 ### Configure Backend URL
+
 Edit `.env.local`:
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 ```
@@ -160,6 +179,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 ## 🎨 Design System
 
 ### Color Scheme
+
 - Primary: Blue (customizable via CSS variables)
 - Neutral: Gray scale
 - Success: Green
@@ -167,16 +187,19 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 - Error: Red
 
 ### Typography
+
 - Font: Inter (Google Fonts)
 - Headings: Bold, various sizes
 - Body: Regular weight
 
 ### Spacing
+
 Consistent Tailwind spacing scale (4px base)
 
 ## 📊 Features Overview
 
 ### Dashboard
+
 - **Sales Stats**: Total sales with growth percentage
 - **Order Stats**: Total orders with trend
 - **Inventory Value**: Current stock value
@@ -186,6 +209,7 @@ Consistent Tailwind spacing scale (4px base)
 - **Recent Activity**: Latest orders
 
 ### Products
+
 - **List View**: Searchable, filterable table
 - **Add/Edit**: Modal form with validation
 - **Categories**: Finished goods / Raw materials
@@ -193,6 +217,7 @@ Consistent Tailwind spacing scale (4px base)
 - **Status Badges**: Low stock indicators
 
 ### Inventory
+
 - **Stock Monitoring**: Real-time levels
 - **Transactions**: Stock in/out recording
 - **History**: Transaction logs
@@ -204,17 +229,20 @@ Consistent Tailwind spacing scale (4px base)
 The codebase is designed for easy extension:
 
 ### Add New Pages
+
 1. Create page in `app/(dashboard)/dashboard/[name]/`
 2. Add route to sidebar
 3. Implement API calls
 4. Add TypeScript types
 
 ### Add New Components
+
 1. Create in `components/[category]/`
 2. Use shadcn/ui as base
 3. Follow existing patterns
 
 ### Connect Real Data
+
 1. Update API base URL
 2. Replace dummy data with API calls
 3. Handle loading/error states
@@ -222,19 +250,19 @@ The codebase is designed for easy extension:
 
 ## 🛠️ Tech Stack Summary
 
-| Category | Technology |
-|----------|-----------|
-| Framework | Next.js 14 |
-| Language | TypeScript |
-| Styling | TailwindCSS |
-| Components | shadcn/ui |
-| Charts | Recharts |
-| State | React Query |
-| Forms | React Hook Form |
-| Validation | Zod |
-| HTTP Client | Axios |
-| Icons | Lucide React |
-| Theme | next-themes |
+| Category    | Technology      |
+| ----------- | --------------- |
+| Framework   | Next.js 14      |
+| Language    | TypeScript      |
+| Styling     | TailwindCSS     |
+| Components  | shadcn/ui       |
+| Charts      | Recharts        |
+| State       | React Query     |
+| Forms       | React Hook Form |
+| Validation  | Zod             |
+| HTTP Client | Axios           |
+| Icons       | Lucide React    |
+| Theme       | next-themes     |
 
 ## 📚 Documentation
 
@@ -245,12 +273,14 @@ The codebase is designed for easy extension:
 ## 🎯 Next Steps
 
 ### Immediate (Connect Backend)
+
 1. Update API base URL in `.env.local`
 2. Implement real authentication endpoints
 3. Test all API integrations
 4. Replace dummy data with real data
 
 ### Short-term (Complete Features)
+
 1. Implement Clients page
 2. Implement Suppliers page
 3. Implement Orders page
@@ -259,6 +289,7 @@ The codebase is designed for easy extension:
 6. Add export functionality
 
 ### Medium-term (Enhancements)
+
 1. WebSocket for real-time updates
 2. Advanced filtering and sorting
 3. Bulk operations
@@ -266,6 +297,7 @@ The codebase is designed for easy extension:
 5. Advanced reporting
 
 ### Long-term (Platform Expansion)
+
 1. AI Assistant module
 2. Mobile app (React Native)
 3. Desktop app (Electron)
@@ -275,6 +307,7 @@ The codebase is designed for easy extension:
 ## ✨ Key Features Highlights
 
 ### Production-Ready
+
 - ✅ Type-safe codebase
 - ✅ Error handling
 - ✅ Loading states
@@ -283,6 +316,7 @@ The codebase is designed for easy extension:
 - ✅ SEO-friendly
 
 ### Developer-Friendly
+
 - ✅ Clean code structure
 - ✅ Reusable components
 - ✅ Consistent patterns
@@ -290,6 +324,7 @@ The codebase is designed for easy extension:
 - ✅ Easy to extend
 
 ### User-Friendly
+
 - ✅ Intuitive navigation
 - ✅ Fast performance
 - ✅ Beautiful UI
@@ -301,10 +336,12 @@ The codebase is designed for easy extension:
 Your SaaS platform is fully set up and ready for development!
 
 **The application is currently running at:**
+
 - Local: http://localhost:3000
 - Network: Available on your local network
 
 **Demo Login:**
+
 - Email: admin@demo.com
 - Password: demo123
 

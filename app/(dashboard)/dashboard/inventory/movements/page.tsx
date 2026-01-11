@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useStockMovements } from '@/lib/api/inventory';
+import { useStockMovements, StockMovement } from '@/lib/api/inventory';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { Plus, TrendingUp, TrendingDown, RefreshCw, Search, Download } from 'lucide-react';
@@ -64,15 +64,16 @@ export default function StockMovementsPage() {
     }
   };
 
-  const movements = data?.data || [];
-  const filteredMovements = movements.filter((movement) => {
+  const movements: StockMovement[] = data?.data || [];
+  const filteredMovements = movements.filter((movement: StockMovement) => {
     const matchesType = typeFilter === 'all' || movement.type === typeFilter;
-    const matchesSearch = !searchQuery ||
+    const matchesSearch =
+      !searchQuery ||
       movement.product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       movement.product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       movement.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       movement.reference?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesType && matchesSearch;
   });
 
@@ -82,9 +83,7 @@ export default function StockMovementsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">{t('inventory.movements.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('inventory.movements.description')}
-          </p>
+          <p className="text-muted-foreground">{t('inventory.movements.description')}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()}>

@@ -194,6 +194,17 @@ export interface OrderItem {
   notes?: string;
 }
 
+// Add to your types file (@/types/index.ts)
+export interface OrderStatusItem {
+  id: string;
+  name: string;
+  slug: string;
+  color: string;
+  position: number;
+  isActive: boolean;
+  isSystem?: boolean;
+}
+
 export interface Order {
   id: string;
   tenantId: string;
@@ -235,6 +246,7 @@ export interface Invoice {
   balanceAmount: number;
   dueDate: string;
   issueDate: string;
+  paidAt?: string;
   notes?: string;
   paymentTerms?: string;
   termsConditions?: string;
@@ -248,6 +260,7 @@ export interface Invoice {
 
 export interface InvoiceItem {
   id: string;
+  productId: string;
   invoiceId: string;
   description: string;
   quantity: number;

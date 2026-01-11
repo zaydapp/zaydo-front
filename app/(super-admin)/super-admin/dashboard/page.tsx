@@ -112,10 +112,7 @@ export default function SuperAdminDashboardPage() {
       </div>
 
       {/* Revenue Chart */}
-      <RevenueChart
-        data={overview?.growthSeries ?? []}
-        isLoading={isLoading || isRefetching}
-      />
+      <RevenueChart data={overview?.growthSeries ?? []} isLoading={isLoading || isRefetching} />
 
       {/* Middle Row: Best Plans and Plan Distribution */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -134,5 +131,3 @@ export default function SuperAdminDashboardPage() {
     </div>
   );
 }
-
-

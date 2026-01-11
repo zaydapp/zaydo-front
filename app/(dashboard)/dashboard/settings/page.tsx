@@ -2,17 +2,17 @@
 
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import { 
-  Settings, 
-  Package, 
-  Users, 
-  DollarSign, 
-  Briefcase, 
-  Ruler, 
-  ListOrdered, 
-  ArrowRight, 
+import {
+  Settings,
+  Package,
+  Users,
+  DollarSign,
+  Briefcase,
+  Ruler,
+  ListOrdered,
+  ArrowRight,
   Boxes,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +27,8 @@ export default function SettingsPage() {
     {
       key: 'units',
       title: t('settings.categories.units') || 'Units of Measurement',
-      description: t('settings.categoryDescriptions.units') || 'Define weight, volume, length units',
+      description:
+        t('settings.categoryDescriptions.units') || 'Define weight, volume, length units',
       icon: Ruler,
       path: '/dashboard/settings/units',
       badge: t('settings.system') || 'System',
@@ -35,7 +36,9 @@ export default function SettingsPage() {
     {
       key: 'currency',
       title: t('settings.categories.finance') || 'Financial Settings',
-      description: t('settings.categoryDescriptions.finance') || 'Taxes, currency, payment terms, and invoicing',
+      description:
+        t('settings.categoryDescriptions.finance') ||
+        'Taxes, currency, payment terms, and invoicing',
       icon: DollarSign,
       path: '/dashboard/settings/finance',
       badge: t('settings.system') || 'System',
@@ -54,7 +57,8 @@ export default function SettingsPage() {
     {
       key: 'clients',
       title: t('settings.categories.clients') || 'Client Parameters',
-      description: t('settings.categoryDescriptions.clients') || 'Client types, categories, and attributes',
+      description:
+        t('settings.categoryDescriptions.clients') || 'Client types, categories, and attributes',
       icon: Users,
       path: '/dashboard/settings/clients',
       badge: t('settings.business') || 'Business',
@@ -62,7 +66,9 @@ export default function SettingsPage() {
     {
       key: 'products',
       title: t('settings.categories.products') || 'Product Parameters',
-      description: t('settings.categoryDescriptions.products') || 'Product types, categories, and classifications',
+      description:
+        t('settings.categoryDescriptions.products') ||
+        'Product types, categories, and classifications',
       icon: Package,
       path: '/dashboard/settings/products',
       badge: t('settings.business') || 'Business',
@@ -70,7 +76,8 @@ export default function SettingsPage() {
     {
       key: 'stock',
       title: t('settings.categories.stock') || 'Stock Parameters',
-      description: t('settings.categoryDescriptions.stock') || 'Stock movement reasons and tracking',
+      description:
+        t('settings.categoryDescriptions.stock') || 'Stock movement reasons and tracking',
       icon: Boxes,
       path: '/dashboard/settings/stock',
       badge: t('settings.business') || 'Business',
@@ -78,15 +85,34 @@ export default function SettingsPage() {
     {
       key: 'hr',
       title: t('settings.categories.hr') || 'HR Parameters',
-      description: t('settings.categoryDescriptions.hr') || 'Employee roles, contract types, departments',
+      description:
+        t('settings.categoryDescriptions.hr') || 'Employee roles, contract types, departments',
       icon: Briefcase,
       path: '/dashboard/settings/hr',
       badge: t('settings.business') || 'Business',
     },
   ];
 
-  const ParameterCard = ({ param }: { param: any }) => (
-    <Card 
+  interface SettingParameter {
+    id: string;
+    key: string;
+    value: unknown;
+    category: string;
+    description?: string;
+    isSystem: boolean;
+  }
+
+  interface SettingParameterCard {
+    key: string;
+    title: string;
+    description: string;
+    icon: React.ComponentType<{ className?: string }>;
+    path: string;
+    badge: string;
+  }
+
+  const ParameterCard = ({ param }: { param: SettingParameterCard }) => (
+    <Card
       className="group hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer h-full"
       onClick={() => router.push(param.path)}
     >
@@ -99,17 +125,13 @@ export default function SettingsPage() {
             {param.badge}
           </Badge>
         </div>
-        <CardTitle className="text-lg leading-tight">
-          {param.title}
-        </CardTitle>
+        <CardTitle className="text-lg leading-tight">{param.title}</CardTitle>
       </CardHeader>
       <CardContent className="pb-4">
-        <CardDescription className="text-sm mb-4 min-h-10">
-          {param.description}
-        </CardDescription>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <CardDescription className="text-sm mb-4 min-h-10">{param.description}</CardDescription>
+        <Button
+          variant="ghost"
+          size="sm"
           className="w-full justify-between group-hover:bg-primary/10 transition-colors"
         >
           {t('common.configure') || 'Configure'}
@@ -132,7 +154,8 @@ export default function SettingsPage() {
               {t('settings.tenantSettings') || 'Tenant Settings'}
             </h1>
             <p className="text-muted-foreground mt-1">
-              {t('settings.tenantSettingsSubtitle') || 'Customize your workspace parameters and workflows'}
+              {t('settings.tenantSettingsSubtitle') ||
+                'Customize your workspace parameters and workflows'}
             </p>
           </div>
         </div>
@@ -149,7 +172,8 @@ export default function SettingsPage() {
               {t('settings.systemParameters') || 'System Parameters'}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {t('settings.systemParametersDesc') || 'Foundational settings and technical configurations'}
+              {t('settings.systemParametersDesc') ||
+                'Foundational settings and technical configurations'}
             </p>
           </div>
         </div>

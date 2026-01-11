@@ -102,23 +102,17 @@ export function Header() {
             <div className="py-2">
               <div className="px-3 py-2 text-sm">
                 <p className="font-medium">Low stock alert</p>
-                <p className="text-muted-foreground">
-                  Orange Juice is running low
-                </p>
+                <p className="text-muted-foreground">Orange Juice is running low</p>
                 <p className="text-xs text-muted-foreground mt-1">2 hours ago</p>
               </div>
               <div className="px-3 py-2 text-sm">
                 <p className="font-medium">New order received</p>
-                <p className="text-muted-foreground">
-                  Order #1234 from ABC Corp
-                </p>
+                <p className="text-muted-foreground">Order #1234 from ABC Corp</p>
                 <p className="text-xs text-muted-foreground mt-1">5 hours ago</p>
               </div>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center">
-              View all notifications
-            </DropdownMenuItem>
+            <DropdownMenuItem className="justify-center">View all notifications</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -128,9 +122,7 @@ export function Header() {
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar>
                 <AvatarImage src={user?.avatar} alt={user?.email} />
-                <AvatarFallback>
-                  {getInitials(user?.firstName, user?.lastName)}
-                </AvatarFallback>
+                <AvatarFallback>{getInitials(user?.firstName, user?.lastName)}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

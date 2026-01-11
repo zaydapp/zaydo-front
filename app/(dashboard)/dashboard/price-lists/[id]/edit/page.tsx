@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
 import { priceListsApi, productsApi } from '@/lib/api';
+import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,6 +29,24 @@ interface PriceListItemForm {
   price: number;
 }
 
+interface PriceListItem {
+  productId: string;
+  product?: { name: string };
+  productName?: string;
+  price: number;
+}
+
+interface PriceListData {
+  name: string;
+  type: string;
+  startDate: string;
+  endDate?: string;
+  isActive: boolean;
+  description?: string;
+  clientGroup?: string;
+  items?: PriceListItem[];
+}
+
 export default function EditPriceListPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -36,49 +55,103 @@ export default function EditPriceListPage() {
 
   const priceListId = params?.id;
 
-  const [name, setName] = useState('');
-  const [type, setType] = useState('RETAIL');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [isActive, setIsActive] = useState(true);
-  const [description, setDescription] = useState('');
-  const [clientGroup, setClientGroup] = useState('');
-  const [items, setItems] = useState<PriceListItemForm[]>([]);
-
-  const { data: priceList, isLoading: isLoadingPriceList } = useQuery({
+  const { data: priceList, isLoading: isLoadingPriceList } = useQuery<PriceListData>({
     queryKey: ['price-lists', priceListId],
-    queryFn: () => priceListsApi.getById(priceListId as string),
+    queryFn: () =>
+      priceListsApi.getById(priceListId as string) as unknown as Promise<PriceListData>,
     enabled: Boolean(priceListId),
   });
+
+  const getInitialFormData = (): {
+    name: string;
+    type: string;
+    startDate: string;
+    endDate: string;
+    isActive: boolean;
+    description: string;
+    clientGroup: string;
+    items: PriceListItemForm[];
+  } => {
+    if (!priceList) {
+      return {
+        name: '',
+        type: 'RETAIL',
+        startDate: '',
+        endDate: '',
+        isActive: true,
+        description: '',
+        clientGroup: '',
+        items: [] as PriceListItemForm[],
+      };
+    }
+
+    const newItems =
+      priceList.items?.map(
+        (item: {
+          productId: string;
+          product?: { name: string };
+          productName?: string;
+          price: number;
+        }) => ({
+          productId: item.productId,
+          productName: item.product?.name || item.productName,
+          price: item.price,
+        })
+      ) || [];
+
+    return {
+      name: priceList.name || '',
+      type: (priceList.type || 'RETAIL') as
+        | 'RETAIL'
+        | 'WHOLESALE'
+        | 'PROMOTIONAL'
+        | 'SEASONAL'
+        | 'CUSTOM',
+      startDate: priceList.startDate
+        ? new Date(priceList.startDate).toISOString().split('T')[0]
+        : '',
+      endDate: priceList.endDate ? new Date(priceList.endDate).toISOString().split('T')[0] : '',
+      isActive: Boolean(priceList.isActive),
+      description: String(priceList.description || ''),
+      clientGroup: String(priceList.clientGroup || ''),
+      items: newItems,
+    };
+  };
+
+  const [formData, setFormData] = useState(() => getInitialFormData());
+
+  const setName = (value: string) => setFormData((prev) => ({ ...prev, name: value }));
+  const setType = (value: string) => setFormData((prev) => ({ ...prev, type: value }));
+  const setStartDate = (value: string) => setFormData((prev) => ({ ...prev, startDate: value }));
+  const setEndDate = (value: string) => setFormData((prev) => ({ ...prev, endDate: value }));
+  const setIsActive = (value: boolean) => setFormData((prev) => ({ ...prev, isActive: value }));
+  const setDescription = (value: string) =>
+    setFormData((prev) => ({ ...prev, description: value }));
+  const setClientGroup = (value: string) =>
+    setFormData((prev) => ({ ...prev, clientGroup: value }));
+  const setItems = (value: PriceListItemForm[]) =>
+    setFormData((prev) => ({ ...prev, items: value }));
+
+  const { name, type, startDate, endDate, isActive, description, clientGroup, items } = formData;
 
   const { data: productsResponse } = useQuery({
     queryKey: ['products'],
     queryFn: () => productsApi.getAll({ take: 1000 }),
   });
 
-  const products = productsResponse?.data || [];
-
-  useEffect(() => {
-    if (!priceList) return;
-
-    setName(priceList.name || '');
-    setType(priceList.type || 'RETAIL');
-    setStartDate(priceList.startDate ? new Date(priceList.startDate).toISOString().split('T')[0] : '');
-    setEndDate(priceList.endDate ? new Date(priceList.endDate).toISOString().split('T')[0] : '');
-    setIsActive(Boolean(priceList.isActive));
-    setDescription(priceList.description || '');
-    setClientGroup(priceList.clientGroup || '');
-    setItems(
-      priceList.items?.map((item: any) => ({
-        productId: item.productId,
-        productName: item.product?.name || item.productName,
-        price: item.price,
-      })) || []
-    );
-  }, [priceList]);
+  const products = useMemo(() => productsResponse?.data || [], [productsResponse?.data]);
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => priceListsApi.update(priceListId as string, data),
+    mutationFn: (data: {
+      name: string;
+      type: string;
+      startDate: string;
+      endDate?: string;
+      isActive: boolean;
+      description?: string;
+      clientGroup?: string;
+      items: Array<{ productId: string; price: number }>;
+    }) => priceListsApi.update(priceListId as string, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['price-lists'] });
       queryClient.invalidateQueries({ queryKey: ['price-lists', priceListId] });
@@ -98,12 +171,12 @@ export default function EditPriceListPage() {
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const updateItem = (index: number, field: keyof PriceListItemForm, value: any) => {
+  const updateItem = (index: number, field: keyof PriceListItemForm, value: string | number) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
 
     if (field === 'productId') {
-      const product = products.find((p: any) => p.id === value);
+      const product = products.find((p: Product) => p.id === value);
       if (product) {
         newItems[index].productName = product.name;
       }
@@ -123,7 +196,9 @@ export default function EditPriceListPage() {
     }
 
     if (items.some((item) => !item.productId || item.price <= 0)) {
-      toast.error(t('priceLists.itemsValidationError') || 'All items must have a product and valid price');
+      toast.error(
+        t('priceLists.itemsValidationError') || 'All items must have a product and valid price'
+      );
       return;
     }
 
@@ -141,7 +216,7 @@ export default function EditPriceListPage() {
 
   const productOptions = useMemo(
     () =>
-      products.map((product: any) => ({
+      products.map((product: Product) => ({
         value: product.id,
         label: `${product.name} (${product.unit})`,
       })),
@@ -151,7 +226,9 @@ export default function EditPriceListPage() {
   if (isLoadingPriceList) {
     return (
       <div className="p-8 flex items-center justify-center h-64">
-        <div className="text-muted-foreground">{t('priceLists.loadingPriceList') || 'Loading price list...'}</div>
+        <div className="text-muted-foreground">
+          {t('priceLists.loadingPriceList') || 'Loading price list...'}
+        </div>
       </div>
     );
   }
@@ -180,9 +257,7 @@ export default function EditPriceListPage() {
           <h1 className="text-3xl font-bold">
             {t('priceLists.editPriceList') || 'Edit Price List'}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            {priceList.name}
-          </p>
+          <p className="text-muted-foreground mt-1">{priceList.name}</p>
         </div>
       </div>
 
@@ -237,7 +312,8 @@ export default function EditPriceListPage() {
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate">
-                  {t('priceLists.startDate') || 'Start Date'} <span className="text-destructive">*</span>
+                  {t('priceLists.startDate') || 'Start Date'}{' '}
+                  <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="startDate"
@@ -265,11 +341,7 @@ export default function EditPriceListPage() {
               <div className="space-y-2">
                 <Label htmlFor="isActive">{t('priceLists.active') || 'Active'}</Label>
                 <div className="flex items-center space-x-2 h-10">
-                  <Switch
-                    id="isActive"
-                    checked={isActive}
-                    onCheckedChange={setIsActive}
-                  />
+                  <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
                   <Label htmlFor="isActive" className="cursor-pointer">
                     {isActive ? t('common.yes') || 'Yes' : t('common.no') || 'No'}
                   </Label>
@@ -283,7 +355,9 @@ export default function EditPriceListPage() {
                 id="clientGroup"
                 value={clientGroup}
                 onChange={(e) => setClientGroup(e.target.value)}
-                placeholder={t('priceLists.clientGroupPlaceholder') || 'Optional: for future segmentation'}
+                placeholder={
+                  t('priceLists.clientGroupPlaceholder') || 'Optional: for future segmentation'
+                }
               />
             </div>
           </CardContent>
@@ -315,7 +389,8 @@ export default function EditPriceListPage() {
                 <div key={index} className="flex gap-4 items-start">
                   <div className="flex-1 space-y-2">
                     <Label>
-                      {t('priceLists.product') || 'Product'} <span className="text-destructive">*</span>
+                      {t('priceLists.product') || 'Product'}{' '}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <SearchableSelect
                       value={item.productId}
@@ -358,11 +433,7 @@ export default function EditPriceListPage() {
         </Card>
 
         <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
+          <Button type="button" variant="outline" onClick={() => router.back()}>
             {t('common.cancel') || 'Cancel'}
           </Button>
           <Button type="submit" disabled={updateMutation.isPending}>
@@ -376,4 +447,3 @@ export default function EditPriceListPage() {
     </div>
   );
 }
-

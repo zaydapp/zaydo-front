@@ -19,14 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { ArrowLeft, Package2, Boxes, Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
+  ArrowLeft,
+  Package2,
+  Boxes,
+  Upload,
+  X,
+  Image as ImageIcon,
+  AlertCircle,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ProductFormData {
@@ -47,21 +49,24 @@ export default function NewProductPage() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // Fetch product types and units from tenant settings
   const { data: productsSettings } = useTenantSettings('products');
   const { data: unitsSettings } = useTenantSettings('units');
-  
-  const productTypesSetting = productsSettings?.find(s => s.key === 'products.types');
+
+  const productTypesSetting = productsSettings?.find((s) => s.key === 'products.types');
   const productTypes = (productTypesSetting?.value as Array<{ value: string; label: string }>) || [
     { value: 'RAW_MATERIAL', label: 'Raw Material' },
     { value: 'FINISHED_PRODUCT', label: 'Finished Product' },
   ];
-  
+
   // Collect all unit types
-  const quantityUnits = (unitsSettings?.find(s => s.key === 'units.quantity')?.value as string[]) || [];
-  const weightUnits = (unitsSettings?.find(s => s.key === 'units.weight')?.value as string[]) || [];
-  const volumeUnits = (unitsSettings?.find(s => s.key === 'units.volume')?.value as string[]) || [];
+  const quantityUnits =
+    (unitsSettings?.find((s) => s.key === 'units.quantity')?.value as string[]) || [];
+  const weightUnits =
+    (unitsSettings?.find((s) => s.key === 'units.weight')?.value as string[]) || [];
+  const volumeUnits =
+    (unitsSettings?.find((s) => s.key === 'units.volume')?.value as string[]) || [];
   const allUnits = [...new Set([...quantityUnits, ...weightUnits, ...volumeUnits])];
   const COMMON_UNITS = allUnits.length > 0 ? allUnits : ['kg', 'L', 'unités', 'g', 'mL', 'pièces'];
 
@@ -84,8 +89,12 @@ export default function NewProductPage() {
       toast.success(t('products.productCreated'));
       router.push('/dashboard/products');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('products.createError'));
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('products.createError'));
     },
   });
 
@@ -94,7 +103,7 @@ export default function NewProductPage() {
       ...data,
       images: imagePreviews,
       mainImageIndex: imagePreviews.length > 0 ? mainImageIndex : undefined,
-    } as any);
+    });
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +112,7 @@ export default function NewProductPage() {
   };
 
   const addImages = (files: File[]) => {
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       if (!file.type.startsWith('image/')) {
         toast.error(t('products.invalidImageType'));
         return false;
@@ -115,26 +124,26 @@ export default function NewProductPage() {
       return true;
     });
 
-    setImages(prev => [...prev, ...validFiles]);
+    setImages((prev) => [...prev, ...validFiles]);
 
-    validFiles.forEach(file => {
+    validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreviews(prev => [...prev, reader.result as string]);
+        setImagePreviews((prev) => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
     });
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-    
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+
     // Adjust mainImageIndex if needed
     if (index === mainImageIndex) {
       setMainImageIndex(0);
     } else if (index < mainImageIndex) {
-      setMainImageIndex(prev => prev - 1);
+      setMainImageIndex((prev) => prev - 1);
     }
   };
 
@@ -161,11 +170,7 @@ export default function NewProductPage() {
     <div className="space-y-6 pb-16">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-        >
+        <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
@@ -186,7 +191,9 @@ export default function NewProductPage() {
               <CardContent className="space-y-4">
                 {/* Product Type */}
                 <div className="space-y-2">
-                  <Label>{t('products.productType')} <span className="text-destructive">*</span></Label>
+                  <Label>
+                    {t('products.productType')} <span className="text-destructive">*</span>
+                  </Label>
                   <Controller
                     name="type"
                     control={control}
@@ -196,10 +203,11 @@ export default function NewProductPage() {
                         {productTypes.map((type, index) => {
                           const valueKey = type.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
                           const translationKey = `settings.settingValues.products.${valueKey}`;
-                          const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
+                          const label =
+                            t(translationKey) !== translationKey ? t(translationKey) : type.label;
                           const isRaw = index === 0;
                           const colorClass = isRaw ? 'orange' : 'blue';
-                          
+
                           return (
                             <button
                               key={type.value}
@@ -213,9 +221,13 @@ export default function NewProductPage() {
                             >
                               <div className="flex items-center gap-2">
                                 {isRaw ? (
-                                  <Boxes className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`} />
+                                  <Boxes
+                                    className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`}
+                                  />
                                 ) : (
-                                  <Package2 className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`} />
+                                  <Package2
+                                    className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`}
+                                  />
                                 )}
                                 <p className="text-sm font-medium">{label}</p>
                               </div>
@@ -362,16 +374,14 @@ export default function NewProductPage() {
 
                 {imagePreviews.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      {t('products.clickToSetMain')}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{t('products.clickToSetMain')}</p>
                     <div className="grid grid-cols-3 gap-4">
                       {imagePreviews.map((preview, index) => (
-                        <div 
-                          key={index} 
+                        <div
+                          key={index}
                           className={`relative group cursor-pointer rounded-lg border-2 transition-all ${
-                            index === mainImageIndex 
-                              ? 'border-primary ring-2 ring-primary/20' 
+                            index === mainImageIndex
+                              ? 'border-primary ring-2 ring-primary/20'
                               : 'border-transparent hover:border-primary/50'
                           }`}
                           onClick={() => setMainImageIndex(index)}
@@ -435,9 +445,7 @@ export default function NewProductPage() {
                       {errors.minStock.message}
                     </p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    {t('products.minStockHelper')}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('products.minStockHelper')}</p>
                 </div>
 
                 <div className="pt-4 space-y-3 border-t">

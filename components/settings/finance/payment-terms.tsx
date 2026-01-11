@@ -33,8 +33,19 @@ export function PaymentTerms() {
   const { data: settings, isLoading } = useTenantSettings('finance');
   const updateSetting = useUpdateSetting();
 
-  const paymentTermsSetting = settings?.find((s: any) => s.key === 'finance.payment_terms');
-  const terms: PaymentTerm[] = paymentTermsSetting?.value || [];
+  interface TenantSetting {
+    id: string;
+    key: string;
+    value: unknown;
+    category: string;
+    description?: string;
+    isSystem: boolean;
+  }
+
+  const paymentTermsSetting = settings?.find(
+    (s: TenantSetting) => s.key === 'finance.payment_terms'
+  );
+  const terms: PaymentTerm[] = (paymentTermsSetting?.value as PaymentTerm[] | undefined) || [];
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -117,7 +128,8 @@ export function PaymentTerms() {
             <div>
               <CardTitle>{t('settings.finance.paymentTerms') || 'Payment Terms'}</CardTitle>
               <CardDescription>
-                {t('settings.finance.paymentTermsDescription') || 'Configure payment terms for invoices and orders'}
+                {t('settings.finance.paymentTermsDescription') ||
+                  'Configure payment terms for invoices and orders'}
               </CardDescription>
             </div>
             <Button onClick={() => setShowAddForm(!showAddForm)} size="sm">
@@ -135,7 +147,9 @@ export function PaymentTerms() {
                   <Input
                     id="new-value"
                     value={formData.value}
-                    onChange={(e) => setFormData({ ...formData, value: e.target.value.toUpperCase() })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, value: e.target.value.toUpperCase() })
+                    }
                     placeholder={t('settings.finance.termValuePlaceholder') || 'NET_30'}
                   />
                 </div>
@@ -155,7 +169,9 @@ export function PaymentTerms() {
                     type="number"
                     min="0"
                     value={formData.days}
-                    onChange={(e) => setFormData({ ...formData, days: parseInt(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, days: parseInt(e.target.value) || 0 })
+                    }
                   />
                 </div>
               </div>
@@ -181,21 +197,34 @@ export function PaymentTerms() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left py-3 px-4 font-medium text-sm">{t('settings.finance.termValue') || 'Value'}</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">{t('settings.finance.termLabel') || 'Label'}</th>
-                    <th className="text-center py-3 px-4 font-medium text-sm">{t('settings.finance.days') || 'Days'}</th>
-                    <th className="text-right py-3 px-4 font-medium text-sm">{t('common.actions') || 'Actions'}</th>
+                    <th className="text-left py-3 px-4 font-medium text-sm">
+                      {t('settings.finance.termValue') || 'Value'}
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-sm">
+                      {t('settings.finance.termLabel') || 'Label'}
+                    </th>
+                    <th className="text-center py-3 px-4 font-medium text-sm">
+                      {t('settings.finance.days') || 'Days'}
+                    </th>
+                    <th className="text-right py-3 px-4 font-medium text-sm">
+                      {t('common.actions') || 'Actions'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {terms.map((term, index) => (
-                    <tr key={index} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr
+                      key={index}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    >
                       {editingIndex === index ? (
                         <>
                           <td className="py-3 px-4">
                             <Input
                               value={formData.value}
-                              onChange={(e) => setFormData({ ...formData, value: e.target.value.toUpperCase() })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, value: e.target.value.toUpperCase() })
+                              }
                               className="h-9"
                             />
                           </td>
@@ -211,7 +240,9 @@ export function PaymentTerms() {
                               type="number"
                               min="0"
                               value={formData.days}
-                              onChange={(e) => setFormData({ ...formData, days: parseInt(e.target.value) || 0 })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, days: parseInt(e.target.value) || 0 })
+                              }
                               className="h-9 w-24 mx-auto"
                             />
                           </td>
@@ -220,7 +251,12 @@ export function PaymentTerms() {
                               <Button size="sm" onClick={handleUpdate} className="h-8">
                                 <Check className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={() => setEditingIndex(null)} className="h-8">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingIndex(null)}
+                                className="h-8"
+                              >
                                 <X className="h-3.5 w-3.5" />
                               </Button>
                             </div>
@@ -235,7 +271,9 @@ export function PaymentTerms() {
                           </td>
                           <td className="py-3 px-4 font-medium">{term.label}</td>
                           <td className="py-3 px-4 text-center">
-                            <Badge variant="outline">{term.days} {t('settings.finance.daysShort') || 'd'}</Badge>
+                            <Badge variant="outline">
+                              {term.days} {t('settings.finance.daysShort') || 'd'}
+                            </Badge>
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center justify-end gap-1">
@@ -271,9 +309,12 @@ export function PaymentTerms() {
       <AlertDialog open={deleteIndex !== null} onOpenChange={() => setDeleteIndex(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('settings.finance.deletePaymentTerm') || 'Delete Payment Term'}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t('settings.finance.deletePaymentTerm') || 'Delete Payment Term'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {t('settings.finance.deletePaymentTermConfirm') || 'Are you sure you want to delete this payment term?'}
+              {t('settings.finance.deletePaymentTermConfirm') ||
+                'Are you sure you want to delete this payment term?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

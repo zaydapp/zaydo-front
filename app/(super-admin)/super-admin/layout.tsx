@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { ReactNode } from 'react';
 import { SuperAdminAuthProvider } from '@/contexts/super-admin-auth-context';
@@ -11,5 +11,3 @@ export default function Layout({ children }: { children: ReactNode }) {
     </SuperAdminAuthProvider>
   );
 }
-
-

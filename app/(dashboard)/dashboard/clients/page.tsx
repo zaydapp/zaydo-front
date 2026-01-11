@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { clientsApi } from '@/lib/api';
-import { Client } from '@/types';
+import { Client, TenantSetting } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Pencil, Trash2, Eye, Users } from 'lucide-react';
@@ -28,24 +28,25 @@ export default function ClientsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  
+
   // Fetch client types from tenant settings
   const { data: settingsData } = useTenantSettings('clients');
-  const clientTypesSetting = settingsData?.find((s: any) => s.key === 'clients.types');
+  const clientTypesSetting = settingsData?.find((s) => s.key === 'clients.types');
   const clientTypes = (clientTypesSetting?.value as Array<{ value: string; label: string }>) || [
     { value: 'INDIVIDUAL', label: 'Individual' },
     { value: 'COMPANY', label: 'Company' },
   ];
-  
+
   const [activeTab, setActiveTab] = useState<string>('ALL');
 
   const { data, isLoading } = useQuery({
     queryKey: ['clients', search, activeTab],
-    queryFn: () => clientsApi.getAll({ 
-      search, 
-      kind: activeTab !== 'ALL' ? activeTab : undefined,
-      take: 50 
-    }),
+    queryFn: () =>
+      clientsApi.getAll({
+        search,
+        kind: activeTab !== 'ALL' ? activeTab : undefined,
+        take: 50,
+      }),
   });
 
   const deleteMutation = useMutation({
@@ -77,7 +78,11 @@ export default function ClientsPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t('clients.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('clients.subtitle')}</p>
         </div>
-        <Button onClick={() => router.push('/dashboard/clients/new')} size="default" className="shadow-sm">
+        <Button
+          onClick={() => router.push('/dashboard/clients/new')}
+          size="default"
+          className="shadow-sm"
+        >
           <Plus className="mr-2 h-4 w-4" />
           {t('clients.addClient')}
         </Button>
@@ -90,9 +95,7 @@ export default function ClientsPage() {
             <button
               onClick={() => setActiveTab('ALL')}
               className={`relative px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap rounded-t-lg ${
-                activeTab === 'ALL'
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
+                activeTab === 'ALL' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <span className="relative z-10">{t('common.all')}</span>
@@ -105,15 +108,13 @@ export default function ClientsPage() {
               const translationKey = `settings.settingValues.clients.${valueKey}`;
               const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
               const isActive = activeTab === type.value;
-              
+
               return (
                 <button
                   key={type.value}
                   onClick={() => setActiveTab(type.value)}
                   className={`relative px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap rounded-t-lg ${
-                    isActive
-                      ? 'text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
+                    isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <span className="relative z-10">{label}</span>
@@ -126,7 +127,7 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        {['ALL', ...clientTypes.map(t => t.value)].map((tabValue) => (
+        {['ALL', ...clientTypes.map((t) => t.value)].map((tabValue) => (
           <TabsContent key={tabValue} value={tabValue} className="space-y-6 mt-6">
             {/* Search Bar */}
             <div className="flex items-center gap-4">
@@ -140,7 +141,8 @@ export default function ClientsPage() {
                 />
               </div>
               <div className="text-sm text-muted-foreground">
-                {data?.pagination.total || 0} {t('common.results', { count: data?.pagination.total || 0 })}
+                {data?.pagination.total || 0}{' '}
+                {t('common.results', { count: data?.pagination.total || 0 })}
               </div>
             </div>
 
@@ -166,10 +168,17 @@ interface ClientsTableProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
-  deleteMutation: any;
+  deleteMutation: { mutate: (id: string) => void; isPending?: boolean };
 }
 
-function ClientsTable({ clients, isLoading, onEdit, onDelete, onView, deleteMutation }: ClientsTableProps) {
+function ClientsTable({
+  clients,
+  isLoading,
+  onEdit,
+  onDelete,
+  onView,
+  deleteMutation,
+}: ClientsTableProps) {
   const { t } = useTranslation();
 
   return (
@@ -230,7 +239,7 @@ function ClientsTable({ clients, isLoading, onEdit, onDelete, onView, deleteMuta
                 <TableCell className="text-muted-foreground">{client.phone || '-'}</TableCell>
                 <TableCell className="text-muted-foreground">{client.city || '-'}</TableCell>
                 <TableCell>
-                  <Badge 
+                  <Badge
                     variant={client.status === 'ACTIVE' ? 'default' : 'secondary'}
                     className="font-normal"
                   >
@@ -259,7 +268,7 @@ function ClientsTable({ clients, isLoading, onEdit, onDelete, onView, deleteMuta
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(client.id)}
-                      disabled={deleteMutation.isPending}
+                      disabled={deleteMutation.isPending || false}
                       className="h-8 w-8 p-0 hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -274,4 +283,3 @@ function ClientsTable({ clients, isLoading, onEdit, onDelete, onView, deleteMuta
     </div>
   );
 }
-

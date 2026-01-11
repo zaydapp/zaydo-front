@@ -103,7 +103,11 @@ export const useStockSummary = () => {
   });
 };
 
-export const useStockMovements = (params?: { productId?: string; skip?: number; take?: number }) => {
+export const useStockMovements = (params?: {
+  productId?: string;
+  skip?: number;
+  take?: number;
+}) => {
   return useQuery({
     queryKey: ['stock-movements', params],
     queryFn: () => inventoryApi.getStockMovements(params),

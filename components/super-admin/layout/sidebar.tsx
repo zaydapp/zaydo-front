@@ -27,9 +27,7 @@ import {
 const navigationGroups = [
   {
     label: 'Main',
-    items: [
-      { icon: LayoutDashboard, label: 'Dashboard', href: '/super-admin/dashboard' },
-    ],
+    items: [{ icon: LayoutDashboard, label: 'Dashboard', href: '/super-admin/dashboard' }],
   },
   {
     label: 'Management',
@@ -58,9 +56,7 @@ export function SuperAdminSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1">
           <Shield className="h-6 w-6 text-primary" />
-          {state === 'expanded' && (
-            <span className="text-lg font-bold">Super Admin</span>
-          )}
+          {state === 'expanded' && <span className="text-lg font-bold">Super Admin</span>}
         </div>
       </SidebarHeader>
 
@@ -73,11 +69,7 @@ export function SuperAdminSidebar() {
                 const isActive = pathname === item.href;
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.label}
-                    >
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
                       <Link href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>
@@ -93,13 +85,9 @@ export function SuperAdminSidebar() {
 
       {state === 'expanded' && (
         <SidebarFooter>
-          <div className="px-3 py-2 text-xs text-muted-foreground">
-            Super Admin Panel v1.0
-          </div>
+          <div className="px-3 py-2 text-xs text-muted-foreground">Super Admin Panel v1.0</div>
         </SidebarFooter>
       )}
     </SidebarPrimitive>
   );
 }
-
-

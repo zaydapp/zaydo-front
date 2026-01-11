@@ -40,7 +40,8 @@ export default function SuperAdminAnalyticsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Analytics & Trends</h1>
           <p className="text-sm text-muted-foreground">
-            Explore revenue, growth, and module adoption trends to make data-driven decisions for your SaaS business.
+            Explore revenue, growth, and module adoption trends to make data-driven decisions for
+            your SaaS business.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full border bg-background p-1">
@@ -62,8 +63,15 @@ export default function SuperAdminAnalyticsPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <GrowthChart data={growthQuery.data ?? []} isLoading={growthQuery.isLoading} title="Tenant growth" />
-        <RevenueBreakdown data={overviewQuery.data?.revenueByPlan ?? []} isLoading={overviewQuery.isLoading} />
+        <GrowthChart
+          data={growthQuery.data ?? []}
+          isLoading={growthQuery.isLoading}
+          title="Tenant growth"
+        />
+        <RevenueBreakdown
+          data={overviewQuery.data?.revenueByPlan ?? []}
+          isLoading={overviewQuery.isLoading}
+        />
       </div>
 
       <Card>
@@ -72,15 +80,15 @@ export default function SuperAdminAnalyticsPage() {
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 text-sm text-muted-foreground">
           <div className="rounded-lg border bg-muted/30 p-4">
-            Track plan performance to determine which tiers attract the most tenants and where to iterate on pricing.
+            Track plan performance to determine which tiers attract the most tenants and where to
+            iterate on pricing.
           </div>
           <div className="rounded-lg border bg-muted/30 p-4">
-            Use growth periods to forecast infrastructure needs and proactively expand capacity ahead of demand spikes.
+            Use growth periods to forecast infrastructure needs and proactively expand capacity
+            ahead of demand spikes.
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-
-

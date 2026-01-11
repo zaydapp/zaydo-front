@@ -16,11 +16,16 @@ export default function StockPage() {
     <div className="space-y-6 pb-8">
       {/* Header with back button */}
       <div className="space-y-4">
-        <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/settings')} className="mb-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard/settings')}
+          className="mb-2"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('common.back') || 'Back to Settings'}
         </Button>
-        
+
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -32,7 +37,8 @@ export default function StockPage() {
               </h1>
             </div>
             <p className="text-muted-foreground ml-14">
-              {t('settings.categoryDescriptions.stock') || 'Stock movement reasons and inventory tracking'}
+              {t('settings.categoryDescriptions.stock') ||
+                'Stock movement reasons and inventory tracking'}
             </p>
           </div>
         </div>
@@ -44,7 +50,8 @@ export default function StockPage() {
         <CardHeader>
           <CardTitle>{t('settings.categories.stock') || 'Stock Parameters'}</CardTitle>
           <CardDescription>
-            {t('settings.stockDescription') || 'Configure stock movement reasons and inventory settings'}
+            {t('settings.stockDescription') ||
+              'Configure stock movement reasons and inventory settings'}
           </CardDescription>
         </CardHeader>
         <CardContent>

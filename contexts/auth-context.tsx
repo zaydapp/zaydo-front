@@ -30,12 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const sessionUser = sessionStorage.getItem('user');
         const localUser = localStorage.getItem('user');
         const storedUser = sessionUser || localUser;
-        
+
         console.log('=== AUTH CONTEXT INIT ===');
         console.log('sessionStorage user:', sessionUser ? 'EXISTS' : 'NULL');
         console.log('localStorage user:', localUser ? 'EXISTS' : 'NULL');
         console.log('Using:', sessionUser ? 'sessionStorage' : localUser ? 'localStorage' : 'NONE');
-        
+
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           console.log('Loaded user:', parsedUser);
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Call the actual backend API
       const response: AuthResponse = await authApi.login(credentials);
-      
+
       // Store tokens and user data
       localStorage.setItem('accessToken', response.accessToken);
       if (response.refreshToken) {
@@ -75,14 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.user.tenantId) {
         localStorage.setItem('tenantId', response.user.tenantId);
       }
-      
+
       setUser(response.user);
-      
+
       toast.success('Login successful!');
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      const errorMessage = error?.response?.data?.message || 'Invalid credentials. Please try again.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Invalid credentials. Please try again.';
       toast.error(errorMessage);
       throw error;
     }
@@ -97,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       // Check if this is an impersonated session
       const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
-      
+
       // Clear appropriate storage
       if (isImpersonated) {
         sessionStorage.removeItem('accessToken');
@@ -111,9 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user');
         localStorage.removeItem('tenantId');
       }
-      
+
       setUser(null);
-      
+
       toast.info('Logged out successfully');
       router.push('/login');
     }

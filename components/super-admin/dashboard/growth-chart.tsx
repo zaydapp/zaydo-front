@@ -1,4 +1,12 @@
-import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TimeSeriesPoint } from '@/types';
 
@@ -9,7 +17,12 @@ interface GrowthChartProps {
   isLoading?: boolean;
 }
 
-export function GrowthChart({ data, title = 'Growth Over Time', subtitle, isLoading }: GrowthChartProps) {
+export function GrowthChart({
+  data,
+  title = 'Growth Over Time',
+  subtitle,
+  isLoading,
+}: GrowthChartProps) {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -62,5 +75,3 @@ export function GrowthChart({ data, title = 'Growth Over Time', subtitle, isLoad
     </Card>
   );
 }
-
-

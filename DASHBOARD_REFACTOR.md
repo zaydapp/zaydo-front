@@ -1,11 +1,13 @@
 # Super Admin Dashboard Refactor
 
 ## Overview
+
 The Super Admin Dashboard has been completely refactored to match the modern, clean design of the Shadcn UI Kit Sales Dashboard. The new implementation features a responsive layout with modern components, charts, and tables.
 
 ## New Components Created
 
 ### 1. **StatsOverview** (`stats-overview.tsx`)
+
 - Modern stat cards with comparison indicators
 - Shows Total Balance, Total Income, Total Expense, and Total Sales Tax
 - Includes percentage change indicators with up/down arrows
@@ -13,6 +15,7 @@ The Super Admin Dashboard has been completely refactored to match the modern, cl
 - Responsive grid layout (4 columns on large screens, 2 on medium, 1 on mobile)
 
 ### 2. **RevenueChart** (`revenue-chart.tsx`)
+
 - Bar chart visualization using Recharts
 - Displays Desktop and Mobile revenue data
 - 28-day time series data
@@ -21,6 +24,7 @@ The Super Admin Dashboard has been completely refactored to match the modern, cl
 - Responsive container with proper sizing
 
 ### 3. **BestPerformingPlans** (`best-performing-plans.tsx`)
+
 - Displays top 5 subscription plans by MRR
 - Avatar icons with plan initials
 - Shows tenant count and revenue per plan
@@ -28,6 +32,7 @@ The Super Admin Dashboard has been completely refactored to match the modern, cl
 - Compact card layout
 
 ### 4. **TenantStatusOverview** (`tenant-status-overview.tsx`)
+
 - Four status categories: New Order, On Progress, Completed, Return
 - Large numeric displays with trend indicators
 - Progress bars with custom colors
@@ -35,6 +40,7 @@ The Super Admin Dashboard has been completely refactored to match the modern, cl
 - Export functionality button
 
 ### 5. **RecentTenantActivity** (`recent-tenant-activity.tsx`)
+
 - Sortable data table with filter functionality
 - Columns: ID, Customer Name, Qty Items, Amount, Payment Method, Status
 - Color-coded status badges
@@ -45,12 +51,14 @@ The Super Admin Dashboard has been completely refactored to match the modern, cl
 ## Design Features
 
 ### Typography & Spacing
+
 - Uses consistent font weights (medium, semibold, bold)
 - Proper text hierarchy with size variations
 - Adequate spacing between sections (space-y-6)
 - Clean card designs with appropriate padding
 
 ### Colors & Theming
+
 - Fully compatible with light/dark themes
 - Uses CSS custom properties for colors
 - Chart colors defined in globals.css:
@@ -61,6 +69,7 @@ The Super Admin Dashboard has been completely refactored to match the modern, cl
   - `--chart-5`: Pink (#f973ab)
 
 ### Responsive Design
+
 - Mobile-first approach
 - Breakpoints: `sm:`, `md:`, `lg:`
 - Grid layouts adapt to screen size
@@ -69,6 +78,7 @@ The Super Admin Dashboard has been completely refactored to match the modern, cl
 ## Component Props
 
 ### StatsOverview
+
 ```typescript
 interface StatsOverviewProps {
   data?: GlobalKpiStats;
@@ -77,6 +87,7 @@ interface StatsOverviewProps {
 ```
 
 ### RevenueChart
+
 ```typescript
 interface RevenueChartProps {
   data: TimeSeriesPoint[];
@@ -85,6 +96,7 @@ interface RevenueChartProps {
 ```
 
 ### BestPerformingPlans
+
 ```typescript
 interface BestPerformingPlansProps {
   data: RevenueByPlanDatum[];
@@ -93,6 +105,7 @@ interface BestPerformingPlansProps {
 ```
 
 ### TenantStatusOverview
+
 ```typescript
 interface TenantStatusOverviewProps {
   data?: GlobalKpiStats;
@@ -101,6 +114,7 @@ interface TenantStatusOverviewProps {
 ```
 
 ### RecentTenantActivity
+
 ```typescript
 interface RecentTenantActivityProps {
   data?: TenantActivityItem[];
@@ -140,6 +154,7 @@ Dashboard Page
 ## Loading States
 
 All components include loading skeletons:
+
 - Animated pulse effect
 - Maintains layout structure
 - Smooth transitions when data loads
@@ -170,6 +185,7 @@ All components include loading skeletons:
 ## Migration Notes
 
 The old components are still available for backward compatibility:
+
 - `SuperAdminKpiSummary` → Use `StatsOverview`
 - `GrowthChart` → Use `RevenueChart`
 - `RevenueBreakdown` → Use `BestPerformingPlans`

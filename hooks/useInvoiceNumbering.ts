@@ -33,7 +33,11 @@ export function useInvoiceNumberPreview(
   return useMemo(() => {
     if (!config) return null;
     return computeInvoiceNumberPreview(
-      { ...config, ...overrides, nextSequence: overrides?.sequence ?? overrides?.nextSequence ?? config.nextSequence },
+      {
+        ...config,
+        ...overrides,
+        nextSequence: overrides?.sequence ?? overrides?.nextSequence ?? config.nextSequence,
+      },
       {
         sequence: overrides?.sequence ?? overrides?.nextSequence ?? config.nextSequence,
         prefixTemplate: overrides?.prefixTemplate ?? config.prefixTemplate,
@@ -43,4 +47,3 @@ export function useInvoiceNumberPreview(
     );
   }, [config, overrides]);
 }
-

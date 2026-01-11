@@ -16,17 +16,20 @@ A modern, full-stack SaaS platform for commercial and industrial project managem
 ## 🛠️ Tech Stack
 
 ### Core
+
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type safety
 - **TailwindCSS** - Utility-first CSS
 
 ### UI Components
+
 - **shadcn/ui** - Accessible component library
 - **Lucide React** - Icon library
 - **Recharts** - Charts and data visualization
 - **next-themes** - Dark mode support
 
 ### State & Data
+
 - **TanStack Query (React Query)** - Server state management
 - **Axios** - HTTP client
 - **React Hook Form** - Form handling
@@ -35,34 +38,39 @@ A modern, full-stack SaaS platform for commercial and industrial project managem
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 
 ### Installation
 
 1. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 2. **Set up environment variables**
-Create a `.env.local` file in the root directory:
+   Create a `.env.local` file in the root directory:
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 ```
 
 3. **Run the development server**
+
 ```bash
 npm run dev
 ```
 
 4. **Open your browser**
-Navigate to [http://localhost:3000](http://localhost:3000)
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## 🔐 Authentication
 
 The app uses JWT-based authentication with automatic token refresh.
 
 ### Demo Credentials
+
 - **Email**: admin@demo.com
 - **Password**: demo123
 
@@ -79,6 +87,7 @@ The app uses JWT-based authentication with automatic token refresh.
 The app is ready to connect to a NestJS backend. All API functions are defined in `lib/api/index.ts`.
 
 ### Environment Variables
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 ```

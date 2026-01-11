@@ -1,7 +1,14 @@
 'use client';
 
 import { TenantSummary } from '@/types';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,14 +28,23 @@ interface TenantTableProps {
   onDeactivate: (tenant: TenantSummary) => void;
 }
 
-const statusVariantMap: Record<TenantSummary['status'], 'default' | 'secondary' | 'destructive' | 'outline'> = {
+const statusVariantMap: Record<
+  TenantSummary['status'],
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
   ACTIVE: 'default',
   SUSPENDED: 'destructive',
   TRIAL: 'secondary',
   INACTIVE: 'outline',
 };
 
-export function TenantTable({ tenants, isLoading, onView, onEdit, onDeactivate }: TenantTableProps) {
+export function TenantTable({
+  tenants,
+  isLoading,
+  onView,
+  onEdit,
+  onDeactivate,
+}: TenantTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -69,23 +85,23 @@ export function TenantTable({ tenants, isLoading, onView, onEdit, onDeactivate }
             const contactEmail = tenant.contact?.email || '—';
 
             return (
-            <TableRow key={tenant.id}>
-              <TableCell>
-                <div>
-                  <p className="font-semibold">{tenant.companyName}</p>
-                  <p className="text-xs text-muted-foreground">{tenant.id}</p>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm font-medium">{tenant.slug}</div>
-              </TableCell>
-              <TableCell>
-                <div>
+              <TableRow key={tenant.id}>
+                <TableCell>
+                  <div>
+                    <p className="font-semibold">{tenant.companyName}</p>
+                    <p className="text-xs text-muted-foreground">{tenant.id}</p>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm font-medium">{tenant.slug}</div>
+                </TableCell>
+                <TableCell>
+                  <div>
                     <p className="text-sm font-medium">{contactName}</p>
                     <p className="text-xs text-muted-foreground">{contactEmail}</p>
-                </div>
-              </TableCell>
-              <TableCell>
+                  </div>
+                </TableCell>
+                <TableCell>
                   <div className="flex items-center gap-2 text-sm">
                     <Badge variant="secondary" className="text-xs">
                       {planLabel}
@@ -94,35 +110,39 @@ export function TenantTable({ tenants, isLoading, onView, onEdit, onDeactivate }
                       <span className="text-xs text-muted-foreground">
                         {tenant.activeModuleKeys.length} modules
                       </span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant={statusVariantMap[tenant.status]} className="capitalize">
-                  {tenant.status.toLowerCase()}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onView(tenant)}>View details</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(tenant)}>Edit tenant</DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onClick={() => onDeactivate(tenant)}
-                    >
-                      {tenant.status === 'SUSPENDED' ? 'Activate tenant' : 'Deactivate tenant'}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={statusVariantMap[tenant.status]} className="capitalize">
+                    {tenant.status.toLowerCase()}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onView(tenant)}>
+                        View details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEdit(tenant)}>
+                        Edit tenant
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => onDeactivate(tenant)}
+                      >
+                        {tenant.status === 'SUSPENDED' ? 'Activate tenant' : 'Deactivate tenant'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
             );
           })}
         </TableBody>
@@ -130,5 +150,3 @@ export function TenantTable({ tenants, isLoading, onView, onEdit, onDeactivate }
     </div>
   );
 }
-
-

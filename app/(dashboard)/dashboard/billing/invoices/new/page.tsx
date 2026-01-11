@@ -36,7 +36,9 @@ export default function NewInvoicePage() {
   const { data: order, isLoading: isOrderLoading } = useOrder(fromOrder || undefined);
   const { state, setState, totals, addLine, updateLine, removeLine } = useInvoiceEditor({}, order);
   const { createInvoice, validateInvoice } = useInvoiceMutations();
-  const [clientType, setClientType] = useState<'client' | 'passenger'>(fromOrder ? 'client' : 'client');
+  const [clientType, setClientType] = useState<'client' | 'passenger'>(
+    fromOrder ? 'client' : 'client'
+  );
   const [passengerName, setPassengerName] = useState('');
   const [passengerClientId, setPassengerClientId] = useState<string | null>(null);
 
@@ -83,9 +85,10 @@ export default function NewInvoicePage() {
     }
   }, [order, router, t]);
 
-  const isSaving = createInvoice.isPending || validateInvoice.isPending || createPassengerClient.isPending;
+  const isSaving =
+    createInvoice.isPending || validateInvoice.isPending || createPassengerClient.isPending;
   const canSubmit = Boolean(
-    (state.clientId || (clientType === 'passenger' && passengerName.trim())) && 
+    (state.clientId || (clientType === 'passenger' && passengerName.trim())) &&
     state.items.length > 0
   );
 
@@ -135,7 +138,7 @@ export default function NewInvoicePage() {
       if (!passengerName.trim()) {
         throw new Error('Missing passenger name');
       }
-      
+
       // If we already created a client for this passenger, reuse it
       if (passengerClientId) {
         finalClientId = passengerClientId;
@@ -156,7 +159,7 @@ export default function NewInvoicePage() {
       termsConditions: state.termsConditions,
       orderId: fromOrder ?? undefined,
       items: state.items.map((item) => ({
-        productId: item.productId,
+        productId: item.productId || '',
         description: item.description,
         quantity: item.quantity,
         unit: item.unit,
@@ -164,7 +167,7 @@ export default function NewInvoicePage() {
         taxRate: item.taxRate,
         discount: item.discount,
         notes: item.notes,
-      })),
+      })) as Parameters<typeof createInvoice.mutateAsync>[0]['items'],
     };
   };
 
@@ -172,13 +175,18 @@ export default function NewInvoicePage() {
     try {
       const payload = await buildPayload();
       const invoice = await createInvoice.mutateAsync(payload);
-      toast.success(t('invoices.saved') || t('invoices.draftSaved') || 'Facture enregistrée comme brouillon');
+      toast.success(
+        t('invoices.saved') || t('invoices.draftSaved') || 'Facture enregistrée comme brouillon'
+      );
       router.push(`/dashboard/billing/invoices/${invoice.id}`);
     } catch (error: unknown) {
-      const message = error && typeof error === 'object' && 'response' in error
-        ? (error.response as { data?: { message?: string } })?.data?.message
-        : undefined;
-      toast.error(message || t('invoices.updateError') || 'Échec de l\'enregistrement de la facture');
+      const message =
+        error && typeof error === 'object' && 'response' in error
+          ? (error.response as { data?: { message?: string } })?.data?.message
+          : undefined;
+      toast.error(
+        message || t('invoices.updateError') || "Échec de l'enregistrement de la facture"
+      );
     }
   };
 
@@ -190,9 +198,10 @@ export default function NewInvoicePage() {
       toast.success(t('invoices.validated') || 'Facture validée');
       router.push(`/dashboard/billing/invoices/${finalInvoice.id}`);
     } catch (error: unknown) {
-      const message = error && typeof error === 'object' && 'response' in error
-        ? (error.response as { data?: { message?: string } })?.data?.message
-        : undefined;
+      const message =
+        error && typeof error === 'object' && 'response' in error
+          ? (error.response as { data?: { message?: string } })?.data?.message
+          : undefined;
       toast.error(message || t('invoices.updateError') || 'Échec de la validation de la facture');
     }
   };
@@ -220,7 +229,9 @@ export default function NewInvoicePage() {
             {/* Client Information Section */}
             <InvoiceFormSection
               title={t('clients.client') || 'Informations client'}
-              description={t('invoices.clientInfoDesc') || 'Informations du client liées à cette facture'}
+              description={
+                t('invoices.clientInfoDesc') || 'Informations du client liées à cette facture'
+              }
             >
               <div className="space-y-4">
                 {fromOrder ? (
@@ -256,11 +267,15 @@ export default function NewInvoicePage() {
                         }}
                       >
                         <SelectTrigger id="clientType" className="mt-1.5 w-full">
-                          <SelectValue placeholder={t('invoices.selectClientType') || 'Sélectionner le type'} />
+                          <SelectValue
+                            placeholder={t('invoices.selectClientType') || 'Sélectionner le type'}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="client">{t('clients.client') || 'Client'}</SelectItem>
-                          <SelectItem value="passenger">{t('invoices.passenger') || 'Passager'}</SelectItem>
+                          <SelectItem value="passenger">
+                            {t('invoices.passenger') || 'Passager'}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -277,7 +292,9 @@ export default function NewInvoicePage() {
                           }}
                         >
                           <SelectTrigger id="client" className="mt-1.5 w-full">
-                            <SelectValue placeholder={t('clients.selectClient') || 'Sélectionner un client'} />
+                            <SelectValue
+                              placeholder={t('clients.selectClient') || 'Sélectionner un client'}
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {clients.map((client: Client) => (
@@ -297,7 +314,9 @@ export default function NewInvoicePage() {
                           id="passengerName"
                           value={passengerName}
                           onChange={(e) => setPassengerName(e.target.value)}
-                          placeholder={t('invoices.passengerNamePlaceholder') || 'Entrer le nom du passager'}
+                          placeholder={
+                            t('invoices.passengerNamePlaceholder') || 'Entrer le nom du passager'
+                          }
                           className="mt-1.5"
                           aria-label={t('invoices.passengerName') || 'Nom du passager'}
                         />
@@ -311,12 +330,15 @@ export default function NewInvoicePage() {
             {/* Billing Details Section */}
             <InvoiceFormSection
               title={t('invoices.billingDetails') || 'Détails de facturation'}
-              description={t('invoices.billingDetailsDesc') || 'Dates, conditions de paiement et informations générales'}
+              description={
+                t('invoices.billingDetailsDesc') ||
+                'Dates, conditions de paiement et informations générales'
+              }
             >
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="issueDate" className="text-sm font-medium">
-                    {t('invoices.issueDate') || 'Date d\'émission'}
+                    {t('invoices.issueDate') || "Date d'émission"}
                   </Label>
                   <Input
                     id="issueDate"
@@ -329,12 +351,12 @@ export default function NewInvoicePage() {
                       }))
                     }
                     className="mt-1.5"
-                    aria-label={t('invoices.issueDate') || 'Date d\'émission'}
+                    aria-label={t('invoices.issueDate') || "Date d'émission"}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="dueDate" className="text-sm font-medium">
-                    {t('invoices.dueDate') || 'Date d\'échéance'}
+                    {t('invoices.dueDate') || "Date d'échéance"}
                   </Label>
                   <Input
                     id="dueDate"
@@ -347,7 +369,7 @@ export default function NewInvoicePage() {
                       }))
                     }
                     className="mt-1.5"
-                    aria-label={t('invoices.dueDate') || 'Date d\'échéance'}
+                    aria-label={t('invoices.dueDate') || "Date d'échéance"}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -363,7 +385,9 @@ export default function NewInvoicePage() {
                         paymentTerms: e.target.value,
                       }))
                     }
-                    placeholder={t('invoices.paymentTermsPlaceholder') || 'Ex: Net 30, Paiement à réception'}
+                    placeholder={
+                      t('invoices.paymentTermsPlaceholder') || 'Ex: Net 30, Paiement à réception'
+                    }
                     className="mt-1.5"
                     aria-label={t('invoices.paymentTerms') || 'Conditions de paiement'}
                   />
@@ -374,7 +398,10 @@ export default function NewInvoicePage() {
             {/* Terms & Notes Section */}
             <InvoiceFormSection
               title={t('invoices.termsAndNotes') || 'Conditions & notes'}
-              description={t('invoices.termsAndNotesDesc') || 'Notes internes et conditions générales pour cette facture'}
+              description={
+                t('invoices.termsAndNotesDesc') ||
+                'Notes internes et conditions générales pour cette facture'
+              }
             >
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -409,7 +436,9 @@ export default function NewInvoicePage() {
                         termsConditions: e.target.value,
                       }))
                     }
-                    placeholder={t('invoices.termsPlaceholder') || 'Ajouter des conditions pour cette facture'}
+                    placeholder={
+                      t('invoices.termsPlaceholder') || 'Ajouter des conditions pour cette facture'
+                    }
                     rows={4}
                     className="mt-1.5 resize-none"
                     aria-label={t('invoices.termsConditions') || 'Conditions générales'}
@@ -420,18 +449,27 @@ export default function NewInvoicePage() {
 
             {/* Line Items Section */}
             <InvoiceFormSection
-              title={t('invoices.lineItems') || 'Lignes d\'articles'}
-              description={t('invoices.lineItemsDesc') || 'Ajustez les quantités, prix unitaires et taxes avant d\'émettre'}
+              title={t('invoices.lineItems') || "Lignes d'articles"}
+              description={
+                t('invoices.lineItemsDesc') ||
+                "Ajustez les quantités, prix unitaires et taxes avant d'émettre"
+              }
             >
               <div className="space-y-4">
                 {/* Table Header */}
                 <div className="grid grid-cols-[1fr_70px_100px_80px_90px] md:grid-cols-[1fr_80px_110px_90px_100px] gap-2 md:gap-3 items-start py-2.5 px-3 md:px-4 bg-muted/50 border-b border-border rounded-t-lg">
                   <div className="text-sm font-semibold">{t('orders.product') || 'Produit'}</div>
                   <div className="text-sm font-semibold text-right">Qte</div>
-                  <div className="text-sm font-semibold text-right">{t('orders.unitPrice') || 'Prix Unitaire'}</div>
-                  <div className="text-sm font-semibold text-right">{t('orders.tax') || 'Taxe'}</div>
+                  <div className="text-sm font-semibold text-right">
+                    {t('orders.unitPrice') || 'Prix Unitaire'}
+                  </div>
+                  <div className="text-sm font-semibold text-right">
+                    {t('orders.tax') || 'Taxe'}
+                  </div>
                   <div className="flex items-center justify-end gap-1.5">
-                    <div className="text-sm font-semibold text-right flex-1">{t('orders.discount') || 'Remise'}</div>
+                    <div className="text-sm font-semibold text-right flex-1">
+                      {t('orders.discount') || 'Remise'}
+                    </div>
                     <div className="w-8"></div>
                   </div>
                 </div>
@@ -457,7 +495,7 @@ export default function NewInvoicePage() {
                   ) : (
                     <div className="text-center py-16">
                       <p className="text-sm text-muted-foreground mb-4">
-                        {t('invoices.noLineItems') || 'Aucune ligne d\'article pour le moment.'}
+                        {t('invoices.noLineItems') || "Aucune ligne d'article pour le moment."}
                       </p>
                     </div>
                   )}

@@ -11,7 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useTenantSettings } from '@/hooks/useTenantSettings';
 
 interface ClientFormModalProps {
@@ -37,12 +43,23 @@ interface ClientFormData {
 export function ClientFormModal({ open, onClose, client }: ClientFormModalProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<ClientFormData>();
-  
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<ClientFormData>();
+
   // Fetch client types from tenant settings
   const { data: settingsData } = useTenantSettings('clients');
-  const clientTypesSetting = settingsData?.find(s => s.key === 'clients.types');
-  const clientTypes = (clientTypesSetting?.value as Array<{ value: string; label: string }>) || [
+  const clientTypesSetting = settingsData?.find(
+    (s: { key: string; value: unknown }) => s.key === 'clients.types'
+  );
+  const clientTypes = (clientTypesSetting?.value as Array<{
+    value: string;
+    label: string;
+  }>) || [
     { value: 'INDIVIDUAL', label: 'Individual' },
     { value: 'COMPANY', label: 'Company' },
   ];
@@ -101,9 +118,7 @@ export function ClientFormModal({ open, onClose, client }: ClientFormModalProps)
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {client ? t('clients.editClient') : t('clients.addClient')}
-          </DialogTitle>
+          <DialogTitle>{client ? t('clients.editClient') : t('clients.addClient')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -121,7 +136,8 @@ export function ClientFormModal({ open, onClose, client }: ClientFormModalProps)
                   {clientTypes.map((type) => {
                     const valueKey = type.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
                     const translationKey = `settings.settingValues.clients.${valueKey}`;
-                    const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
+                    const label =
+                      t(translationKey) !== translationKey ? t(translationKey) : type.label;
                     return (
                       <SelectItem key={type.value} value={type.value}>
                         {label}
@@ -165,11 +181,7 @@ export function ClientFormModal({ open, onClose, client }: ClientFormModalProps)
 
             <div className="space-y-2">
               <Label htmlFor="city">{t('clients.city')}</Label>
-              <Input
-                id="city"
-                {...register('city')}
-                placeholder={t('clients.cityPlaceholder')}
-              />
+              <Input id="city" {...register('city')} placeholder={t('clients.cityPlaceholder')} />
             </div>
 
             <div className="space-y-2">
@@ -202,11 +214,7 @@ export function ClientFormModal({ open, onClose, client }: ClientFormModalProps)
 
           <div className="space-y-2">
             <Label htmlFor="taxId">{t('clients.taxId')}</Label>
-            <Input
-              id="taxId"
-              {...register('taxId')}
-              placeholder={t('clients.taxIdPlaceholder')}
-            />
+            <Input id="taxId" {...register('taxId')} placeholder={t('clients.taxIdPlaceholder')} />
           </div>
 
           {client && (

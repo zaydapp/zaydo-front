@@ -29,7 +29,7 @@ type BackendTenantUser = NonNullable<BackendTenant['users']>[number];
 type BackendTenantModuleEntry = BackendTenantModule;
 
 const mapTenantModuleAssignment = (
-  assignment: BackendTenantModuleEntry,
+  assignment: BackendTenantModuleEntry
 ): TenantModuleAssignment => ({
   moduleId: assignment.moduleId,
   moduleKey: assignment.module?.key ?? assignment.moduleId,
@@ -56,6 +56,7 @@ const mapTenantSummary = (tenant: BackendTenant): TenantSummary => {
       phone: tenant.contactPhone ?? '',
     },
     status: tenant.status,
+    monthlyRecurringRevenue: normalizeDecimal(tenant.subscription?.monthlyRecurringRevenue),
     currentPlanId: tenant.subscription?.planId ?? '',
     currentPlanName: tenant.subscription?.plan?.name ?? '—',
     activeModuleKeys,
@@ -66,7 +67,9 @@ const mapTenantSummary = (tenant: BackendTenant): TenantSummary => {
 
 const mapTenantDetails = (tenant: BackendTenant): TenantDetails => {
   const summary = mapTenantSummary(tenant);
-  const modules = Array.isArray(tenant.modules) ? tenant.modules.map(mapTenantModuleAssignment) : [];
+  const modules = Array.isArray(tenant.modules)
+    ? tenant.modules.map(mapTenantModuleAssignment)
+    : [];
   const users: BackendTenantUser[] = Array.isArray(tenant.users) ? tenant.users : [];
 
   return {
@@ -165,7 +168,8 @@ export const useTenantsStore = create<TenantsState>()(
         set({ tenants, isLoading: false });
       } catch (error) {
         console.error('Failed to fetch tenants', error);
-        const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        const message = (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message;
         toast.error(message || 'Unable to load tenants');
         set({ isLoading: false });
       }
@@ -183,7 +187,8 @@ export const useTenantsStore = create<TenantsState>()(
         set({ modules: sortedModules });
       } catch (error) {
         console.error('Failed to fetch modules', error);
-        const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        const message = (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message;
         toast.error(message || 'Unable to load modules');
       }
     },
@@ -196,7 +201,8 @@ export const useTenantsStore = create<TenantsState>()(
         return tenant;
       } catch (error) {
         console.error('Failed to fetch tenant', error);
-        const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        const message = (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message;
         toast.error(message || 'Unable to load tenant details');
         set({ isDetailLoading: false });
         return null;
@@ -210,7 +216,8 @@ export const useTenantsStore = create<TenantsState>()(
         return mapTenantDetails(response);
       } catch (error) {
         console.error('Failed to create tenant', error);
-        const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        const message = (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message;
         toast.error(message || 'Unable to create tenant');
         return null;
       }
@@ -225,7 +232,8 @@ export const useTenantsStore = create<TenantsState>()(
         return tenant;
       } catch (error) {
         console.error('Failed to update tenant', error);
-        const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        const message = (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message;
         toast.error(message || 'Unable to update tenant');
         return null;
       }
@@ -260,7 +268,8 @@ export const useTenantsStore = create<TenantsState>()(
         await get().fetchTenants();
       } catch (error) {
         console.error('Failed to toggle module', error);
-        const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        const message = (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message;
         toast.error(message || 'Unable to update module');
         // rollback
         set({ selectedTenant: currentTenant });
@@ -268,4 +277,3 @@ export const useTenantsStore = create<TenantsState>()(
     },
   }))
 );
-

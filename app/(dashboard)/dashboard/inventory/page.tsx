@@ -3,26 +3,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  useProductStats, 
-  useStockSummary, 
-  useLowStockAlerts 
-} from '@/lib/api/inventory';
+import { useProductStats, useStockSummary, useLowStockAlerts } from '@/lib/api/inventory';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { 
-  Package, 
-  AlertTriangle, 
-  Plus,
-  FileText,
-  Activity
-} from 'lucide-react';
+import { Package, AlertTriangle, Plus, FileText, Activity } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function InventoryPage() {
   const { t } = useTranslation();
   const { data: stats, isLoading: statsLoading, error: statsError } = useProductStats();
-  const { data: lowStockAlerts, isLoading: alertsLoading, error: alertsError } = useLowStockAlerts();
+  const {
+    data: lowStockAlerts,
+    isLoading: alertsLoading,
+    error: alertsError,
+  } = useLowStockAlerts();
   const { data: stockSummary, isLoading: summaryLoading, error: summaryError } = useStockSummary();
 
   // Log for debugging
@@ -62,9 +56,7 @@ export default function InventoryPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">{t('inventory.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('inventory.description')}
-          </p>
+          <p className="text-muted-foreground">{t('inventory.description')}</p>
         </div>
         <div className="flex gap-2">
           <Link href="/dashboard/inventory/movements/new">
@@ -92,7 +84,8 @@ export default function InventoryPage() {
               <>
                 <div className="text-2xl font-bold">{stats?.total || 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats?.rawMaterials || 0} {t('inventory.stats.rawMaterials')}, {stats?.finishedProducts || 0} {t('inventory.stats.finishedProducts')}
+                  {stats?.rawMaterials || 0} {t('inventory.stats.rawMaterials')},{' '}
+                  {stats?.finishedProducts || 0} {t('inventory.stats.finishedProducts')}
                 </p>
               </>
             )}
@@ -101,9 +94,7 @@ export default function InventoryPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('inventory.stats.lowStock')}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t('inventory.stats.lowStock')}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
@@ -111,9 +102,7 @@ export default function InventoryPage() {
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold text-yellow-600">
-                  {stats?.lowStock || 0}
-                </div>
+                <div className="text-2xl font-bold text-yellow-600">{stats?.lowStock || 0}</div>
                 <p className="text-xs text-muted-foreground">
                   {t('inventory.stats.needsAttention')}
                 </p>
@@ -124,14 +113,15 @@ export default function InventoryPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('inventory.stats.movements')}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t('inventory.stats.movements')}</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">-</div>
-            <Link href="/dashboard/inventory/movements" className="text-xs text-primary hover:underline">
+            <Link
+              href="/dashboard/inventory/movements"
+              className="text-xs text-primary hover:underline"
+            >
               {t('inventory.viewAll')}
             </Link>
           </CardContent>
@@ -139,9 +129,7 @@ export default function InventoryPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('inventory.stats.reports')}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t('inventory.stats.reports')}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -160,9 +148,7 @@ export default function InventoryPage() {
               <AlertTriangle className="h-5 w-5 text-yellow-600" />
               {t('inventory.lowStockAlerts')}
             </CardTitle>
-            <CardDescription>
-              {t('inventory.lowStockDescription')}
-            </CardDescription>
+            <CardDescription>{t('inventory.lowStockDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -188,7 +174,7 @@ export default function InventoryPage() {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {t('inventory.currentStock')}: {product.currentStock} {product.unit} | {' '}
+                        {t('inventory.currentStock')}: {product.currentStock} {product.unit} |{' '}
                         {t('inventory.minStock')}: {product.minStock} {product.unit}
                         {product.shortage && product.shortage > 0 && (
                           <span className="text-yellow-600 ml-2">
@@ -222,9 +208,7 @@ export default function InventoryPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t('inventory.stockOverview')}</CardTitle>
-          <CardDescription>
-            {t('inventory.stockOverviewDescription')}
-          </CardDescription>
+          <CardDescription>{t('inventory.stockOverviewDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">

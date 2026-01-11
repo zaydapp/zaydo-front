@@ -37,7 +37,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     console.log('=== TENANT CONTEXT EFFECT ===');
     console.log('isAuthenticated:', isAuthenticated);
     console.log('user:', user);
-    
+
     if (isAuthenticated && user) {
       console.log('Fetching tenant data...');
       fetchTenant();

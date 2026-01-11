@@ -3,6 +3,7 @@
 ## Running the Dashboard
 
 1. **Start the development server**:
+
    ```powershell
    cd "d:\Next.js Projects\zaydo"
    npm run dev
@@ -90,6 +91,7 @@ Edit `components/super-admin/dashboard/recent-tenant-activity.tsx`:
 ## Styling Tips
 
 ### Card Styling
+
 ```typescript
 <Card className="border-primary/50 shadow-sm">
   {/* Highlighted card */}
@@ -97,6 +99,7 @@ Edit `components/super-admin/dashboard/recent-tenant-activity.tsx`:
 ```
 
 ### Button Variants
+
 ```typescript
 <Button variant="outline">Secondary</Button>
 <Button variant="default">Primary</Button>
@@ -104,6 +107,7 @@ Edit `components/super-admin/dashboard/recent-tenant-activity.tsx`:
 ```
 
 ### Responsive Grids
+
 ```typescript
 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
   {/* Auto-responsive grid */}
@@ -113,6 +117,7 @@ Edit `components/super-admin/dashboard/recent-tenant-activity.tsx`:
 ## Common Patterns
 
 ### Loading States
+
 ```typescript
 {isLoading ? (
   <div className="h-8 w-32 animate-pulse rounded bg-muted" />
@@ -122,6 +127,7 @@ Edit `components/super-admin/dashboard/recent-tenant-activity.tsx`:
 ```
 
 ### Empty States
+
 ```typescript
 {data.length === 0 ? (
   <p className="text-sm text-muted-foreground">No data available</p>
@@ -131,6 +137,7 @@ Edit `components/super-admin/dashboard/recent-tenant-activity.tsx`:
 ```
 
 ### Error Handling
+
 ```typescript
 {error ? (
   <p className="text-sm text-destructive">Error loading data</p>
@@ -155,6 +162,7 @@ import type {
 ## Testing
 
 ### Component Testing
+
 ```typescript
 import { render, screen } from '@testing-library/react';
 import { StatsOverview } from './stats-overview';
@@ -168,35 +176,36 @@ test('renders stats cards', () => {
 ## Troubleshooting
 
 ### Chart Not Rendering
+
 - Ensure Recharts is installed: `npm list recharts`
 - Check data format matches `TimeSeriesPoint[]`
 - Verify container has height
 
 ### Styles Not Applying
+
 - Run build: `npm run build`
 - Clear cache: Delete `.next` folder
 - Check Tailwind config
 
 ### TypeScript Errors
+
 - Update types in `types/super-admin.ts`
 - Run type check: `npx tsc --noEmit`
 
 ## Performance Tips
 
 1. **Memoize expensive calculations**:
+
    ```typescript
-   const sortedData = useMemo(() => 
-     data.sort((a, b) => b.value - a.value), 
-     [data]
-   );
+   const sortedData = useMemo(() => data.sort((a, b) => b.value - a.value), [data]);
    ```
 
 2. **Lazy load heavy components**:
+
    ```typescript
-   const RevenueChart = dynamic(() => 
-     import('./revenue-chart').then(m => m.RevenueChart), 
-     { ssr: false }
-   );
+   const RevenueChart = dynamic(() => import('./revenue-chart').then((m) => m.RevenueChart), {
+     ssr: false,
+   });
    ```
 
 3. **Optimize images**:
@@ -215,6 +224,7 @@ test('renders stats cards', () => {
 ## Support
 
 For issues or questions:
+
 1. Check `DASHBOARD_REFACTOR.md` for detailed component docs
 2. Review `DASHBOARD_COMPONENT_MAPPING.md` for design reference
 3. Consult the TypeScript types in `types/super-admin.ts`

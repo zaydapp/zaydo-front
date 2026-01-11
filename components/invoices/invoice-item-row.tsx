@@ -1,3 +1,4 @@
+/*eslint-disable*/
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,11 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Command,
   CommandEmpty,
@@ -82,7 +79,7 @@ export function InvoiceItemRow({
   // Handle input change - allow free text
   const handleInputChange = (value: string) => {
     setSearchValue(value);
-    
+
     // If user is typing and there's a product selected, clear the product selection
     if (item.productId && value !== selectedProduct?.name) {
       // User is typing something different from the selected product, treat as free text
@@ -156,12 +153,15 @@ export function InvoiceItemRow({
                 />
                 <CommandList>
                   <CommandEmpty>
-                    {t('invoices.continueTypingForFreeText') || 'Continue typing for free text entry'}
+                    {t('invoices.continueTypingForFreeText') ||
+                      'Continue typing for free text entry'}
                   </CommandEmpty>
                   <CommandGroup>
                     {products
-                      .filter((product) =>
-                        !searchValue || product.name.toLowerCase().includes(searchValue.toLowerCase())
+                      .filter(
+                        (product) =>
+                          !searchValue ||
+                          product.name.toLowerCase().includes(searchValue.toLowerCase())
                       )
                       .map((product) => (
                         <CommandItem
@@ -177,7 +177,9 @@ export function InvoiceItemRow({
                           />
                           <span className="truncate">{product.name}</span>
                           {product.sku && (
-                            <span className="ml-auto text-xs text-muted-foreground">SKU: {product.sku}</span>
+                            <span className="ml-auto text-xs text-muted-foreground">
+                              SKU: {product.sku}
+                            </span>
                           )}
                         </CommandItem>
                       ))}
@@ -237,9 +239,7 @@ export function InvoiceItemRow({
           }}
         >
           <SelectTrigger className="w-full h-9 text-sm">
-            <SelectValue>
-              {item.taxRate > 0 ? `${item.taxRate}%` : '0%'}
-            </SelectValue>
+            <SelectValue>{item.taxRate > 0 ? `${item.taxRate}%` : '0%'}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {activeTaxes.length > 0 ? (

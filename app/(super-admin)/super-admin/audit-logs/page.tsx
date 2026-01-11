@@ -3,11 +3,25 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { superAdminAuditLogsApi, superAdminTenantsApi } from '@/lib/api';
-import { AuditLogEntry, TenantSummary } from '@/types';
+import { AuditLogEntry } from '@/types';
+import type { BackendTenant } from '@/lib/api/super-admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
 interface Filters {
@@ -46,7 +60,6 @@ export default function SuperAdminAuditLogsPage() {
       });
       return response;
     },
-    keepPreviousData: true,
   });
 
   const data = logsQuery.data;
@@ -57,7 +70,8 @@ export default function SuperAdminAuditLogsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Audit Logs</h1>
         <p className="text-sm text-muted-foreground">
-          Every action performed by the system, the owner, or tenant admins is recorded for compliance and traceability.
+          Every action performed by the system, the owner, or tenant admins is recorded for
+          compliance and traceability.
         </p>
       </div>
 
@@ -81,9 +95,9 @@ export default function SuperAdminAuditLogsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All tenants</SelectItem>
-              {(tenantsQuery.data ?? []).map((tenant: TenantSummary) => (
+              {(tenantsQuery.data ?? []).map((tenant: BackendTenant) => (
                 <SelectItem key={tenant.id} value={tenant.id}>
-                  {tenant.companyName}
+                  {tenant.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -190,14 +204,18 @@ export default function SuperAdminAuditLogsPage() {
                   <TableCell>
                     <div className="text-sm">
                       <p className="font-medium">{log.resourceType}</p>
-                      {log.resourceId && <p className="text-xs text-muted-foreground">{log.resourceId}</p>}
+                      {log.resourceId && (
+                        <p className="text-xs text-muted-foreground">{log.resourceId}</p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
                     {log.tenantName ? (
                       <div className="text-sm">
                         <p className="font-medium">{log.tenantName}</p>
-                        {log.tenantId && <p className="text-xs text-muted-foreground">{log.tenantId}</p>}
+                        {log.tenantId && (
+                          <p className="text-xs text-muted-foreground">{log.tenantId}</p>
+                        )}
                       </div>
                     ) : (
                       <p className="text-xs text-muted-foreground">Global</p>
@@ -218,4 +236,3 @@ export default function SuperAdminAuditLogsPage() {
     </div>
   );
 }
-

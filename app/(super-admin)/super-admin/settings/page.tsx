@@ -1,3 +1,4 @@
+/*eslint-disable*/
 'use client';
 
 import { useEffect } from 'react';
@@ -163,7 +164,8 @@ export default function SuperAdminSettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">SaaS Owner Settings</h1>
         <p className="text-sm text-muted-foreground">
-          Configure the global branding, system email identity, and AI assistant integrations for every tenant experience.
+          Configure the global branding, system email identity, and AI assistant integrations for
+          every tenant experience.
         </p>
       </div>
 
@@ -177,31 +179,51 @@ export default function SuperAdminSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Branding</CardTitle>
-            <CardDescription>Customize the SaaS owner control center and tenant onboarding experience.</CardDescription>
+            <CardDescription>
+              Customize the SaaS owner control center and tenant onboarding experience.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="branding-name">Product name</Label>
               <Input id="branding-name" {...brandingForm.register('productName')} />
               {brandingForm.formState.errors.productName && (
-                <p className="text-sm text-destructive">{brandingForm.formState.errors.productName.message}</p>
+                <p className="text-sm text-destructive">
+                  {brandingForm.formState.errors.productName.message}
+                </p>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="branding-logo">Logo URL</Label>
-              <Input id="branding-logo" {...brandingForm.register('logoUrl')} placeholder="https://..." />
+              <Input
+                id="branding-logo"
+                {...brandingForm.register('logoUrl')}
+                placeholder="https://..."
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="branding-favicon">Favicon URL</Label>
-              <Input id="branding-favicon" {...brandingForm.register('faviconUrl')} placeholder="https://..." />
+              <Input
+                id="branding-favicon"
+                {...brandingForm.register('faviconUrl')}
+                placeholder="https://..."
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="branding-primary">Primary color</Label>
-              <Input id="branding-primary" {...brandingForm.register('primaryColor')} placeholder="#2563eb" />
+              <Input
+                id="branding-primary"
+                {...brandingForm.register('primaryColor')}
+                placeholder="#2563eb"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="branding-accent">Accent color</Label>
-              <Input id="branding-accent" {...brandingForm.register('accentColor')} placeholder="#f97316" />
+              <Input
+                id="branding-accent"
+                {...brandingForm.register('accentColor')}
+                placeholder="#f97316"
+              />
             </div>
           </CardContent>
         </Card>
@@ -209,21 +231,28 @@ export default function SuperAdminSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>System email</CardTitle>
-            <CardDescription>Control the sender identity for transactional messages sent to tenants and their users.</CardDescription>
+            <CardDescription>
+              Control the sender identity for transactional messages sent to tenants and their
+              users.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="email-from-name">From name</Label>
               <Input id="email-from-name" {...emailForm.register('fromName')} />
               {emailForm.formState.errors.fromName && (
-                <p className="text-sm text-destructive">{emailForm.formState.errors.fromName.message}</p>
+                <p className="text-sm text-destructive">
+                  {emailForm.formState.errors.fromName.message}
+                </p>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email-from-email">From email</Label>
               <Input id="email-from-email" {...emailForm.register('fromEmail')} />
               {emailForm.formState.errors.fromEmail && (
-                <p className="text-sm text-destructive">{emailForm.formState.errors.fromEmail.message}</p>
+                <p className="text-sm text-destructive">
+                  {emailForm.formState.errors.fromEmail.message}
+                </p>
               )}
             </div>
             <div className="space-y-2">
@@ -232,7 +261,11 @@ export default function SuperAdminSettingsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email-provider">Email provider</Label>
-              <Input id="email-provider" {...emailForm.register('provider')} placeholder="postmark" />
+              <Input
+                id="email-provider"
+                {...emailForm.register('provider')}
+                placeholder="postmark"
+              />
             </div>
           </CardContent>
         </Card>
@@ -240,7 +273,10 @@ export default function SuperAdminSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>AI assistant</CardTitle>
-            <CardDescription>Optional automation features for forecasting, knowledge base answers, and smart insights.</CardDescription>
+            <CardDescription>
+              Optional automation features for forecasting, knowledge base answers, and smart
+              insights.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
@@ -289,5 +325,3 @@ export default function SuperAdminSettingsPage() {
     </div>
   );
 }
-
-

@@ -35,8 +35,13 @@ export const useCreateTax = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { name: string; rate: number; code?: string; description?: string; isActive?: boolean }) => 
-      taxesApi.create(data),
+    mutationFn: (data: {
+      name: string;
+      rate: number;
+      code?: string;
+      description?: string;
+      isActive?: boolean;
+    }) => taxesApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['taxes'] });
     },
@@ -47,8 +52,7 @@ export const useUpdateTax = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Tax> }) => 
-      taxesApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Tax> }) => taxesApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['taxes'] });
       queryClient.invalidateQueries({ queryKey: ['taxes', variables.id] });

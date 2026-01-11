@@ -13,8 +13,10 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTenantSettings } from '@/hooks/useTenantSettings';
+import type { LucideIcon } from 'lucide-react';
+import { TenantSetting } from '@/types';
 
-const SUPPLIER_TYPE_ICONS: Record<string, any> = {
+const SUPPLIER_TYPE_ICONS: Record<string, LucideIcon> = {
   RAW_MATERIAL: Package,
   PACKAGING: Box,
   SERVICE: Settings,
@@ -29,8 +31,13 @@ export default function NewSupplierPage() {
 
   // Fetch supplier types from tenant settings
   const { data: settingsData } = useTenantSettings('suppliers');
-  const supplierTypesSetting = settingsData?.find((s: any) => s.key === 'suppliers.types');
-  const supplierTypes = (supplierTypesSetting?.value as Array<{ value: string; label: string }>) || [
+  const supplierTypesSetting = (settingsData as TenantSetting[] | undefined)?.find(
+    (s) => s.key === 'suppliers.types'
+  );
+  const supplierTypes = (supplierTypesSetting?.value as Array<{
+    value: string;
+    label: string;
+  }>) || [
     { value: 'RAW_MATERIAL', label: 'Raw Materials' },
     { value: 'PACKAGING', label: 'Packaging' },
   ];
@@ -70,12 +77,7 @@ export default function NewSupplierPage() {
     <div className="space-y-6 max-w-6xl">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-          className="h-8 w-8"
-        >
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -89,7 +91,9 @@ export default function NewSupplierPage() {
         {/* Supplier Type Selection */}
         <Card className="border-2">
           <CardContent className="pt-6">
-            <Label className="text-base font-semibold mb-4 block">{t('suppliers.selectType')}</Label>
+            <Label className="text-base font-semibold mb-4 block">
+              {t('suppliers.selectType')}
+            </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {supplierTypes.map((type) => {
                 const Icon = SUPPLIER_TYPE_ICONS[type.value] || Ship;
@@ -110,9 +114,7 @@ export default function NewSupplierPage() {
                     }`}
                   >
                     <div
-                      className={`rounded-full p-3 ${
-                        isSelected ? 'bg-primary/10' : 'bg-muted'
-                      }`}
+                      className={`rounded-full p-3 ${isSelected ? 'bg-primary/10' : 'bg-muted'}`}
                     >
                       <Icon
                         className={`h-6 w-6 ${

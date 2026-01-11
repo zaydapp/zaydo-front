@@ -7,7 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Mail, Phone, MapPin, FileText, Calendar, DollarSign, Package, Edit, AlertCircle, Truck, User } from 'lucide-react';
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  MapPin,
+  FileText,
+  Calendar,
+  DollarSign,
+  Package,
+  Edit,
+  AlertCircle,
+  Truck,
+  User,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/hooks/use-currency';
 import { format } from 'date-fns';
@@ -41,9 +54,7 @@ export default function SupplierDetailsPage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <p className="text-lg font-semibold mb-2">{t('suppliers.notFound')}</p>
-          <Button onClick={() => router.push('/dashboard/suppliers')}>
-            {t('common.goBack')}
-          </Button>
+          <Button onClick={() => router.push('/dashboard/suppliers')}>{t('common.goBack')}</Button>
         </div>
       </div>
     );
@@ -54,18 +65,12 @@ export default function SupplierDetailsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push('/dashboard/suppliers')}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/suppliers')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold">{supplier.name}</h1>
-            <p className="text-muted-foreground">
-              {t('suppliers.supplierDetails')}
-            </p>
+            <p className="text-muted-foreground">{t('suppliers.supplierDetails')}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -134,9 +139,7 @@ export default function SupplierDetailsPage() {
                   <p className="text-sm text-muted-foreground">{t('suppliers.address')}</p>
                   <div className="font-medium">
                     {supplier.address && <p>{supplier.address}</p>}
-                    <p>
-                      {[supplier.city, supplier.postalCode].filter(Boolean).join(', ')}
-                    </p>
+                    <p>{[supplier.city, supplier.postalCode].filter(Boolean).join(', ')}</p>
                     {supplier.country && <p>{supplier.country}</p>}
                   </div>
                 </div>
@@ -192,9 +195,7 @@ export default function SupplierDetailsPage() {
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">{t('suppliers.lastOrder')}</p>
-                    <p className="font-medium">
-                      {format(new Date(supplier.lastOrderDate), 'PPP')}
-                    </p>
+                    <p className="font-medium">{format(new Date(supplier.lastOrderDate), 'PPP')}</p>
                   </div>
                 </div>
               </>

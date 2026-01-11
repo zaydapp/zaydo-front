@@ -110,13 +110,14 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
       reset();
       onClose();
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('products.createError'));
+    onError: (error: Error) => {
+      const apiError = error as Error & { response?: { data?: { message?: string } } };
+      toast.error(apiError?.response?.data?.message || t('products.createError'));
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<Product> }) =>
       productsApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -124,8 +125,9 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
       reset();
       onClose();
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('products.updateError'));
+    onError: (error: Error) => {
+      const apiError = error as Error & { response?: { data?: { message?: string } } };
+      toast.error(apiError?.response?.data?.message || t('products.updateError'));
     },
   });
 
@@ -162,9 +164,7 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
                 {product ? t('products.editProduct') : t('products.addProduct')}
               </DialogTitle>
               <DialogDescription>
-                {product
-                  ? t('products.editDescription')
-                  : t('products.addDescription')}
+                {product ? t('products.editDescription') : t('products.addDescription')}
               </DialogDescription>
             </div>
           </div>
@@ -192,7 +192,9 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Boxes className={`h-5 w-5 ${field.value === 'RAW_MATERIAL' ? 'text-orange-600' : 'text-muted-foreground'}`} />
+                      <Boxes
+                        className={`h-5 w-5 ${field.value === 'RAW_MATERIAL' ? 'text-orange-600' : 'text-muted-foreground'}`}
+                      />
                       <div className="text-left">
                         <p className="font-medium">{t('products.rawMaterial')}</p>
                         <p className="text-xs text-muted-foreground">
@@ -211,7 +213,9 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Package2 className={`h-5 w-5 ${field.value === 'FINISHED_PRODUCT' ? 'text-blue-600' : 'text-muted-foreground'}`} />
+                      <Package2
+                        className={`h-5 w-5 ${field.value === 'FINISHED_PRODUCT' ? 'text-blue-600' : 'text-muted-foreground'}`}
+                      />
                       <div className="text-left">
                         <p className="font-medium">{t('products.finishedProduct')}</p>
                         <p className="text-xs text-muted-foreground">
@@ -252,11 +256,7 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
 
               <div className="space-y-2">
                 <Label htmlFor="sku">{t('products.sku')}</Label>
-                <Input
-                  id="sku"
-                  {...register('sku')}
-                  placeholder={t('products.skuPlaceholder')}
-                />
+                <Input id="sku" {...register('sku')} placeholder={t('products.skuPlaceholder')} />
                 <p className="text-xs text-muted-foreground">{t('products.skuHelper')}</p>
               </div>
             </div>
@@ -310,8 +310,7 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
 
               <div className="space-y-2">
                 <Label htmlFor="currentStock">
-                  {t('products.currentStock')}{' '}
-                  <span className="text-destructive">*</span>
+                  {t('products.currentStock')} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="currentStock"
@@ -371,7 +370,7 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
           {/* Additional Information */}
           <div className="space-y-4">
             <h3 className="text-base font-semibold">{t('products.additionalInformation')}</h3>
-            
+
             <div className="space-y-2">
               <Label htmlFor="supplierId">{t('products.supplier')}</Label>
               <Input
@@ -410,8 +409,8 @@ export function ProductFormModal({ open, onClose, product }: ProductFormModalPro
                 {isSubmitting || createMutation.isPending || updateMutation.isPending
                   ? t('common.saving')
                   : product
-                  ? t('products.update')
-                  : t('products.create')}
+                    ? t('products.update')
+                    : t('products.create')}
               </Button>
             </div>
           </div>

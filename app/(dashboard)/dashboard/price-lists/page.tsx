@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { priceListsApi } from '@/lib/api';
+import { priceListsApi, PriceList } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Eye, Pencil, Trash2, Calendar, Tag } from 'lucide-react';
@@ -54,7 +54,7 @@ export default function PriceListsPage() {
     },
   });
 
-  const filteredPriceLists = priceLists.filter((priceList: any) =>
+  const filteredPriceLists = priceLists.filter((priceList: PriceList) =>
     priceList.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -66,7 +66,7 @@ export default function PriceListsPage() {
     });
   };
 
-  const isActiveNow = (priceList: any) => {
+  const isActiveNow = (priceList: PriceList) => {
     if (!priceList.isActive) return false;
     const now = new Date();
     const start = new Date(priceList.startDate);
@@ -76,11 +76,16 @@ export default function PriceListsPage() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'RETAIL': return 'bg-blue-500';
-      case 'WHOLESALE': return 'bg-purple-500';
-      case 'PROMOTIONAL': return 'bg-orange-500';
-      case 'SEASONAL': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'RETAIL':
+        return 'bg-blue-500';
+      case 'WHOLESALE':
+        return 'bg-purple-500';
+      case 'PROMOTIONAL':
+        return 'bg-orange-500';
+      case 'SEASONAL':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
@@ -101,7 +106,8 @@ export default function PriceListsPage() {
         <div>
           <h1 className="text-3xl font-bold">{t('priceLists.title') || 'Price Lists'}</h1>
           <p className="text-muted-foreground mt-1">
-            {t('priceLists.description') || 'Manage pricing for different periods and customer segments'}
+            {t('priceLists.description') ||
+              'Manage pricing for different periods and customer segments'}
           </p>
         </div>
         <Button onClick={() => router.push('/dashboard/price-lists/new')}>
@@ -152,7 +158,7 @@ export default function PriceListsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredPriceLists.map((priceList: any) => (
+                filteredPriceLists.map((priceList: PriceList) => (
                   <TableRow key={priceList.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
@@ -166,9 +172,7 @@ export default function PriceListsPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getTypeColor(priceList.type)}>
-                        {priceList.type}
-                      </Badge>
+                      <Badge className={getTypeColor(priceList.type)}>{priceList.type}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
@@ -187,21 +191,15 @@ export default function PriceListsPage() {
                     </TableCell>
                     <TableCell>
                       {isActiveNow(priceList) ? (
-                        <Badge className="bg-green-500">
-                          {t('priceLists.active') || 'Active'}
-                        </Badge>
+                        <Badge className="bg-green-500">{t('priceLists.active') || 'Active'}</Badge>
                       ) : !priceList.isActive ? (
-                        <Badge variant="secondary">
-                          {t('priceLists.inactive') || 'Inactive'}
-                        </Badge>
+                        <Badge variant="secondary">{t('priceLists.inactive') || 'Inactive'}</Badge>
                       ) : new Date(priceList.startDate) > new Date() ? (
                         <Badge className="bg-blue-500">
                           {t('priceLists.scheduled') || 'Scheduled'}
                         </Badge>
                       ) : (
-                        <Badge variant="outline">
-                          {t('priceLists.expired') || 'Expired'}
-                        </Badge>
+                        <Badge variant="outline">{t('priceLists.expired') || 'Expired'}</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -220,11 +218,7 @@ export default function PriceListsPage() {
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteId(priceList.id)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(priceList.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -245,7 +239,7 @@ export default function PriceListsPage() {
               {t('priceLists.deleteConfirmTitle') || 'Delete Price List'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t('priceLists.deleteConfirmMessage') || 
+              {t('priceLists.deleteConfirmMessage') ||
                 'Are you sure? This will permanently delete this price list and all its pricing data.'}
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -1,21 +1,21 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/contexts/theme-provider";
-import { AuthProvider } from "@/contexts/auth-context";
-import { TenantProvider } from "@/contexts/tenant-context";
-import { QueryProvider } from "@/contexts/query-provider";
-import { LanguageProvider } from "@/contexts/language-context";
-import { Toaster } from "@/components/ui/sonner";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { ThemeProvider } from '@/contexts/theme-provider';
+import { AuthProvider } from '@/contexts/auth-context';
+import { TenantProvider } from '@/contexts/tenant-context';
+import { QueryProvider } from '@/contexts/query-provider';
+import { LanguageProvider } from '@/contexts/language-context';
+import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+  subsets: ['latin'],
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
-  title: "Zaydo - Project Management SaaS",
-  description: "Modern SaaS platform for commercial and industrial project management",
+  title: 'Zaydo - Project Management SaaS',
+  description: 'Modern SaaS platform for commercial and industrial project management',
 };
 
 export default function RootLayout({

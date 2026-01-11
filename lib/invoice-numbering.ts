@@ -14,13 +14,17 @@ export interface InvoiceNumberingPreviewResult {
   warnings: string[];
 }
 
-export interface InvoiceNumberingDraft
-  extends Partial<
-    Pick<
-      InvoiceNumberingConfig,
-      'prefixTemplate' | 'formatTemplate' | 'sequenceLength' | 'resetFrequency' | 'nextSequence' | 'allowManualOverride'
-    >
-  > {}
+export type InvoiceNumberingDraft = Partial<
+  Pick<
+    InvoiceNumberingConfig,
+    | 'prefixTemplate'
+    | 'formatTemplate'
+    | 'sequenceLength'
+    | 'resetFrequency'
+    | 'nextSequence'
+    | 'allowManualOverride'
+  >
+>;
 
 export const INVOICE_NUMBERING_TOKENS: Array<{ token: string; description: string }> = [
   { token: '{PREFIX}', description: 'Resolved prefix (after placeholder substitution)' },
@@ -88,8 +92,10 @@ export function computeInvoiceNumberPreview(
 ): InvoiceNumberingPreviewResult {
   const baseDate = overrides?.date ?? new Date();
   const dateTokens = getDateTokens(baseDate);
-  const prefixTemplate = overrides?.prefixTemplate ?? config?.prefixTemplate ?? DEFAULT_PREFIX_TEMPLATE;
-  const formatTemplate = overrides?.formatTemplate ?? config?.formatTemplate ?? DEFAULT_FORMAT_TEMPLATE;
+  const prefixTemplate =
+    overrides?.prefixTemplate ?? config?.prefixTemplate ?? DEFAULT_PREFIX_TEMPLATE;
+  const formatTemplate =
+    overrides?.formatTemplate ?? config?.formatTemplate ?? DEFAULT_FORMAT_TEMPLATE;
   const sequenceLength = clampSequenceLength(overrides?.sequenceLength ?? config?.sequenceLength);
   const sequence = overrides?.sequence ?? config?.nextSequence ?? 1;
   const resolvedPrefix = renderTemplate(prefixTemplate, dateTokens) || 'INV';
@@ -136,4 +142,3 @@ export function computeInvoiceNumberPreview(
 export function validateInvoiceNumberingDraft(draft: InvoiceNumberingDraft) {
   return computeInvoiceNumberPreview(draft);
 }
-

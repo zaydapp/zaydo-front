@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { superAdminModulesApi } from '@/lib/api';
 import { ModuleDefinition } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +18,7 @@ export default function SuperAdminModulesPage() {
     queryKey: ['super-admin', 'modules', 'all'],
     queryFn: async () => {
       const response = await superAdminModulesApi.list();
-      return response.data;
+      return response;
     },
   });
 
@@ -31,9 +32,7 @@ export default function SuperAdminModulesPage() {
       if (prev) {
         queryClient.setQueryData(
           ['super-admin', 'modules', 'all'],
-          prev.map((module) =>
-            module.id === moduleId ? { ...module, isGloballyEnabled } : module
-          )
+          prev.map((module) => (module.id === moduleId ? { ...module, isGloballyEnabled } : module))
         );
       }
       return { prev };
@@ -42,7 +41,7 @@ export default function SuperAdminModulesPage() {
       toast.success('Module state updated');
       queryClient.invalidateQueries({ queryKey: ['super-admin', 'modules'] });
     },
-    onError: (error: any, _variables, context) => {
+    onError: (error: AxiosError<{ message: string }>, _variables, context) => {
       toast.error(error?.response?.data?.message || 'Failed to update module');
       if (context?.prev) {
         queryClient.setQueryData(['super-admin', 'modules', 'all'], context.prev);
@@ -60,7 +59,8 @@ export default function SuperAdminModulesPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Module Inventory</h1>
         <p className="text-sm text-muted-foreground">
-          Manage feature availability across the entire platform. Disabling a module globally removes per-tenant access overrides.
+          Manage feature availability across the entire platform. Disabling a module globally
+          removes per-tenant access overrides.
         </p>
       </div>
 
@@ -70,7 +70,9 @@ export default function SuperAdminModulesPage() {
             <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <CardTitle>{module.name}</CardTitle>
-                <CardDescription>{module.description || 'No description provided.'}</CardDescription>
+                <CardDescription>
+                  {module.description || 'No description provided.'}
+                </CardDescription>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
@@ -96,7 +98,8 @@ export default function SuperAdminModulesPage() {
                 Active tenants: <span className="font-medium">{module.activeTenantCount}</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                Changes propagate instantly. Suspended tenants retain their module configuration but lose access until reactivated.
+                Changes propagate instantly. Suspended tenants retain their module configuration but
+                lose access until reactivated.
               </p>
             </CardContent>
           </Card>
@@ -110,5 +113,3 @@ export default function SuperAdminModulesPage() {
     </div>
   );
 }
-
-

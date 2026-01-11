@@ -29,16 +29,12 @@ interface Tax {
   id: string;
   name: string;
   rate: number;
-  code: string;
+  code?: string;
   description?: string;
   isActive: boolean;
 }
 
-interface TaxesPageProps {
-  hideHeader?: boolean;
-}
-
-export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
+export default function TaxesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -55,7 +51,11 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
   const [newTaxDescription, setNewTaxDescription] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const { data: taxes = [], isLoading, error } = useQuery({
+  const {
+    data: taxes = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['taxes'],
     queryFn: taxesApi.getAll,
   });
@@ -73,20 +73,28 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
       setNewTaxDescription('');
       setShowAddForm(false);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('taxes.createError') || 'Failed to create tax');
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('taxes.createError') || 'Failed to create tax');
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => taxesApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Tax> }) => taxesApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['taxes'] });
       toast.success(t('taxes.updateSuccess') || 'Tax updated successfully');
       setEditingId(null);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('taxes.updateError') || 'Failed to update tax');
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('taxes.updateError') || 'Failed to update tax');
     },
   });
 
@@ -97,8 +105,12 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
       toast.success(t('taxes.deleteSuccess') || 'Tax deleted successfully');
       setDeleteId(null);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('taxes.deleteError') || 'Failed to delete tax');
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('taxes.deleteError') || 'Failed to delete tax');
     },
   });
 
@@ -108,8 +120,12 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
       queryClient.invalidateQueries({ queryKey: ['taxes'] });
       toast.success(t('taxes.toggleSuccess') || 'Tax status updated successfully');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('taxes.toggleError') || 'Failed to update tax status');
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('taxes.toggleError') || 'Failed to update tax status');
     },
   });
 
@@ -141,7 +157,7 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
     setEditingId(tax.id);
     setEditName(tax.name);
     setEditRate(tax.rate.toString());
-    setEditCode(tax.code);
+    setEditCode(tax.code || '');
     setEditDescription(tax.description || '');
   };
 
@@ -170,7 +186,7 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
         name: editName,
         rate,
         code: editCode,
-        description: editDescription || null,
+        description: editDescription || undefined,
       },
     });
   };
@@ -182,14 +198,12 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        {!hideHeader && (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/settings')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t('common.back') || 'Back'}
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/settings')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t('common.back') || 'Back'}
+          </Button>
+        </div>
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">{t('common.loading') || 'Loading...'}</p>
         </div>
@@ -200,46 +214,38 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
   return (
     <div className="space-y-6 pb-8">
       {/* Header with back button */}
-      {!hideHeader && (
-        <>
-          <div className="space-y-4">
-            <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/settings')} className="mb-2">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t('common.back') || 'Back to Settings'}
-            </Button>
-            
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Percent className="h-6 w-6 text-primary" />
-                  </div>
-                  <h1 className="text-3xl font-bold tracking-tight">
-                    {t('taxes.title') || 'Taxes & Tax Rates'}
-                  </h1>
-                </div>
-                <p className="text-muted-foreground ml-14">
-                  {t('taxes.description') || 'Configure tax rates for your products and services'}
-                </p>
-              </div>
-              <Button onClick={() => setShowAddForm(!showAddForm)} size="lg">
-                <Plus className="h-4 w-4 mr-2" />
-                {t('taxes.addTax') || 'Add Tax'}
-              </Button>
-            </div>
-          </div>
-          <Separator />
-        </>
-      )}
+      <div className="space-y-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard/settings')}
+          className="mb-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t('common.back') || 'Back to Settings'}
+        </Button>
 
-      {hideHeader && (
-        <div className="flex items-end justify-end">
-          <Button onClick={() => setShowAddForm(!showAddForm)} size="default">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Percent className="h-6 w-6 text-primary" />
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {t('taxes.title') || 'Taxes & Tax Rates'}
+              </h1>
+            </div>
+            <p className="text-muted-foreground ml-14">
+              {t('taxes.description') || 'Configure tax rates for your products and services'}
+            </p>
+          </div>
+          <Button onClick={() => setShowAddForm(!showAddForm)} size="lg">
             <Plus className="h-4 w-4 mr-2" />
             {t('taxes.addTax') || 'Add Tax'}
           </Button>
         </div>
-      )}
+      </div>
+      <Separator />
 
       {showAddForm && (
         <Card className="border-primary/50 shadow-sm">
@@ -281,7 +287,10 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-code" className="text-sm font-medium">
-                  {t('taxes.code') || 'Code'} <span className="text-muted-foreground text-xs">({t('common.optional') || 'Optional'})</span>
+                  {t('taxes.code') || 'Code'}{' '}
+                  <span className="text-muted-foreground text-xs">
+                    ({t('common.optional') || 'Optional'})
+                  </span>
                 </Label>
                 <Input
                   id="new-code"
@@ -293,7 +302,10 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-description" className="text-sm font-medium">
-                  {t('taxes.description') || 'Description'} <span className="text-muted-foreground text-xs">({t('common.optional') || 'Optional'})</span>
+                  {t('taxes.description') || 'Description'}{' '}
+                  <span className="text-muted-foreground text-xs">
+                    ({t('common.optional') || 'Optional'})
+                  </span>
                 </Label>
                 <Input
                   id="new-description"
@@ -323,7 +335,7 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
         <CardHeader>
           <CardTitle>{t('taxes.currentTaxes') || 'Current Taxes'}</CardTitle>
           <CardDescription>
-            {taxes.length > 0 
+            {taxes.length > 0
               ? `${taxes.length} ${taxes.length === 1 ? 'tax rate' : 'tax rates'} configured`
               : t('taxes.noTaxes') || 'No taxes configured yet'}
           </CardDescription>
@@ -334,7 +346,9 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
                 <Percent className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="text-muted-foreground mb-4">{t('taxes.noTaxes') || 'No taxes configured yet'}</p>
+              <p className="text-muted-foreground mb-4">
+                {t('taxes.noTaxes') || 'No taxes configured yet'}
+              </p>
               <Button onClick={() => setShowAddForm(true)} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 {t('taxes.addTax') || 'Add Your First Tax'}
@@ -345,17 +359,32 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
               <table className="w-full">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left py-3 px-4 font-medium text-sm">{t('taxes.name') || 'Name'}</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">{t('taxes.rate') || 'Rate'}</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">{t('taxes.code') || 'Code'}</th>
-                    <th className="text-left py-3 px-4 font-medium text-sm">{t('taxes.description') || 'Description'}</th>
-                    <th className="text-center py-3 px-4 font-medium text-sm">{t('taxes.active') || 'Active'}</th>
-                    <th className="text-right py-3 px-4 font-medium text-sm">{t('common.actions') || 'Actions'}</th>
+                    <th className="text-left py-3 px-4 font-medium text-sm">
+                      {t('taxes.name') || 'Name'}
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-sm">
+                      {t('taxes.rate') || 'Rate'}
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-sm">
+                      {t('taxes.code') || 'Code'}
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-sm">
+                      {t('taxes.description') || 'Description'}
+                    </th>
+                    <th className="text-center py-3 px-4 font-medium text-sm">
+                      {t('taxes.active') || 'Active'}
+                    </th>
+                    <th className="text-right py-3 px-4 font-medium text-sm">
+                      {t('common.actions') || 'Actions'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {taxes.map((tax: Tax, index: number) => (
-                    <tr key={tax.id} className={`border-b last:border-0 hover:bg-muted/30 transition-colors ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                    <tr
+                      key={tax.id}
+                      className={`border-b last:border-0 hover:bg-muted/30 transition-colors ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
+                    >
                       {editingId === tax.id ? (
                         <>
                           <td className="py-3 px-4">
@@ -393,10 +422,20 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
                           <td className="py-3 px-4 text-center"></td>
                           <td className="py-3 px-4">
                             <div className="flex items-center justify-end gap-1">
-                              <Button size="sm" onClick={handleSaveEdit} variant="default" className="h-8">
+                              <Button
+                                size="sm"
+                                onClick={handleSaveEdit}
+                                variant="default"
+                                className="h-8"
+                              >
                                 <Check className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-8">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingId(null)}
+                                className="h-8"
+                              >
                                 <X className="h-3.5 w-3.5" />
                               </Button>
                             </div>
@@ -469,7 +508,8 @@ export default function TaxesPage({ hideHeader = false }: TaxesPageProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('taxes.deleteTitle') || 'Delete Tax'}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('taxes.deleteConfirm') || 'Are you sure you want to delete this tax? This action cannot be undone.'}
+              {t('taxes.deleteConfirm') ||
+                'Are you sure you want to delete this tax? This action cannot be undone.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

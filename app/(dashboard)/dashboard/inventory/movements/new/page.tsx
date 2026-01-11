@@ -67,8 +67,8 @@ export default function NewStockMovementPage() {
 
   const selectedProductId = watch('productId');
   const movementType = watch('type');
-  
-  const selectedProduct = products.find(p => p.id === selectedProductId);
+
+  const selectedProduct = products.find((p) => p.id === selectedProductId);
 
   const onSubmit = async (data: StockMovementForm) => {
     try {
@@ -79,8 +79,12 @@ export default function NewStockMovementPage() {
 
       toast.success(t('inventory.movements.addSuccess'));
       router.push('/dashboard/inventory/movements');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || t('common.error'));
+    } catch (error: unknown) {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('common.error'));
     }
   };
 
@@ -108,9 +112,7 @@ export default function NewStockMovementPage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold">{t('inventory.movements.addNew')}</h1>
-          <p className="text-muted-foreground">
-            {t('inventory.movements.addDescription')}
-          </p>
+          <p className="text-muted-foreground">{t('inventory.movements.addDescription')}</p>
         </div>
       </div>
 
@@ -119,9 +121,7 @@ export default function NewStockMovementPage() {
         <Card>
           <CardHeader>
             <CardTitle>{t('inventory.movements.movementDetails')}</CardTitle>
-            <CardDescription>
-              {getTypeDescription(movementType)}
-            </CardDescription>
+            <CardDescription>{getTypeDescription(movementType)}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Movement Type */}
@@ -131,26 +131,18 @@ export default function NewStockMovementPage() {
               </Label>
               <Select
                 value={watch('type')}
-                onValueChange={(value) => setValue('type', value as any)}
+                onValueChange={(value) => setValue('type', value as 'IN' | 'OUT' | 'ADJUSTMENT')}
               >
                 <SelectTrigger id="type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="IN">
-                    {t('inventory.movements.in')}
-                  </SelectItem>
-                  <SelectItem value="OUT">
-                    {t('inventory.movements.out')}
-                  </SelectItem>
-                  <SelectItem value="ADJUSTMENT">
-                    {t('inventory.movements.adjustment')}
-                  </SelectItem>
+                  <SelectItem value="IN">{t('inventory.movements.in')}</SelectItem>
+                  <SelectItem value="OUT">{t('inventory.movements.out')}</SelectItem>
+                  <SelectItem value="ADJUSTMENT">{t('inventory.movements.adjustment')}</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.type && (
-                <p className="text-sm text-red-500">{errors.type.message}</p>
-              )}
+              {errors.type && <p className="text-sm text-red-500">{errors.type.message}</p>}
             </div>
 
             {/* Product Selection */}
@@ -180,7 +172,8 @@ export default function NewStockMovementPage() {
               </Select>
               {selectedProduct && (
                 <p className="text-sm text-muted-foreground">
-                  {t('inventory.movements.currentStock')}: {selectedProduct.currentStock || 0} {selectedProduct.unit}
+                  {t('inventory.movements.currentStock')}: {selectedProduct.currentStock || 0}{' '}
+                  {selectedProduct.unit}
                 </p>
               )}
               {errors.productId && (
@@ -204,24 +197,20 @@ export default function NewStockMovementPage() {
                   min: { value: 0.001, message: t('inventory.movements.quantityMin') },
                 })}
               />
-              {errors.quantity && (
-                <p className="text-sm text-red-500">{errors.quantity.message}</p>
-              )}
+              {errors.quantity && <p className="text-sm text-red-500">{errors.quantity.message}</p>}
             </div>
 
             {/* Reason */}
             <div className="space-y-2">
-              <Label htmlFor="reason">
-                {t('inventory.movements.reason')}
-              </Label>
+              <Label htmlFor="reason">{t('inventory.movements.reason')}</Label>
               <Input
                 id="reason"
                 placeholder={
                   movementType === 'IN'
                     ? t('inventory.movements.reasonInPlaceholder')
                     : movementType === 'OUT'
-                    ? t('inventory.movements.reasonOutPlaceholder')
-                    : t('inventory.movements.reasonAdjustmentPlaceholder')
+                      ? t('inventory.movements.reasonOutPlaceholder')
+                      : t('inventory.movements.reasonAdjustmentPlaceholder')
                 }
                 {...register('reason')}
               />
@@ -229,9 +218,7 @@ export default function NewStockMovementPage() {
 
             {/* Reference */}
             <div className="space-y-2">
-              <Label htmlFor="reference">
-                {t('inventory.movements.reference')}
-              </Label>
+              <Label htmlFor="reference">{t('inventory.movements.reference')}</Label>
               <Input
                 id="reference"
                 placeholder={t('inventory.movements.referencePlaceholder')}
@@ -241,9 +228,7 @@ export default function NewStockMovementPage() {
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes">
-                {t('inventory.movements.notes')}
-              </Label>
+              <Label htmlFor="notes">{t('inventory.movements.notes')}</Label>
               <Textarea
                 id="notes"
                 placeholder={t('inventory.movements.notesPlaceholder')}

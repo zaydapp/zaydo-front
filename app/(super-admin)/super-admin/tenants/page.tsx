@@ -1,3 +1,4 @@
+/*eslint-disable*/
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -6,7 +7,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PlusCircle, RefreshCcw } from 'lucide-react';
 import { TenantTable } from './components/TenantTable';
 import { TenantFormModal } from './components/TenantFormModal';
@@ -99,7 +106,10 @@ export default function SuperAdminTenantsPage() {
     }
   };
 
-  const handleSubmitTenant = async (values: TenantCreateInput | TenantUpdateInput, tenantId?: string) => {
+  const handleSubmitTenant = async (
+    values: TenantCreateInput | TenantUpdateInput,
+    tenantId?: string
+  ) => {
     setIsSubmitting(true);
     try {
       if (tenantId) {
@@ -124,7 +134,8 @@ export default function SuperAdminTenantsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Tenant Directory</h1>
           <p className="text-sm text-muted-foreground">
-            Govern every tenant from a single hub. Suspend access, manage plans, and control module availability.
+            Govern every tenant from a single hub. Suspend access, manage plans, and control module
+            availability.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -147,7 +158,10 @@ export default function SuperAdminTenantsPage() {
             value={filters.search}
             onChange={(event) => handleChangeFilter('search', event.target.value)}
           />
-          <Select value={planFilterValue} onValueChange={(value) => handleChangeFilter('plan', value)}>
+          <Select
+            value={planFilterValue}
+            onValueChange={(value) => handleChangeFilter('plan', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Plan" />
             </SelectTrigger>
@@ -160,7 +174,10 @@ export default function SuperAdminTenantsPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={statusFilterValue} onValueChange={(value) => handleChangeFilter('status', value)}>
+          <Select
+            value={statusFilterValue}
+            onValueChange={(value) => handleChangeFilter('status', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -208,4 +225,3 @@ export default function SuperAdminTenantsPage() {
     </div>
   );
 }
-

@@ -53,7 +53,7 @@ export const useUpdateClient = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Client> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<Client> }) =>
       clientsApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });

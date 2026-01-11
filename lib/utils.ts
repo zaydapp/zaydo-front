@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export interface CurrencyFormatOptions {
@@ -20,10 +20,7 @@ export interface CurrencyFormatOptions {
  * @param options - Currency formatting options
  * @returns Formatted currency string
  */
-export function formatCurrency(
-  amount: number,
-  options?: Partial<CurrencyFormatOptions>
-): string {
+export function formatCurrency(amount: number, options?: Partial<CurrencyFormatOptions>): string {
   const defaults: CurrencyFormatOptions = {
     code: 'USD',
     symbol: '$',
@@ -39,7 +36,8 @@ export function formatCurrency(
   const formatted = new Intl.NumberFormat('en', {
     minimumFractionDigits: settings.decimals,
     maximumFractionDigits: settings.decimals,
-  }).format(amount)
+  })
+    .format(amount)
     .replace(/,/g, '###THOUSAND###')
     .replace(/\./g, settings.decimalSeparator)
     .replace(/###THOUSAND###/g, settings.thousandSeparator);

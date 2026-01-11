@@ -17,18 +17,25 @@ export function InvoicePrintView({ invoice }: InvoicePrintViewProps) {
     return format(new Date(date), 'dd.MM.yyyy');
   };
 
-  const tenant = invoice.tenant || {
+  // TODO: Get tenant data from context or API
+  const tenant = {
     name: 'Mon Entreprise',
     address: '22, Avenue Voltaire',
     city: 'Marseille',
     postalCode: '13000',
     country: 'France',
     phone: '+33 4 92 99 99 99',
+    email: '',
+    website: '',
+    vatNumber: '',
+    bankName: '',
+    bankIban: '',
+    bankSwift: '',
   };
 
   return (
-    <div 
-      className="bg-white print:bg-white w-[210mm] mx-auto" 
+    <div
+      className="bg-white print:bg-white w-[210mm] mx-auto"
       style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
     >
       {/* Header Section with Orange Background */}
@@ -74,11 +81,15 @@ export function InvoicePrintView({ invoice }: InvoicePrintViewProps) {
               <div className="space-y-2.5">
                 <div className="grid grid-cols-[150px_1fr] gap-x-4 text-sm">
                   <span className="text-gray-700">Date :</span>
-                  <span className="font-medium text-gray-900 text-right">{formatDate(invoice.issueDate)}</span>
+                  <span className="font-medium text-gray-900 text-right">
+                    {formatDate(invoice.issueDate)}
+                  </span>
                 </div>
                 <div className="grid grid-cols-[150px_1fr] gap-x-4 text-sm">
                   <span className="text-gray-700">Numéro de facture :</span>
-                  <span className="font-medium text-gray-900 text-right">{invoice.invoiceNumber}</span>
+                  <span className="font-medium text-gray-900 text-right">
+                    {invoice.invoiceNumber}
+                  </span>
                 </div>
                 <div className="grid grid-cols-[150px_1fr] gap-x-4 text-sm">
                   <span className="text-gray-700">Paiement :</span>
@@ -89,12 +100,16 @@ export function InvoicePrintView({ invoice }: InvoicePrintViewProps) {
                 {invoice.order && (
                   <div className="grid grid-cols-[150px_1fr] gap-x-4 text-sm">
                     <span className="text-gray-700">Référence :</span>
-                    <span className="font-medium text-gray-900 text-right">{invoice.order.orderNumber}</span>
+                    <span className="font-medium text-gray-900 text-right">
+                      {invoice.order.orderNumber}
+                    </span>
                   </div>
                 )}
                 <div className="grid grid-cols-[150px_1fr] gap-x-4 text-sm">
                   <span className="text-gray-700">Échéance :</span>
-                  <span className="font-medium text-gray-900 text-right">{formatDate(invoice.dueDate)}</span>
+                  <span className="font-medium text-gray-900 text-right">
+                    {formatDate(invoice.dueDate)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -120,7 +135,9 @@ export function InvoicePrintView({ invoice }: InvoicePrintViewProps) {
                 <th className="text-left py-3 px-4 text-sm font-semibold">Description</th>
                 <th className="text-center py-3 px-4 text-sm font-semibold w-24">Quantité</th>
                 <th className="text-center py-3 px-4 text-sm font-semibold w-20">Unité</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold w-32">Prix unitaire HT</th>
+                <th className="text-right py-3 px-4 text-sm font-semibold w-32">
+                  Prix unitaire HT
+                </th>
                 <th className="text-center py-3 px-4 text-sm font-semibold w-20">% TVA</th>
                 <th className="text-right py-3 px-4 text-sm font-semibold w-28">Total TVA</th>
                 <th className="text-right py-3 px-4 text-sm font-semibold w-32">Total TTC</th>
@@ -136,8 +153,8 @@ export function InvoicePrintView({ invoice }: InvoicePrintViewProps) {
                 const totalLine = subtotal + taxAmount;
 
                 return (
-                  <tr 
-                    key={item.id} 
+                  <tr
+                    key={item.id}
                     className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                   >
                     <td className="py-3 px-4 text-sm text-gray-900">
@@ -145,7 +162,9 @@ export function InvoicePrintView({ invoice }: InvoicePrintViewProps) {
                       {item.notes && <div className="text-xs text-gray-500 mt-1">{item.notes}</div>}
                     </td>
                     <td className="py-3 px-4 text-sm text-center text-gray-900">{quantity}</td>
-                    <td className="py-3 px-4 text-sm text-center text-gray-900">{item.unit || 'unités'}</td>
+                    <td className="py-3 px-4 text-sm text-center text-gray-900">
+                      {item.unit || 'unités'}
+                    </td>
                     <td className="py-3 px-4 text-sm text-right text-gray-900">
                       {formatCurrency(unitPrice)}
                     </td>
@@ -205,16 +224,18 @@ export function InvoicePrintView({ invoice }: InvoicePrintViewProps) {
         </div>
 
         {/* Payment Status Badge */}
-        {invoice.status === 'PAID' && invoice.paidAmount && parseFloat(invoice.paidAmount.toString()) > 0 && (
-          <div className="mb-8 p-4 bg-green-50 border-l-4 border-green-500 rounded">
-            <p className="text-sm font-semibold text-green-800">
-              ✓ Facture payée le {invoice.paidDate ? formatDate(invoice.paidDate) : ''}
-            </p>
-            <p className="text-sm text-green-700 mt-1">
-              Montant réglé : {formatCurrency(parseFloat(invoice.paidAmount.toString()))}
-            </p>
-          </div>
-        )}
+        {invoice.status === 'PAID' &&
+          invoice.paidAmount &&
+          parseFloat(invoice.paidAmount.toString()) > 0 && (
+            <div className="mb-8 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+              <p className="text-sm font-semibold text-green-800">
+                ✓ Facture payée le {invoice.paidAt ? formatDate(invoice.paidAt) : ''}
+              </p>
+              <p className="text-sm text-green-700 mt-1">
+                Montant réglé : {formatCurrency(parseFloat(invoice.paidAmount.toString()))}
+              </p>
+            </div>
+          )}
       </div>
 
       {/* Footer with Orange Background */}

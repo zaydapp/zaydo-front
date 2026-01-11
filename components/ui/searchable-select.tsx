@@ -31,9 +31,7 @@ export function SearchableSelect({
 
   const filteredOptions = React.useMemo(() => {
     if (!search) return options;
-    return options.filter((option) =>
-      option.label.toLowerCase().includes(search.toLowerCase())
-    );
+    return options.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()));
   }, [options, search]);
 
   const selectedOption = options.find((option) => option.value === value);
@@ -61,10 +59,7 @@ export function SearchableSelect({
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        className={cn(
-          'w-full justify-between h-9 font-normal',
-          !value && 'text-muted-foreground'
-        )}
+        className={cn('w-full justify-between h-9 font-normal', !value && 'text-muted-foreground')}
         onClick={() => setOpen(!open)}
       >
         <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
@@ -86,9 +81,7 @@ export function SearchableSelect({
           </div>
           <div className="max-h-[300px] overflow-y-auto p-1">
             {filteredOptions.length === 0 ? (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                {emptyText}
-              </div>
+              <div className="py-6 text-center text-sm text-muted-foreground">{emptyText}</div>
             ) : (
               filteredOptions.map((option) => (
                 <button

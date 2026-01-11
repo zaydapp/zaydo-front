@@ -20,7 +20,7 @@ interface StatusItem {
 
 export function TenantStatusOverview({ data, isLoading }: TenantStatusOverviewProps) {
   const totalTenants = data?.totalTenants || 0;
-  
+
   const statusItems: StatusItem[] = [
     {
       label: 'New Order',
@@ -38,7 +38,10 @@ export function TenantStatusOverview({ data, isLoading }: TenantStatusOverviewPr
     },
     {
       label: 'Completed',
-      count: Math.max(0, totalTenants - (data?.activeTenants || 0) - (data?.churnedTenantsThisMonth || 0)),
+      count: Math.max(
+        0,
+        totalTenants - (data?.activeTenants || 0) - (data?.churnedTenantsThisMonth || 0)
+      ),
       total: totalTenants,
       color: 'bg-emerald-500',
       change: 0.5,
@@ -62,9 +65,7 @@ export function TenantStatusOverview({ data, isLoading }: TenantStatusOverviewPr
               Analyze growth and changes in visitor patterns
             </p>
           </div>
-          <button className="text-sm text-muted-foreground hover:text-foreground">
-            Export
-          </button>
+          <button className="text-sm text-muted-foreground hover:text-foreground">Export</button>
         </div>
       </CardHeader>
       <CardContent>
@@ -103,11 +104,7 @@ export function TenantStatusOverview({ data, isLoading }: TenantStatusOverviewPr
                       </div>
                     </div>
                   </div>
-                  <Progress 
-                    value={percentage} 
-                    className="h-1.5" 
-                    indicatorClassName={item.color}
-                  />
+                  <Progress value={percentage} className="h-1.5" indicatorClassName={item.color} />
                 </div>
               );
             })}
