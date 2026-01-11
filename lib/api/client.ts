@@ -10,9 +10,10 @@ const redirectToAuth = (isSuperAdmin: boolean) => {
 };
 
 const clearAuthStorage = (isSuperAdmin: boolean) => {
+  if (typeof window === 'undefined') return;
   // Check if this is an impersonated session (stored in sessionStorage)
   const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
-
+  
   if (isImpersonated) {
     // Clear only sessionStorage for impersonated sessions
     sessionStorage.removeItem('accessToken');
@@ -35,16 +36,18 @@ const clearAuthStorage = (isSuperAdmin: boolean) => {
 
 // Helper function to get token from either sessionStorage or localStorage
 const getToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
   // Check sessionStorage first (impersonated sessions)
   const sessionToken = sessionStorage.getItem('accessToken');
   if (sessionToken) return sessionToken;
-
+  
   // Fall back to localStorage (regular sessions)
   return localStorage.getItem('accessToken') ?? localStorage.getItem('superAdminAccessToken');
 };
 
 // Helper function to get tenant ID from either sessionStorage or localStorage
 const getTenantId = (): string | null => {
+  if (typeof window === 'undefined') return null;
   return sessionStorage.getItem('tenantId') ?? localStorage.getItem('tenantId');
 };
 
@@ -98,6 +101,10 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
+        if (typeof window === 'undefined') {
+          return Promise.reject(error);
+        }
+        
         const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
         const refreshToken = isImpersonated
           ? sessionStorage.getItem('refreshToken')
