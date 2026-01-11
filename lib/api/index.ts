@@ -19,7 +19,50 @@ import {
   PaginatedResponse,
   ApiResponse,
   InvoiceNumberingConfig,
+  ProductStats,
+  StockMovement,
 } from '@/types';
+import { Tax } from '@/lib/api/taxes';
+
+// Type definitions for API responses
+export interface PriceList {
+  id: string;
+  name: string;
+  type: string;
+  startDate: string;
+  endDate?: string;
+  isActive: boolean;
+  clientGroup?: string;
+  description?: string;
+  items?: Array<{
+    productId: string;
+    price: number;
+    product?: { name: string };
+    productName?: string;
+  }>;
+  _count?: { items: number };
+  updatedAt: string;
+  createdAt: string;
+}
+
+interface OrderStatus {
+  id: string;
+  name: string;
+  slug: string;
+  color?: string;
+  position?: number;
+  isActive?: boolean;
+  isSystem?: boolean;
+}
+
+interface TenantSetting {
+  id: string;
+  key: string;
+  value: unknown;
+  category: string;
+  description?: string;
+  isSystem: boolean;
+}
 
 // Auth API
 export const authApi = {
@@ -43,7 +86,9 @@ export const authApi = {
   },
 
   impersonate: async (token: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/impersonate', { token });
+    const response = await apiClient.post<AuthResponse>('/auth/impersonate', {
+      token,
+    });
     return response.data;
   },
 };
@@ -56,12 +101,16 @@ export const dashboardApi = {
   },
 
   getSalesChart: async (period: 'week' | 'month' | 'year'): Promise<SalesChartData[]> => {
-    const response = await apiClient.get<SalesChartData[]>(`/dashboard/sales-chart?period=${period}`);
+    const response = await apiClient.get<SalesChartData[]>(
+      `/dashboard/sales-chart?period=${period}`
+    );
     return response.data;
   },
 
   getProductionChart: async (period: 'week' | 'month'): Promise<ProductionChartData[]> => {
-    const response = await apiClient.get<ProductionChartData[]>(`/dashboard/production-chart?period=${period}`);
+    const response = await apiClient.get<ProductionChartData[]>(
+      `/dashboard/production-chart?period=${period}`
+    );
     return response.data;
   },
 };
@@ -73,7 +122,10 @@ export const productsApi = {
     type?: 'RAW_MATERIAL' | 'FINISHED_PRODUCT';
     skip?: number;
     take?: number;
-  }): Promise<{ data: Product[]; pagination: { total: number; skip: number; take: number } }> => {
+  }): Promise<{
+    data: Product[];
+    pagination: { total: number; skip: number; take: number };
+  }> => {
     const response = await apiClient.get('/tenant/products', { params });
     return response.data;
   },
@@ -116,7 +168,10 @@ export const productsApi = {
     productId?: string;
     skip?: number;
     take?: number;
-  }): Promise<{ data: StockMovement[]; pagination: { total: number; skip: number; take: number } }> => {
+  }): Promise<{
+    data: StockMovement[];
+    pagination: { total: number; skip: number; take: number };
+  }> => {
     const response = await apiClient.get('/tenant/products/stock-movements/history', { params });
     return response.data;
   },
@@ -134,16 +189,27 @@ export const inventoryApi = {
     limit?: number;
     productId?: string;
   }): Promise<PaginatedResponse<InventoryTransaction>> => {
-    const response = await apiClient.get<PaginatedResponse<InventoryTransaction>>('/inventory/transactions', { params });
+    const response = await apiClient.get<PaginatedResponse<InventoryTransaction>>(
+      '/inventory/transactions',
+      { params }
+    );
     return response.data;
   },
 
-  addStock: async (data: { productId: string; quantity: number; reason: string }): Promise<InventoryTransaction> => {
+  addStock: async (data: {
+    productId: string;
+    quantity: number;
+    reason: string;
+  }): Promise<InventoryTransaction> => {
     const response = await apiClient.post<InventoryTransaction>('/inventory/stock-in', data);
     return response.data;
   },
 
-  removeStock: async (data: { productId: string; quantity: number; reason: string }): Promise<InventoryTransaction> => {
+  removeStock: async (data: {
+    productId: string;
+    quantity: number;
+    reason: string;
+  }): Promise<InventoryTransaction> => {
     const response = await apiClient.post<InventoryTransaction>('/inventory/stock-out', data);
     return response.data;
   },
@@ -157,7 +223,10 @@ export const clientsApi = {
     status?: string;
     skip?: number;
     take?: number;
-  }): Promise<{ data: Client[]; pagination: { total: number; skip: number; take: number } }> => {
+  }): Promise<{
+    data: Client[];
+    pagination: { total: number; skip: number; take: number };
+  }> => {
     const response = await apiClient.get('/tenant/clients', { params });
     return response.data;
   },
@@ -205,7 +274,10 @@ export const suppliersApi = {
     status?: string;
     skip?: number;
     take?: number;
-  }): Promise<{ data: Supplier[]; pagination: { total: number; skip: number; take: number } }> => {
+  }): Promise<{
+    data: Supplier[];
+    pagination: { total: number; skip: number; take: number };
+  }> => {
     const response = await apiClient.get('/tenant/suppliers', { params });
     return response.data;
   },
@@ -257,7 +329,10 @@ export const ordersApi = {
     endDate?: string;
     skip?: number;
     take?: number;
-  }): Promise<{ data: Order[]; pagination: { total: number; skip: number; take: number } }> => {
+  }): Promise<{
+    data: Order[];
+    pagination: { total: number; skip: number; take: number };
+  }> => {
     const response = await apiClient.get('/tenant/orders', { params });
     return response.data;
   },
@@ -320,18 +395,18 @@ export const ordersApi = {
 
 // Price Lists API
 export const priceListsApi = {
-  getAll: async (): Promise<any[]> => {
-    const response = await apiClient.get('/tenant/price-lists');
+  getAll: async (): Promise<PriceList[]> => {
+    const response = await apiClient.get<PriceList[]>('/tenant/price-lists');
     return response.data;
   },
 
-  getById: async (id: string): Promise<any> => {
-    const response = await apiClient.get(`/tenant/price-lists/${id}`);
+  getById: async (id: string): Promise<PriceList> => {
+    const response = await apiClient.get<PriceList>(`/tenant/price-lists/${id}`);
     return response.data;
   },
 
-  getActive: async (date?: string): Promise<any> => {
-    const response = await apiClient.get('/tenant/price-lists/active', {
+  getActive: async (date?: string): Promise<PriceList> => {
+    const response = await apiClient.get<PriceList>('/tenant/price-lists/active', {
       params: { date },
     });
     return response.data;
@@ -344,13 +419,13 @@ export const priceListsApi = {
     return response.data;
   },
 
-  create: async (data: any): Promise<any> => {
-    const response = await apiClient.post('/tenant/price-lists', data);
+  create: async (data: Partial<PriceList>): Promise<PriceList> => {
+    const response = await apiClient.post<PriceList>('/tenant/price-lists', data);
     return response.data;
   },
 
-  update: async (id: string, data: any): Promise<any> => {
-    const response = await apiClient.patch(`/tenant/price-lists/${id}`, data);
+  update: async (id: string, data: Partial<PriceList>): Promise<PriceList> => {
+    const response = await apiClient.patch<PriceList>(`/tenant/price-lists/${id}`, data);
     return response.data;
   },
 
@@ -368,23 +443,38 @@ export const priceListsApi = {
 
 // Order Statuses API
 export const orderStatusesApi = {
-  getAll: async (): Promise<any[]> => {
-    const response = await apiClient.get('/tenant/order-statuses');
+  getAll: async (): Promise<OrderStatus[]> => {
+    const response = await apiClient.get<OrderStatus[]>('/tenant/order-statuses');
     return response.data;
   },
 
-  getById: async (id: string): Promise<any> => {
-    const response = await apiClient.get(`/tenant/order-statuses/${id}`);
+  getById: async (id: string): Promise<OrderStatus> => {
+    const response = await apiClient.get<OrderStatus>(`/tenant/order-statuses/${id}`);
     return response.data;
   },
 
-  create: async (data: { name: string; slug: string; color?: string; position?: number; isActive?: boolean }): Promise<any> => {
-    const response = await apiClient.post('/tenant/order-statuses', data);
+  create: async (data: {
+    name: string;
+    slug: string;
+    color?: string;
+    position?: number;
+    isActive?: boolean;
+  }): Promise<OrderStatus> => {
+    const response = await apiClient.post<OrderStatus>('/tenant/order-statuses', data);
     return response.data;
   },
 
-  update: async (id: string, data: Partial<{ name: string; slug: string; color: string; position: number; isActive: boolean }>): Promise<any> => {
-    const response = await apiClient.patch(`/tenant/order-statuses/${id}`, data);
+  update: async (
+    id: string,
+    data: Partial<{
+      name: string;
+      slug: string;
+      color: string;
+      position: number;
+      isActive: boolean;
+    }>
+  ): Promise<OrderStatus> => {
+    const response = await apiClient.patch<OrderStatus>(`/tenant/order-statuses/${id}`, data);
     return response.data;
   },
 
@@ -399,23 +489,38 @@ export const orderStatusesApi = {
 
 // Taxes API
 export const taxesApi = {
-  getAll: async (): Promise<any[]> => {
-    const response = await apiClient.get('/tenant/taxes');
+  getAll: async (): Promise<Tax[]> => {
+    const response = await apiClient.get<Tax[]>('/tenant/taxes');
     return response.data;
   },
 
-  getById: async (id: string): Promise<any> => {
-    const response = await apiClient.get(`/tenant/taxes/${id}`);
+  getById: async (id: string): Promise<Tax> => {
+    const response = await apiClient.get<Tax>(`/tenant/taxes/${id}`);
     return response.data;
   },
 
-  create: async (data: { name: string; rate: number; code?: string; description?: string; isActive?: boolean }): Promise<any> => {
-    const response = await apiClient.post('/tenant/taxes', data);
+  create: async (data: {
+    name: string;
+    rate: number;
+    code?: string;
+    description?: string;
+    isActive?: boolean;
+  }): Promise<Tax> => {
+    const response = await apiClient.post<Tax>('/tenant/taxes', data);
     return response.data;
   },
 
-  update: async (id: string, data: Partial<{ name: string; rate: number; code: string; description: string; isActive: boolean }>): Promise<any> => {
-    const response = await apiClient.patch(`/tenant/taxes/${id}`, data);
+  update: async (
+    id: string,
+    data: Partial<{
+      name: string;
+      rate: number;
+      code: string;
+      description: string;
+      isActive: boolean;
+    }>
+  ): Promise<Tax> => {
+    const response = await apiClient.patch<Tax>(`/tenant/taxes/${id}`, data);
     return response.data;
   },
 
@@ -423,8 +528,8 @@ export const taxesApi = {
     await apiClient.delete(`/tenant/taxes/${id}`);
   },
 
-  toggle: async (id: string): Promise<any> => {
-    const response = await apiClient.patch(`/tenant/taxes/${id}/toggle`);
+  toggle: async (id: string): Promise<Tax> => {
+    const response = await apiClient.patch<Tax>(`/tenant/taxes/${id}/toggle`);
     return response.data;
   },
 };
@@ -466,12 +571,12 @@ export const invoicesApi = {
     return response.data;
   },
 
-  create: async (data: any): Promise<Invoice> => {
+  create: async (data: Partial<Invoice>): Promise<Invoice> => {
     const response = await apiClient.post<Invoice>('/invoices', data);
     return response.data;
   },
 
-  update: async (id: string, data: any): Promise<Invoice> => {
+  update: async (id: string, data: Partial<Invoice>): Promise<Invoice> => {
     const response = await apiClient.patch<Invoice>(`/invoices/${id}`, data);
     return response.data;
   },
@@ -492,15 +597,18 @@ export const invoicesApi = {
     await apiClient.delete(`/invoices/${id}`);
   },
 
-  createCreditNote: async (invoiceId: string, data: {
-    items: Array<{
-      itemId: string;
-      quantity: number;
+  createCreditNote: async (
+    invoiceId: string,
+    data: {
+      items: Array<{
+        itemId: string;
+        quantity: number;
+        reason: string;
+      }>;
       reason: string;
-    }>;
-    reason: string;
-    notes?: string;
-  }): Promise<Invoice> => {
+      notes?: string;
+    }
+  ): Promise<Invoice> => {
     const response = await apiClient.post<Invoice>(`/invoices/${invoiceId}/credit-note`, data);
     return response.data;
   },
@@ -569,29 +677,34 @@ export const tenantApi = {
 
 // Settings API
 export const settingsApi = {
-  getAll: async (category?: string): Promise<any> => {
+  getAll: async (category?: string): Promise<TenantSetting[]> => {
     const params = category ? { category } : {};
-    const response = await apiClient.get('/settings', { params });
+    const response = await apiClient.get<TenantSetting[]>('/settings', {
+      params,
+    });
     return response.data;
   },
 
-  getByKey: async (key: string): Promise<any> => {
-    const response = await apiClient.get(`/settings/${key}`);
+  getByKey: async (key: string): Promise<TenantSetting> => {
+    const response = await apiClient.get<TenantSetting>(`/settings/${key}`);
     return response.data;
   },
 
   create: async (data: {
     key: string;
-    value: any;
+    value: unknown;
     category: string;
     description?: string;
-  }): Promise<any> => {
-    const response = await apiClient.post('/settings', data);
+  }): Promise<TenantSetting> => {
+    const response = await apiClient.post<TenantSetting>('/settings', data);
     return response.data;
   },
 
-  update: async (key: string, data: { value?: any; description?: string }): Promise<any> => {
-    const response = await apiClient.patch(`/settings/${key}`, data);
+  update: async (
+    key: string,
+    data: { value?: unknown; description?: string }
+  ): Promise<TenantSetting> => {
+    const response = await apiClient.patch<TenantSetting>(`/settings/${key}`, data);
     return response.data;
   },
 
@@ -613,7 +726,10 @@ export const invoiceNumberingApi = {
   },
 
   updateConfig: async (
-    data: Partial<InvoiceNumberingConfig> & { nextSequence?: number; manualOverride?: boolean }
+    data: Partial<InvoiceNumberingConfig> & {
+      nextSequence?: number;
+      manualOverride?: boolean;
+    }
   ): Promise<InvoiceNumberingConfig> => {
     const response = await apiClient.patch<InvoiceNumberingConfig>('/invoice-numbering', data);
     return response.data;

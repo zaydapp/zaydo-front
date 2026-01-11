@@ -4,35 +4,36 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ModuleDefinition, SubscriptionPlan } from '@/types';
+import { ModuleDefinition } from '@/types';
+import { SubscriptionPlan } from '@/lib/api/super-admin';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const planSchema = z.object({
   name: z.string().min(3, 'Plan name is required'),
   description: z.string().optional(),
-  priceMonthly: z
-    .number({ invalid_type_error: 'Monthly price must be a number' })
-    .nonnegative('Monthly price must be positive'),
-  priceYearly: z
-    .number({ invalid_type_error: 'Yearly price must be a number' })
-    .nonnegative('Yearly price must be positive'),
+  price: z.number({ message: 'Price must be a number' }).nonnegative('Price must be positive'),
   currency: z.string().min(2, 'Currency code required'),
+  billingCycle: z.enum(['MONTHLY', 'YEARLY']),
   maxUsers: z
-    .number({ invalid_type_error: 'Max users must be a number' })
+    .number({ message: 'Max users must be a number' })
     .int('Max users must be an integer')
-    .positive('Max users must be positive'),
-  trialPeriodDays: z
-    .number({ invalid_type_error: 'Trial days must be a number' })
-    .int()
-    .min(0)
-    .max(90)
+    .positive('Max users must be positive')
+    .nullable()
     .optional(),
-  includedModuleKeys: z.array(z.string()).default([]),
+  isActive: z.boolean(),
+  features: z.array(z.string()),
 });
 
 export type PlanFormValues = z.infer<typeof planSchema>;
@@ -45,7 +46,13 @@ interface PlanFormProps {
   isSubmitting?: boolean;
 }
 
-export function PlanForm({ modules, defaultValues, onSubmit, onCancel, isSubmitting }: PlanFormProps) {
+export function PlanForm({
+  modules,
+  defaultValues,
+  onSubmit,
+  onCancel,
+  isSubmitting,
+}: PlanFormProps) {
   const {
     register,
     handleSubmit,
@@ -59,22 +66,22 @@ export function PlanForm({ modules, defaultValues, onSubmit, onCancel, isSubmitt
       ? {
           name: defaultValues.name,
           description: defaultValues.description ?? '',
-          priceMonthly: defaultValues.priceMonthly,
-          priceYearly: defaultValues.priceYearly,
+          price: defaultValues.price,
           currency: defaultValues.currency,
-          maxUsers: defaultValues.maxUsers,
-          trialPeriodDays: defaultValues.trialPeriodDays,
-          includedModuleKeys: defaultValues.includedModuleKeys,
+          billingCycle: defaultValues.billingCycle,
+          maxUsers: defaultValues.maxUsers ?? null,
+          isActive: defaultValues.isActive,
+          features: defaultValues.features,
         }
       : {
           name: '',
           description: '',
-          priceMonthly: 0,
-          priceYearly: 0,
+          price: 0,
           currency: 'USD',
+          billingCycle: 'MONTHLY' as const,
           maxUsers: 10,
-          trialPeriodDays: 14,
-          includedModuleKeys: [],
+          isActive: true,
+          features: [],
         },
   });
 
@@ -83,17 +90,17 @@ export function PlanForm({ modules, defaultValues, onSubmit, onCancel, isSubmitt
       reset({
         name: defaultValues.name,
         description: defaultValues.description ?? '',
-        priceMonthly: defaultValues.priceMonthly,
-        priceYearly: defaultValues.priceYearly,
+        price: defaultValues.price,
         currency: defaultValues.currency,
-        maxUsers: defaultValues.maxUsers,
-        trialPeriodDays: defaultValues.trialPeriodDays,
-        includedModuleKeys: defaultValues.includedModuleKeys,
+        billingCycle: defaultValues.billingCycle,
+        maxUsers: defaultValues.maxUsers ?? null,
+        isActive: defaultValues.isActive,
+        features: defaultValues.features,
       });
     }
   }, [defaultValues, reset]);
 
-  const includedModuleKeys = watch('includedModuleKeys');
+  const features = watch('features');
 
   return (
     <form
@@ -114,29 +121,53 @@ export function PlanForm({ modules, defaultValues, onSubmit, onCancel, isSubmitt
           {errors.currency && <p className="text-sm text-destructive">{errors.currency.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="plan-price-monthly">Monthly price</Label>
+          <Label htmlFor="plan-billing-cycle">Billing cycle</Label>
+          <Select
+            defaultValue={defaultValues?.billingCycle ?? 'MONTHLY'}
+            onValueChange={(value) => setValue('billingCycle', value as 'MONTHLY' | 'YEARLY')}
+          >
+            <SelectTrigger id="plan-billing-cycle">
+              <SelectValue placeholder="Select billing cycle" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="MONTHLY">Monthly</SelectItem>
+              <SelectItem value="YEARLY">Yearly</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.billingCycle && (
+            <p className="text-sm text-destructive">{errors.billingCycle.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="plan-price">Price</Label>
           <Input
-            id="plan-price-monthly"
+            id="plan-price"
             type="number"
             step="0.01"
-            {...register('priceMonthly', { valueAsNumber: true })}
+            {...register('price', { valueAsNumber: true })}
           />
-          {errors.priceMonthly && <p className="text-sm text-destructive">{errors.priceMonthly.message}</p>}
+          {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="plan-price-yearly">Yearly price</Label>
-          <Input id="plan-price-yearly" type="number" step="0.01" {...register('priceYearly', { valueAsNumber: true })} />
-          {errors.priceYearly && <p className="text-sm text-destructive">{errors.priceYearly.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="plan-max-users">Max users</Label>
-          <Input id="plan-max-users" type="number" {...register('maxUsers', { valueAsNumber: true })} />
+          <Label htmlFor="plan-max-users">Max users (optional)</Label>
+          <Input
+            id="plan-max-users"
+            type="number"
+            {...register('maxUsers', {
+              valueAsNumber: true,
+              setValueAs: (v) => (v === '' ? null : Number(v)),
+            })}
+          />
           {errors.maxUsers && <p className="text-sm text-destructive">{errors.maxUsers.message}</p>}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="plan-trial">Trial period (days)</Label>
-          <Input id="plan-trial" type="number" {...register('trialPeriodDays', { valueAsNumber: true })} />
-          {errors.trialPeriodDays && <p className="text-sm text-destructive">{errors.trialPeriodDays.message}</p>}
+        <div className="space-y-2 flex items-center pt-8">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Checkbox
+              checked={watch('isActive')}
+              onCheckedChange={(checked) => setValue('isActive', checked === true)}
+            />
+            <span className="text-sm font-medium">Active</span>
+          </label>
         </div>
       </div>
 
@@ -148,31 +179,34 @@ export function PlanForm({ modules, defaultValues, onSubmit, onCancel, isSubmitt
           {...register('description')}
           placeholder="Ideal for growing teams needing full automation."
         />
-        {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+        {errors.description && (
+          <p className="text-sm text-destructive">{errors.description.message}</p>
+        )}
       </div>
 
       <Separator />
 
       <div className="space-y-3">
         <div>
-          <Label>Included modules</Label>
+          <Label>Features (module keys)</Label>
           <p className="text-xs text-muted-foreground">
-            Select modules that are bundled with this plan. Tenants can purchase additional modules separately.
+            Select modules that are bundled with this plan. Tenants can purchase additional modules
+            separately.
           </p>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {modules.map((module) => {
-            const checked = includedModuleKeys?.includes(module.key) ?? false;
+            const checked = features?.includes(module.key) ?? false;
             return (
               <label key={module.id} className="flex items-start gap-2 rounded-md border p-3">
                 <Checkbox
                   checked={checked}
                   onCheckedChange={(isChecked) => {
                     setValue(
-                      'includedModuleKeys',
+                      'features',
                       isChecked
-                        ? [...new Set([...(includedModuleKeys ?? []), module.key])]
-                        : (includedModuleKeys ?? []).filter((key) => key !== module.key)
+                        ? [...new Set([...(features ?? []), module.key])]
+                        : (features ?? []).filter((key) => key !== module.key)
                     );
                   }}
                 />
@@ -197,5 +231,3 @@ export function PlanForm({ modules, defaultValues, onSubmit, onCancel, isSubmitt
     </form>
   );
 }
-
-

@@ -16,11 +16,16 @@ export default function ProductsPage() {
     <div className="space-y-6 pb-8">
       {/* Header with back button */}
       <div className="space-y-4">
-        <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/settings')} className="mb-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard/settings')}
+          className="mb-2"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('common.back') || 'Back to Settings'}
         </Button>
-        
+
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -32,7 +37,8 @@ export default function ProductsPage() {
               </h1>
             </div>
             <p className="text-muted-foreground ml-14">
-              {t('settings.categoryDescriptions.products') || 'Product types, categories, and classifications'}
+              {t('settings.categoryDescriptions.products') ||
+                'Product types, categories, and classifications'}
             </p>
           </div>
         </div>

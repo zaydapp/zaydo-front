@@ -48,5 +48,3 @@ export function ModuleUsageList({ data, isLoading }: ModuleUsageProps) {
     </Card>
   );
 }
-
-

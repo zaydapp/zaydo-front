@@ -19,14 +19,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { ArrowLeft, Package2, Boxes, Upload, X, Image as ImageIcon, AlertCircle, Loader2 } from 'lucide-react';
+  ArrowLeft,
+  Package2,
+  Boxes,
+  Upload,
+  X,
+  Image as ImageIcon,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ProductFormData {
@@ -52,21 +55,24 @@ export default function EditProductPage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // Fetch product types and units from tenant settings
   const { data: productsSettings } = useTenantSettings('products');
   const { data: unitsSettings } = useTenantSettings('units');
-  
-  const productTypesSetting = productsSettings?.find(s => s.key === 'products.types');
+
+  const productTypesSetting = productsSettings?.find((s) => s.key === 'products.types');
   const productTypes = (productTypesSetting?.value as Array<{ value: string; label: string }>) || [
     { value: 'RAW_MATERIAL', label: 'Raw Material' },
     { value: 'FINISHED_PRODUCT', label: 'Finished Product' },
   ];
-  
+
   // Collect all unit types
-  const quantityUnits = (unitsSettings?.find(s => s.key === 'units.quantity')?.value as string[]) || [];
-  const weightUnits = (unitsSettings?.find(s => s.key === 'units.weight')?.value as string[]) || [];
-  const volumeUnits = (unitsSettings?.find(s => s.key === 'units.volume')?.value as string[]) || [];
+  const quantityUnits =
+    (unitsSettings?.find((s) => s.key === 'units.quantity')?.value as string[]) || [];
+  const weightUnits =
+    (unitsSettings?.find((s) => s.key === 'units.weight')?.value as string[]) || [];
+  const volumeUnits =
+    (unitsSettings?.find((s) => s.key === 'units.volume')?.value as string[]) || [];
   const allUnits = [...new Set([...quantityUnits, ...weightUnits, ...volumeUnits])];
   const COMMON_UNITS = allUnits.length > 0 ? allUnits : ['kg', 'L', 'unités', 'g', 'mL', 'pièces'];
 
@@ -101,7 +107,7 @@ export default function EditProductPage() {
         supplierId: product.supplierId || '',
         notes: product.notes || '',
       });
-      
+
       // Load existing images
       if (product.images && product.images.length > 0) {
         setExistingImages(product.images);
@@ -118,8 +124,12 @@ export default function EditProductPage() {
       toast.success(t('products.productUpdated'));
       router.push('/dashboard/products');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('products.updateError'));
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('products.updateError'));
     },
   });
 
@@ -130,8 +140,12 @@ export default function EditProductPage() {
       toast.success(t('products.productDeleted'));
       router.push('/dashboard/products');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('products.deleteError'));
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('products.deleteError'));
     },
   });
 
@@ -151,7 +165,7 @@ export default function EditProductPage() {
   };
 
   const addImages = (files: File[]) => {
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       if (!file.type.startsWith('image/')) {
         toast.error(t('products.invalidImageType'));
         return false;
@@ -163,12 +177,12 @@ export default function EditProductPage() {
       return true;
     });
 
-    setImages(prev => [...prev, ...validFiles]);
+    setImages((prev) => [...prev, ...validFiles]);
 
-    validFiles.forEach(file => {
+    validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreviews(prev => [...prev, reader.result as string]);
+        setImagePreviews((prev) => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
     });
@@ -176,18 +190,18 @@ export default function EditProductPage() {
 
   const removeImage = (index: number, isExisting: boolean = false) => {
     if (isExisting) {
-      setExistingImages(prev => prev.filter((_, i) => i !== index));
-      
+      setExistingImages((prev) => prev.filter((_, i) => i !== index));
+
       // Adjust mainImageIndex
       if (index === mainImageIndex) {
         setMainImageIndex(0);
       } else if (index < mainImageIndex) {
-        setMainImageIndex(prev => Math.max(0, prev - 1));
+        setMainImageIndex((prev) => Math.max(0, prev - 1));
       }
     } else {
       const adjustedIndex = index - existingImages.length;
-      setImages(prev => prev.filter((_, i) => i !== adjustedIndex));
-      setImagePreviews(prev => prev.filter((_, i) => i !== adjustedIndex));
+      setImages((prev) => prev.filter((_, i) => i !== adjustedIndex));
+      setImagePreviews((prev) => prev.filter((_, i) => i !== adjustedIndex));
     }
   };
 
@@ -223,9 +237,7 @@ export default function EditProductPage() {
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <AlertCircle className="h-12 w-12 text-muted-foreground" />
         <p className="text-muted-foreground">{t('products.notFound')}</p>
-        <Button onClick={() => router.push('/dashboard/products')}>
-          {t('common.back')}
-        </Button>
+        <Button onClick={() => router.push('/dashboard/products')}>{t('common.back')}</Button>
       </div>
     );
   }
@@ -235,11 +247,7 @@ export default function EditProductPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -247,11 +255,7 @@ export default function EditProductPage() {
             <p className="text-muted-foreground">{t('products.editProductDescription')}</p>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={deleteMutation.isPending}
-        >
+        <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
           {deleteMutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -275,7 +279,9 @@ export default function EditProductPage() {
               <CardContent className="space-y-4">
                 {/* Product Type */}
                 <div className="space-y-2">
-                  <Label>{t('products.productType')} <span className="text-destructive">*</span></Label>
+                  <Label>
+                    {t('products.productType')} <span className="text-destructive">*</span>
+                  </Label>
                   <Controller
                     name="type"
                     control={control}
@@ -285,10 +291,11 @@ export default function EditProductPage() {
                         {productTypes.map((type, index) => {
                           const valueKey = type.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
                           const translationKey = `settings.settingValues.products.${valueKey}`;
-                          const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
+                          const label =
+                            t(translationKey) !== translationKey ? t(translationKey) : type.label;
                           const isRaw = index === 0;
                           const colorClass = isRaw ? 'orange' : 'blue';
-                          
+
                           return (
                             <button
                               key={type.value}
@@ -302,9 +309,13 @@ export default function EditProductPage() {
                             >
                               <div className="flex items-center gap-2">
                                 {isRaw ? (
-                                  <Boxes className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`} />
+                                  <Boxes
+                                    className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`}
+                                  />
                                 ) : (
-                                  <Package2 className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`} />
+                                  <Package2
+                                    className={`h-5 w-5 ${field.value === type.value ? `text-${colorClass}-600` : 'text-muted-foreground'}`}
+                                  />
                                 )}
                                 <p className="text-sm font-medium">{label}</p>
                               </div>
@@ -451,9 +462,7 @@ export default function EditProductPage() {
 
                 {(existingImages.length > 0 || imagePreviews.length > 0) && (
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      {t('products.clickToSetMain')}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{t('products.clickToSetMain')}</p>
                     <div className="grid grid-cols-3 gap-4">
                       {/* Existing images from database */}
                       {existingImages.map((imageUrl, index) => (
@@ -488,7 +497,7 @@ export default function EditProductPage() {
                           )}
                         </div>
                       ))}
-                      
+
                       {/* New images to be uploaded */}
                       {imagePreviews.map((preview, index) => {
                         const absoluteIndex = existingImages.length + index;
@@ -565,9 +574,7 @@ export default function EditProductPage() {
                       {errors.minStock.message}
                     </p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    {t('products.minStockHelper')}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('products.minStockHelper')}</p>
                 </div>
 
                 <div className="pt-4 space-y-3 border-t">

@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
@@ -56,19 +56,11 @@ export default function LoginPage() {
             <span className="text-3xl font-bold text-primary-foreground">Z</span>
           </div>
           <h1 className="text-3xl font-bold">{t('auth.welcomeBack')}</h1>
-          <p className="text-muted-foreground mt-2">
-            {t('auth.signInDescription')}
-          </p>
+          <p className="text-muted-foreground mt-2">Votre logiciel de gestion commerciale</p>
         </div>
 
         {/* Login Card */}
         <Card>
-          <CardHeader>
-            <CardTitle>{t('auth.login')}</CardTitle>
-            <CardDescription>
-              {t('auth.enterCredentials')}
-            </CardDescription>
-          </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
@@ -80,9 +72,7 @@ export default function LoginPage() {
                   {...register('email')}
                   disabled={isLoading}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
+                {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -99,17 +89,11 @@ export default function LoginPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <label className="flex items-center space-x-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300"
-                  />
+                  <input type="checkbox" className="rounded border-gray-300" />
                   <span>{t('auth.rememberMe')}</span>
                 </label>
-                <Button variant="link" className="px-0" type="button">
-                  {t('auth.forgotPassword')}
-                </Button>
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
@@ -123,26 +107,6 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            <div className="mt-6 text-center text-sm">
-              <p className="text-muted-foreground">
-                {t('auth.dontHaveAccount')}{' '}
-                <Button variant="link" className="px-0">
-                  {t('auth.contactSales')}
-                </Button>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Demo Credentials */}
-        <Card className="bg-muted/50">
-          <CardContent className="pt-6">
-            <p className="text-sm font-medium mb-2">{t('auth.demoCredentials')}</p>
-            <div className="text-xs space-y-1 text-muted-foreground">
-              <p>Email: admin@demo.com</p>
-              <p>Password: demo123</p>
-            </div>
           </CardContent>
         </Card>
       </div>

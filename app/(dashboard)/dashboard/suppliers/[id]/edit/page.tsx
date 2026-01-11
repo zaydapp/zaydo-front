@@ -19,15 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, AlertCircle, Loader2, Package, Box, Settings, Truck, Ship } from 'lucide-react';
 
-const SUPPLIER_TYPE_ICONS: Record<string, any> = {
+const SUPPLIER_TYPE_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   RAW_MATERIAL: Package,
   PACKAGING: Box,
   SERVICE: Settings,
@@ -50,6 +45,11 @@ interface SupplierFormData {
   status?: 'ACTIVE' | 'INACTIVE';
 }
 
+interface TenantSetting {
+  key: string;
+  value: unknown;
+}
+
 export default function EditSupplierPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -59,8 +59,13 @@ export default function EditSupplierPage() {
 
   // Fetch supplier types from tenant settings
   const { data: settingsData } = useTenantSettings('suppliers');
-  const supplierTypesSetting = settingsData?.find((s: any) => s.key === 'suppliers.types');
-  const supplierTypes = (supplierTypesSetting?.value as Array<{ value: string; label: string }>) || [
+  const supplierTypesSetting = settingsData?.find(
+    (s: TenantSetting) => s.key === 'suppliers.types'
+  );
+  const supplierTypes = (supplierTypesSetting?.value as Array<{
+    value: string;
+    label: string;
+  }>) || [
     { value: 'RAW_MATERIAL', label: 'Raw Materials' },
     { value: 'PACKAGING', label: 'Packaging' },
   ];
@@ -111,8 +116,9 @@ export default function EditSupplierPage() {
       toast.success(t('suppliers.supplierUpdated'));
       router.push('/dashboard/suppliers');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('suppliers.updateError'));
+    onError: (error: Error) => {
+      const message = error instanceof Error ? error.message : t('suppliers.updateError');
+      toast.error(message || t('suppliers.updateError'));
     },
   });
 
@@ -123,8 +129,9 @@ export default function EditSupplierPage() {
       toast.success(t('suppliers.supplierDeleted'));
       router.push('/dashboard/suppliers');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('suppliers.deleteError'));
+    onError: (error: Error) => {
+      const message = error instanceof Error ? error.message : t('suppliers.deleteError');
+      toast.error(message || t('suppliers.deleteError'));
     },
   });
 
@@ -151,9 +158,7 @@ export default function EditSupplierPage() {
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <AlertCircle className="h-12 w-12 text-muted-foreground" />
         <p className="text-muted-foreground">{t('suppliers.notFound')}</p>
-        <Button onClick={() => router.push('/dashboard/suppliers')}>
-          {t('common.back')}
-        </Button>
+        <Button onClick={() => router.push('/dashboard/suppliers')}>{t('common.back')}</Button>
       </div>
     );
   }
@@ -163,11 +168,7 @@ export default function EditSupplierPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -175,11 +176,7 @@ export default function EditSupplierPage() {
             <p className="text-muted-foreground">{t('suppliers.editSupplierDescription')}</p>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={deleteMutation.isPending}
-        >
+        <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
           {deleteMutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -203,7 +200,9 @@ export default function EditSupplierPage() {
               <CardContent className="space-y-4">
                 {/* Supplier Type */}
                 <div className="space-y-2">
-                  <Label>{t('suppliers.type')} <span className="text-destructive">*</span></Label>
+                  <Label>
+                    {t('suppliers.type')} <span className="text-destructive">*</span>
+                  </Label>
                   <Controller
                     name="type"
                     control={control}
@@ -214,9 +213,10 @@ export default function EditSupplierPage() {
                           const Icon = SUPPLIER_TYPE_ICONS[type.value] || Ship;
                           const valueKey = type.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
                           const translationKey = `settings.settingValues.suppliers.${valueKey}`;
-                          const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
+                          const label =
+                            t(translationKey) !== translationKey ? t(translationKey) : type.label;
                           const isSelected = field.value === type.value;
-                          
+
                           return (
                             <button
                               key={type.value}
@@ -229,9 +229,11 @@ export default function EditSupplierPage() {
                               }`}
                             >
                               <div className="flex items-center gap-2">
-                                <Icon className={`h-5 w-5 ${
-                                  isSelected ? 'text-primary' : 'text-muted-foreground'
-                                }`} />
+                                <Icon
+                                  className={`h-5 w-5 ${
+                                    isSelected ? 'text-primary' : 'text-muted-foreground'
+                                  }`}
+                                />
                                 <p className="text-sm font-medium">{label}</p>
                               </div>
                             </button>

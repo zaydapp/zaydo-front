@@ -6,11 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { SuperAdminUser, ApiResponse } from '@/types';
-import {
-  superAdminAuthApi,
-  SuperAdminLoginPayload,
-  SuperAdminLoginResponse,
-} from '@/lib/api';
+import { superAdminAuthApi, SuperAdminLoginPayload, SuperAdminLoginResponse } from '@/lib/api';
 
 interface SuperAdminAuthContextValue {
   currentUser: SuperAdminUser | null;
@@ -86,7 +82,12 @@ const extractErrorMessage = (error: unknown, fallback: string): string => {
     return responseMessage ?? fallback;
   }
 
-  if (typeof error === 'object' && error && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+  if (
+    typeof error === 'object' &&
+    error &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  ) {
     return (error as { message: string }).message;
   }
 
@@ -141,7 +142,13 @@ export function SuperAdminAuthProvider({ children }: { children: ReactNode }) {
       const response = await superAdminAuthApi.login(payload);
       return { response, payload };
     },
-    onSuccess: ({ response, payload }: { response: ApiResponse<SuperAdminLoginResponse>; payload: SuperAdminLoginPayload }) => {
+    onSuccess: ({
+      response,
+      payload,
+    }: {
+      response: ApiResponse<SuperAdminLoginResponse>;
+      payload: SuperAdminLoginPayload;
+    }) => {
       const { user, accessToken } = response.data;
       persistAccessToken(accessToken);
       setCurrentUser(user);
@@ -154,7 +161,7 @@ export function SuperAdminAuthProvider({ children }: { children: ReactNode }) {
             persistUser(null);
             persistAccessToken(null);
           },
-          { once: true },
+          { once: true }
         );
       }
       router.replace('/super-admin/dashboard');
@@ -162,7 +169,7 @@ export function SuperAdminAuthProvider({ children }: { children: ReactNode }) {
     onError: (error) => {
       const message = extractErrorMessage(
         error,
-        'Unable to log in as super admin. Please verify your credentials.',
+        'Unable to log in as super admin. Please verify your credentials.'
       );
       toast.error(message);
     },
@@ -227,5 +234,3 @@ export function useSuperAdminAuth() {
   }
   return context;
 }
-
-

@@ -86,16 +86,10 @@ export function ImageCarousel({
               key={index}
               onClick={() => handleThumbnailClick(index)}
               className={`shrink-0 relative rounded-lg overflow-hidden transition-all ${
-                index === currentIndex
-                  ? 'ring-2 ring-primary'
-                  : 'opacity-60 hover:opacity-100'
+                index === currentIndex ? 'ring-2 ring-primary' : 'opacity-60 hover:opacity-100'
               }`}
             >
-              <img
-                src={image}
-                alt={`Thumbnail ${index + 1}`}
-                className="h-20 w-20 object-cover"
-              />
+              <img src={image} alt={`Thumbnail ${index + 1}`} className="h-20 w-20 object-cover" />
               {index === mainImageIndex && showMainBadge && (
                 <div className="absolute bottom-1 left-1">
                   <Badge variant="secondary" className="text-[10px] px-1 py-0">

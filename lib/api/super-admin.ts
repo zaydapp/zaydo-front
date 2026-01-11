@@ -8,12 +8,31 @@ import {
   SuperAdminDashboardData,
   SuperAdminSettingsPayload,
   SuperAdminUser,
-  SubscriptionPlan,
-  SubscriptionPlanWithTenants,
   TenantModuleAssignment,
   TenantCreateInput,
   TenantUpdateInput,
 } from '@/types';
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  currency: string;
+  billingCycle: 'MONTHLY' | 'YEARLY';
+  features: string[];
+  maxUsers?: number | null;
+  maxStorage?: number | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubscriptionPlanWithTenants extends SubscriptionPlan {
+  _count?: {
+    tenants: number;
+  };
+}
 
 export interface SuperAdminLoginPayload {
   email: string;
@@ -51,6 +70,7 @@ export interface BackendTenantUser {
 
 export interface BackendTenantUserSummary extends BackendTenantUser {
   tenantId: string;
+  role: string;
   tenant?: {
     id: string;
     name: string;
@@ -134,13 +154,15 @@ export const superAdminAuthApi = {
     const { rememberMe: _rememberMe, ...credentials } = payload;
     const response = await apiClient.post<ApiResponse<SuperAdminLoginResponse>>(
       '/super-admin/auth/login',
-      credentials,
+      credentials
     );
     return response.data;
   },
 
   logout: async (): Promise<ApiResponse<{ success: boolean }>> => {
-    const response = await apiClient.post<ApiResponse<{ success: boolean }>>('/super-admin/auth/logout');
+    const response = await apiClient.post<ApiResponse<{ success: boolean }>>(
+      '/super-admin/auth/logout'
+    );
     return response.data;
   },
 
@@ -152,13 +174,17 @@ export const superAdminAuthApi = {
 
 export const superAdminDashboardApi = {
   getOverview: async (): Promise<ApiResponse<SuperAdminDashboardData>> => {
-    const response = await apiClient.get<ApiResponse<SuperAdminDashboardData>>('/super-admin/dashboard/overview');
+    const response = await apiClient.get<ApiResponse<SuperAdminDashboardData>>(
+      '/super-admin/dashboard/overview'
+    );
     return response.data;
   },
 
-  getGrowthSeries: async (period: '30d' | '90d' | '365d'): Promise<ApiResponse<SuperAdminDashboardData['growthSeries']>> => {
+  getGrowthSeries: async (
+    period: '30d' | '90d' | '365d'
+  ): Promise<ApiResponse<SuperAdminDashboardData['growthSeries']>> => {
     const response = await apiClient.get<ApiResponse<SuperAdminDashboardData['growthSeries']>>(
-      `/super-admin/dashboard/growth?period=${period}`,
+      `/super-admin/dashboard/growth?period=${period}`
     );
     return response.data;
   },
@@ -180,16 +206,13 @@ export const superAdminTenantsApi = {
         ? (Math.max(page, 1) - 1) * Math.max(limit, 1)
         : undefined;
 
-    const response = await apiClient.get<PaginatedResponse<BackendTenant>>(
-      '/super-admin/tenants',
-      {
-        params: {
-          ...rest,
-          take,
-          skip,
-        },
+    const response = await apiClient.get<PaginatedResponse<BackendTenant>>('/super-admin/tenants', {
+      params: {
+        ...rest,
+        take,
+        skip,
       },
-    );
+    });
     return response.data;
   },
 
@@ -199,7 +222,10 @@ export const superAdminTenantsApi = {
   },
 
   update: async (tenantId: string, payload: TenantUpdateInput): Promise<BackendTenant> => {
-    const response = await apiClient.patch<BackendTenant>(`/super-admin/tenants/${tenantId}`, payload);
+    const response = await apiClient.patch<BackendTenant>(
+      `/super-admin/tenants/${tenantId}`,
+      payload
+    );
     return response.data;
   },
 
@@ -208,21 +234,36 @@ export const superAdminTenantsApi = {
     return response.data;
   },
 
-  updateStatus: async (tenantId: string, payload: UpdateTenantStatusPayload): Promise<BackendTenant> => {
-    const response = await apiClient.patch<BackendTenant>(`/super-admin/tenants/${tenantId}/status`, payload);
+  updateStatus: async (
+    tenantId: string,
+    payload: UpdateTenantStatusPayload
+  ): Promise<BackendTenant> => {
+    const response = await apiClient.patch<BackendTenant>(
+      `/super-admin/tenants/${tenantId}/status`,
+      payload
+    );
     return response.data;
   },
 
-  updatePlan: async (tenantId: string, payload: UpdateTenantPlanPayload): Promise<BackendTenant> => {
-    const response = await apiClient.patch<BackendTenant>(`/super-admin/tenants/${tenantId}/plan`, payload);
+  updatePlan: async (
+    tenantId: string,
+    payload: UpdateTenantPlanPayload
+  ): Promise<BackendTenant> => {
+    const response = await apiClient.patch<BackendTenant>(
+      `/super-admin/tenants/${tenantId}/plan`,
+      payload
+    );
     return response.data;
   },
 
   updateModules: async (
     tenantId: string,
-    payload: UpdateTenantModulesPayload,
+    payload: UpdateTenantModulesPayload
   ): Promise<BackendTenant> => {
-    const response = await apiClient.patch<BackendTenant>(`/super-admin/tenants/${tenantId}/modules`, payload);
+    const response = await apiClient.patch<BackendTenant>(
+      `/super-admin/tenants/${tenantId}/modules`,
+      payload
+    );
     return response.data;
   },
 
@@ -236,22 +277,34 @@ export const superAdminTenantsApi = {
 
 export const superAdminPlansApi = {
   list: async (): Promise<ApiResponse<SubscriptionPlanWithTenants[]>> => {
-    const response = await apiClient.get<ApiResponse<SubscriptionPlanWithTenants[]>>('/super-admin/plans');
+    const response =
+      await apiClient.get<ApiResponse<SubscriptionPlanWithTenants[]>>('/super-admin/plans');
     return response.data;
   },
 
   create: async (payload: CreatePlanPayload): Promise<ApiResponse<SubscriptionPlan>> => {
-    const response = await apiClient.post<ApiResponse<SubscriptionPlan>>('/super-admin/plans', payload);
+    const response = await apiClient.post<ApiResponse<SubscriptionPlan>>(
+      '/super-admin/plans',
+      payload
+    );
     return response.data;
   },
 
-  update: async (planId: string, payload: UpdatePlanPayload): Promise<ApiResponse<SubscriptionPlan>> => {
-    const response = await apiClient.put<ApiResponse<SubscriptionPlan>>(`/super-admin/plans/${planId}`, payload);
+  update: async (
+    planId: string,
+    payload: UpdatePlanPayload
+  ): Promise<ApiResponse<SubscriptionPlan>> => {
+    const response = await apiClient.put<ApiResponse<SubscriptionPlan>>(
+      `/super-admin/plans/${planId}`,
+      payload
+    );
     return response.data;
   },
 
   archive: async (planId: string): Promise<ApiResponse<{ id: string }>> => {
-    const response = await apiClient.delete<ApiResponse<{ id: string }>>(`/super-admin/plans/${planId}`);
+    const response = await apiClient.delete<ApiResponse<{ id: string }>>(
+      `/super-admin/plans/${planId}`
+    );
     return response.data;
   },
 };
@@ -263,7 +316,10 @@ export const superAdminModulesApi = {
   },
 
   updateGlobalState: async (payload: UpdateModuleGlobalStatePayload): Promise<ModuleDefinition> => {
-    const response = await apiClient.patch<ModuleDefinition>('/super-admin/modules/global-state', payload);
+    const response = await apiClient.patch<ModuleDefinition>(
+      '/super-admin/modules/global-state',
+      payload
+    );
     return response.data;
   },
 };
@@ -292,23 +348,29 @@ export const superAdminUsersApi = {
           take,
           skip,
         },
-      },
+      }
     );
     return response.data;
   },
 
   suspendUser: async (userId: string, reason?: string): Promise<{ id: string }> => {
-    const response = await apiClient.post<{ id: string }>(`/super-admin/users/${userId}/suspend`, { reason });
+    const response = await apiClient.post<{ id: string }>(`/super-admin/users/${userId}/suspend`, {
+      reason,
+    });
     return response.data;
   },
 
   resetPassword: async (userId: string): Promise<{ userId: string }> => {
-    const response = await apiClient.post<{ userId: string }>(`/super-admin/users/${userId}/reset-password`);
+    const response = await apiClient.post<{ userId: string }>(
+      `/super-admin/users/${userId}/reset-password`
+    );
     return response.data;
   },
 
   impersonate: async (userId: string): Promise<ImpersonationResponse> => {
-    const response = await apiClient.post<ImpersonationResponse>(`/super-admin/users/${userId}/impersonate`);
+    const response = await apiClient.post<ImpersonationResponse>(
+      `/super-admin/users/${userId}/impersonate`
+    );
     return response.data;
   },
 };
@@ -324,21 +386,30 @@ export const superAdminAuditLogsApi = {
     page?: number;
     limit?: number;
   }): Promise<PaginatedResponse<AuditLogEntry>> => {
-    const response = await apiClient.get<PaginatedResponse<AuditLogEntry>>('/super-admin/audit-logs', {
-      params,
-    });
+    const response = await apiClient.get<PaginatedResponse<AuditLogEntry>>(
+      '/super-admin/audit-logs',
+      {
+        params,
+      }
+    );
     return response.data;
   },
 };
 
 export const superAdminSettingsApi = {
   get: async (): Promise<ApiResponse<SuperAdminSettingsPayload>> => {
-    const response = await apiClient.get<ApiResponse<SuperAdminSettingsPayload>>('/super-admin/settings');
+    const response =
+      await apiClient.get<ApiResponse<SuperAdminSettingsPayload>>('/super-admin/settings');
     return response.data;
   },
 
-  update: async (payload: UpdateSystemSettingsPayload): Promise<ApiResponse<SuperAdminSettingsPayload>> => {
-    const response = await apiClient.put<ApiResponse<SuperAdminSettingsPayload>>('/super-admin/settings', payload);
+  update: async (
+    payload: UpdateSystemSettingsPayload
+  ): Promise<ApiResponse<SuperAdminSettingsPayload>> => {
+    const response = await apiClient.put<ApiResponse<SuperAdminSettingsPayload>>(
+      '/super-admin/settings',
+      payload
+    );
     return response.data;
   },
 };
@@ -350,14 +421,16 @@ export const superAdminNotificationsApi = {
   },
 
   markAsRead: async (id: string): Promise<ApiResponse<{ id: string }>> => {
-    const response = await apiClient.post<ApiResponse<{ id: string }>>(`/super-admin/notifications/${id}/read`);
+    const response = await apiClient.post<ApiResponse<{ id: string }>>(
+      `/super-admin/notifications/${id}/read`
+    );
     return response.data;
   },
 
   markAllAsRead: async (): Promise<ApiResponse<{ count: number }>> => {
-    const response = await apiClient.post<ApiResponse<{ count: number }>>('/super-admin/notifications/read-all');
+    const response = await apiClient.post<ApiResponse<{ count: number }>>(
+      '/super-admin/notifications/read-all'
+    );
     return response.data;
   },
 };
-
-

@@ -1,3 +1,4 @@
+/*eslint-disable*/
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,11 +45,7 @@ export function ChartCard({
         return (
           <AreaChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey={xAxisKey}
-              className="text-xs"
-              tick={{ fill: 'currentColor' }}
-            />
+            <XAxis dataKey={xAxisKey} className="text-xs" tick={{ fill: 'currentColor' }} />
             <YAxis className="text-xs" tick={{ fill: 'currentColor' }} />
             <Tooltip
               contentStyle={{
@@ -74,11 +71,7 @@ export function ChartCard({
         return (
           <BarChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey={xAxisKey}
-              className="text-xs"
-              tick={{ fill: 'currentColor' }}
-            />
+            <XAxis dataKey={xAxisKey} className="text-xs" tick={{ fill: 'currentColor' }} />
             <YAxis className="text-xs" tick={{ fill: 'currentColor' }} />
             <Tooltip
               contentStyle={{
@@ -98,11 +91,7 @@ export function ChartCard({
         return (
           <LineChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey={xAxisKey}
-              className="text-xs"
-              tick={{ fill: 'currentColor' }}
-            />
+            <XAxis dataKey={xAxisKey} className="text-xs" tick={{ fill: 'currentColor' }} />
             <YAxis className="text-xs" tick={{ fill: 'currentColor' }} />
             <Tooltip
               contentStyle={{

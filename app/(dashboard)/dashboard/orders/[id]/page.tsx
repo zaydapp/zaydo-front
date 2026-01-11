@@ -3,6 +3,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { ordersApi, invoicesApi } from '@/lib/api';
+import { Order, OrderItem, OrderStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -62,7 +63,7 @@ export default function OrderDetailsPage() {
       // Dynamically import jsPDF and html2canvas
       const { jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
-      
+
       if (!order) throw new Error('Order not found');
 
       // Create a temporary container with the PDF content
@@ -117,7 +118,7 @@ export default function OrderDetailsPage() {
           <strong>Adresse:</strong> ___________________________
         </div>
         <div>
-          <strong>Email:</strong> ${order.client?.email || order.supplier?.email || '___________'}
+          <strong>Email:</strong> ___________________________
         </div>
       `;
 
@@ -128,7 +129,7 @@ export default function OrderDetailsPage() {
       // Items Table
       const tableDiv = document.createElement('div');
       tableDiv.style.marginBottom = '20px';
-      
+
       const table = document.createElement('table');
       table.style.width = '100%';
       table.style.borderCollapse = 'collapse';
@@ -150,7 +151,7 @@ export default function OrderDetailsPage() {
 
       // Table Body
       const tbody = document.createElement('tbody');
-      order.items?.forEach((item: any) => {
+      order.items?.forEach((item: OrderItem) => {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td style="padding: 8px; border: 1px solid #000;">${item.productName}</td>
@@ -300,9 +301,7 @@ export default function OrderDetailsPage() {
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <p className="text-lg font-semibold mb-2">{t('orders.notFound')}</p>
-          <Button onClick={() => router.push('/dashboard/orders')}>
-            {t('common.goBack')}
-          </Button>
+          <Button onClick={() => router.push('/dashboard/orders')}>{t('common.goBack')}</Button>
         </div>
       </div>
     );
@@ -339,233 +338,227 @@ export default function OrderDetailsPage() {
         }
       `}</style>
       <div className="space-y-6 print-container" id="order-content">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push('/dashboard/orders')}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{order.orderNumber}</h1>
-            <p className="text-muted-foreground">
-              {t('orders.orderDetails')}
-            </p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/orders')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">{order.orderNumber}</h1>
+              <p className="text-muted-foreground">{t('orders.orderDetails')}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(`/dashboard/orders/${orderId}/edit`)}
+              className="print:hidden"
+            >
+              Éditer
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadPdf}
+              disabled={isGeneratingPdf}
+              className="print:hidden"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isGeneratingPdf ? t('common.loading') : t('common.download')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePrint} className="print:hidden">
+              <Printer className="h-4 w-4 mr-2" />
+              {t('common.print')}
+            </Button>
+            {/*eslint-disable */}
+            <span
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              style={{
+                backgroundColor:
+                  order.status && typeof order.status === 'object' && 'color' in order.status
+                    ? `${(order.status as any).color}20`
+                    : '#f3f4f6',
+                color:
+                  order.status && typeof order.status === 'object' && 'color' in order.status
+                    ? (order.status as any).color
+                    : '#6b7280',
+                border: `1px solid ${order.status && typeof order.status === 'object' && 'color' in order.status ? (order.status as any).color : '#e5e7eb'}`,
+              }}
+            >
+              {order.status && typeof order.status === 'object' && 'name' in order.status
+                ? t(`orderStatuses.systemStatuses.${(order.status as any).name}`)
+                : order.status && typeof order.status === 'object' && 'name' in order.status
+                  ? (order.status as any).name
+                  : ''}
+            </span>
+            <Badge variant="outline">{t(`orders.${order.type.toLowerCase()}`)}</Badge>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push(`/dashboard/orders/${orderId}/edit`)}
-            className="print:hidden"
-          >
-            Éditer
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownloadPdf}
-            disabled={isGeneratingPdf}
-            className="print:hidden"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            {isGeneratingPdf ? t('common.loading') : t('common.download')}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrint}
-            className="print:hidden"
-          >
-            <Printer className="h-4 w-4 mr-2" />
-            {t('common.print')}
-          </Button>
-          <span 
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-            style={{ 
-              backgroundColor: order.status?.color ? `${order.status.color}20` : '#f3f4f6',
-              color: order.status?.color || '#6b7280',
-              border: `1px solid ${order.status?.color || '#e5e7eb'}`
-            }}
-          >
-            {order.status?.isSystem 
-              ? t(`orderStatuses.systemStatuses.${order.status.slug}`)
-              : order.status?.name}
-          </span>
-          <Badge variant="outline">
-            {t(`orders.${order.type.toLowerCase()}`)}
-          </Badge>
-        </div>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Order Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('orders.orderInformation')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-                <p className="text-sm text-muted-foreground">{t('orders.orderDate')}</p>
-                <p className="font-medium">{format(new Date(order.orderDate), 'PPP')}</p>
-              </div>
-            </div>
-
-            {order.deliveryDate && (
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Order Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('orders.orderInformation')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('orders.deliveryDate')}</p>
-                  <p className="font-medium">{format(new Date(order.deliveryDate), 'PPP')}</p>
+                  <p className="text-sm text-muted-foreground">{t('orders.orderDate')}</p>
+                  <p className="font-medium">{format(new Date(order.orderDate), 'PPP')}</p>
                 </div>
               </div>
-            )}
 
-            {order.client && (
-              <div className="flex items-start gap-3">
-                <User className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('clients.client')}</p>
-                  <p className="font-medium">{order.client.name}</p>
+              {order.deliveryDate && (
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('orders.deliveryDate')}</p>
+                    <p className="font-medium">{format(new Date(order.deliveryDate), 'PPP')}</p>
+                  </div>
+                </div>
+              )}
+
+              {order.client && (
+                <div className="flex items-start gap-3">
+                  <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('clients.client')}</p>
+                    <p className="font-medium">{order.client.name}</p>
+                  </div>
+                </div>
+              )}
+
+              {order.supplier && (
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('suppliers.supplier')}</p>
+                    <p className="font-medium">{order.supplier.name}</p>
+                  </div>
+                </div>
+              )}
+
+              {order.createdBy && (
+                <div className="flex items-start gap-3">
+                  <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('orders.createdBy')}</p>
+                    <p className="font-medium">{order.createdBy}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          <InvoicePanel order={order} />
+
+          {/* Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('orders.orderSummary')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Package className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('orders.totalItems')}</p>
+                    <p className="text-2xl font-bold">{order.items?.length || 0}</p>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {order.supplier && (
-              <div className="flex items-start gap-3">
-                <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('suppliers.supplier')}</p>
-                  <p className="font-medium">{order.supplier.name}</p>
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('orders.totalAmount')}</p>
+                    <p className="text-2xl font-bold">
+                      {formatCurrency(Number(order.totalAmount))}
+                    </p>
+                  </div>
                 </div>
               </div>
-            )}
+            </CardContent>
+          </Card>
+        </div>
 
-            {order.createdBy && (
-              <div className="flex items-start gap-3">
-                <User className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('orders.createdBy')}</p>
-                  <p className="font-medium">{order.createdBy}</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <InvoicePanel order={order} />
-
-        {/* Summary */}
+        {/* Order Items */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('orders.orderSummary')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Package className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('orders.totalItems')}</p>
-                  <p className="text-2xl font-bold">{order.items?.length || 0}</p>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('orders.totalAmount')}</p>
-                  <p className="text-2xl font-bold">
-                    {formatCurrency(Number(order.totalAmount))}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Order Items */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('orders.orderItems')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-lg border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead>{t('orders.product')}</TableHead>
-                  <TableHead className="text-right">{t('orders.quantity')}</TableHead>
-                  <TableHead className="text-right">{t('orders.unitPrice')}</TableHead>
-                  <TableHead className="text-right">{t('orders.lineTotal')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {order.items?.map((item: any) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{item.productName}</p>
-                        {item.notes && (
-                          <p className="text-sm text-muted-foreground">{item.notes}</p>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {item.quantity} {item.unit}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(Number(item.unitPrice))}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(Number(item.totalPrice))}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Total */}
-          <div className="flex justify-end pt-4 border-t mt-4">
-            <div className="space-y-2 w-full md:w-1/3">
-              <div className="flex justify-between text-lg font-bold">
-                <span>{t('orders.total')}:</span>
-                <span>
-                  {formatCurrency(Number(order.totalAmount))}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Notes */}
-      {order.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('orders.notes')}</CardTitle>
+            <CardTitle>{t('orders.orderItems')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground whitespace-pre-wrap">{order.notes}</p>
+            <div className="rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>{t('orders.product')}</TableHead>
+                    <TableHead className="text-right">{t('orders.quantity')}</TableHead>
+                    <TableHead className="text-right">{t('orders.unitPrice')}</TableHead>
+                    <TableHead className="text-right">{t('orders.lineTotal')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {order.items?.map((item: OrderItem) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{item.productName}</p>
+                          {item.notes && (
+                            <p className="text-sm text-muted-foreground">{item.notes}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {item.quantity} {item.unit}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(Number(item.unitPrice))}
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(Number(item.totalPrice))}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Total */}
+            <div className="flex justify-end pt-4 border-t mt-4">
+              <div className="space-y-2 w-full md:w-1/3">
+                <div className="flex justify-between text-lg font-bold">
+                  <span>{t('orders.total')}:</span>
+                  <span>{formatCurrency(Number(order.totalAmount))}</span>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Notes */}
+        {order.notes && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('orders.notes')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground whitespace-pre-wrap">{order.notes}</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );
 }
 
-function InvoicePanel({ order }: { order: any }) {
+function InvoicePanel({ order }: { order?: Order | null }) {
   const router = useRouter();
   const { format: formatCurrency } = useCurrency();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -607,7 +600,8 @@ function InvoicePanel({ order }: { order: any }) {
             Invoice
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            This order has not been invoiced yet. Generate a draft invoice using the order data in one click.
+            This order has not been invoiced yet. Generate a draft invoice using the order data in
+            one click.
           </p>
         </div>
         <CardContent className="space-y-4 pt-6">
@@ -623,11 +617,18 @@ function InvoicePanel({ order }: { order: any }) {
             </div>
           </div>
           <div className="grid gap-2">
-            <Button className="w-full" onClick={() => router.push(`/dashboard/billing/invoices/new?fromOrder=${order.id}`)}>
+            <Button
+              className="w-full"
+              onClick={() => router.push(`/dashboard/billing/invoices/new?fromOrder=${order?.id}`)}
+            >
               <FileText className="h-4 w-4 mr-2" />
               Generate Invoice
             </Button>
-            <Button variant="outline" className="w-full" onClick={() => router.push('/dashboard/billing/invoices/new')}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push('/dashboard/billing/invoices/new')}
+            >
               Create manually
             </Button>
           </div>
@@ -645,7 +646,8 @@ function InvoicePanel({ order }: { order: any }) {
             Invoice #{invoice.invoiceNumber}
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Issued {new Date(invoice.issueDate).toLocaleDateString()} · Due {new Date(invoice.dueDate).toLocaleDateString()}
+            Issued {new Date(invoice.issueDate).toLocaleDateString()} · Due{' '}
+            {new Date(invoice.dueDate).toLocaleDateString()}
           </p>
         </div>
         <span
@@ -658,7 +660,7 @@ function InvoicePanel({ order }: { order: any }) {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-lg border bg-muted/30 px-3 py-3">
             <p className="text-xs text-muted-foreground">Billed amount</p>
-            <p className="text-lg font-semibold">{formatCurrency(invoice.totalAmount ?? invoice.total ?? 0)}</p>
+            <p className="text-lg font-semibold">{formatCurrency(invoice.totalAmount ?? 0)}</p>
           </div>
           <div className="rounded-lg border bg-muted/30 px-3 py-3">
             <p className="text-xs text-muted-foreground">Balance due</p>
@@ -683,7 +685,12 @@ function InvoicePanel({ order }: { order: any }) {
               View Invoice
             </Link>
           </Button>
-          <Button variant="outline" className="w-full" onClick={handleDownloadInvoice} disabled={isDownloading}>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleDownloadInvoice}
+            disabled={isDownloading}
+          >
             <DownloadCloud className="h-4 w-4 mr-2" />
             {isDownloading ? 'Preparing…' : 'Download PDF'}
           </Button>

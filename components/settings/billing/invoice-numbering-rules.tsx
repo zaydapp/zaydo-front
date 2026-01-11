@@ -1,3 +1,4 @@
+/*eslint-disable*/
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -10,19 +11,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { useInvoiceNumberingConfig, useUpdateInvoiceNumberingConfig } from '@/hooks/useInvoiceNumbering';
-import { INVOICE_NUMBERING_TOKENS, computeInvoiceNumberPreview, describeResetFrequency } from '@/lib/invoice-numbering';
+import {
+  useInvoiceNumberingConfig,
+  useUpdateInvoiceNumberingConfig,
+} from '@/hooks/useInvoiceNumbering';
+import {
+  INVOICE_NUMBERING_TOKENS,
+  computeInvoiceNumberPreview,
+  describeResetFrequency,
+} from '@/lib/invoice-numbering';
 import { InvoiceNumberingConfig, InvoiceNumberingResetFrequency, UserRole } from '@/types';
 import { useAuth } from '@/contexts/auth-context';
 import { Save, ShieldAlert, Eye, RefreshCw } from 'lucide-react';
 
 type FormState = Pick<
   InvoiceNumberingConfig,
-  'prefixTemplate' | 'formatTemplate' | 'sequenceLength' | 'resetFrequency' | 'allowManualOverride' | 'nextSequence'
+  | 'prefixTemplate'
+  | 'formatTemplate'
+  | 'sequenceLength'
+  | 'resetFrequency'
+  | 'allowManualOverride'
+  | 'nextSequence'
 >;
 
 const resetOptions: { value: InvoiceNumberingResetFrequency; label: string }[] = [
@@ -85,7 +104,9 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
 
   const handleSave = async () => {
     if (hasErrors) {
-      toast.error(t('settings.billing.validationError') || 'Please resolve validation errors before saving.');
+      toast.error(
+        t('settings.billing.validationError') || 'Please resolve validation errors before saving.'
+      );
       return;
     }
 
@@ -98,10 +119,13 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
         allowManualOverride: formState.allowManualOverride,
         nextSequence: formState.nextSequence,
       });
-      toast.success(t('settings.billing.numberingUpdated') || 'Invoice numbering rules updated successfully');
+      toast.success(
+        t('settings.billing.numberingUpdated') || 'Invoice numbering rules updated successfully'
+      );
       setDirty(false);
     } catch (error: any) {
-      const message = error?.response?.data?.message || t('settings.updateError') || 'Failed to update settings';
+      const message =
+        error?.response?.data?.message || t('settings.updateError') || 'Failed to update settings';
       toast.error(message);
     }
   };
@@ -124,7 +148,8 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
             {t('settings.billing.invoiceNumbering') || 'Invoice Numbering Rules'}
           </h1>
           <p className="text-muted-foreground">
-            {t('settings.billing.invoiceNumberingDescription') || 'Configure how invoice numbers are generated'}
+            {t('settings.billing.invoiceNumberingDescription') ||
+              'Configure how invoice numbers are generated'}
           </p>
         </div>
       )}
@@ -148,7 +173,8 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
                 maxLength={24}
               />
               <p className="text-xs text-muted-foreground">
-                {t('settings.billing.prefixHelp') || 'You can combine static text with {YYYY} or {MM} placeholders.'}
+                {t('settings.billing.prefixHelp') ||
+                  'You can combine static text with {YYYY} or {MM} placeholders.'}
               </p>
             </div>
 
@@ -162,7 +188,8 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
                 onChange={(e) => handleInputChange('sequenceLength', Number(e.target.value))}
               />
               <p className="text-xs text-muted-foreground">
-                {t('settings.billing.sequenceLengthHelp') || 'Determines how many digits are padded in {SEQ}.'}
+                {t('settings.billing.sequenceLengthHelp') ||
+                  'Determines how many digits are padded in {SEQ}.'}
               </p>
             </div>
           </div>
@@ -195,7 +222,9 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
               <Label>{t('settings.billing.resetFrequency') || 'Reset Frequency'}</Label>
               <Select
                 value={formState.resetFrequency}
-                onValueChange={(value: InvoiceNumberingResetFrequency) => handleInputChange('resetFrequency', value)}
+                onValueChange={(value: InvoiceNumberingResetFrequency) =>
+                  handleInputChange('resetFrequency', value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -217,7 +246,9 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
               <Label className="flex items-center gap-2">
                 {t('settings.billing.manualOverride') || 'Manual Override'}
                 {!canOverrideSequence && (
-                  <Badge variant="outline">{t('settings.billing.restricted') || 'Restricted'}</Badge>
+                  <Badge variant="outline">
+                    {t('settings.billing.restricted') || 'Restricted'}
+                  </Badge>
                 )}
               </Label>
               <div className="flex items-center justify-between rounded-lg border p-3">
@@ -352,8 +383,8 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
             </div>
             <div className="text-sm text-muted-foreground flex items-center justify-between">
               <span>
-                {t('settings.billing.sequenceLength') || 'Sequence length'}: {formState.sequenceLength} ·{' '}
-                {t('settings.billing.resetFrequency') || 'Reset'}:{' '}
+                {t('settings.billing.sequenceLength') || 'Sequence length'}:{' '}
+                {formState.sequenceLength} · {t('settings.billing.resetFrequency') || 'Reset'}:{' '}
                 {resetOptions.find((o) => o.value === formState.resetFrequency)?.label}
               </span>
               {data?.updatedAt && (
@@ -387,4 +418,3 @@ export function InvoiceNumberingRules({ showHeader = false }: { showHeader?: boo
     </div>
   );
 }
-

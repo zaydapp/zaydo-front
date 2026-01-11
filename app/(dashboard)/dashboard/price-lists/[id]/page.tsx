@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Calendar, DownloadCloud, Pencil, Tag } from 'lucide-react';
 import { priceListsApi } from '@/lib/api';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,20 +32,6 @@ interface PriceListItem {
   productName?: string;
 }
 
-interface PriceList {
-  id: string;
-  name: string;
-  type: string;
-  description?: string | null;
-  clientGroup?: string | null;
-  startDate: string;
-  endDate?: string | null;
-  isActive: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  items: PriceListItem[];
-}
-
 export default function PriceListDetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -54,7 +41,11 @@ export default function PriceListDetailsPage() {
 
   const priceListId = params?.id;
 
-  const { data: priceList, isLoading, isError } = useQuery({
+  const {
+    data: priceList,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['price-lists', priceListId],
     queryFn: () => priceListsApi.getById(priceListId as string),
     enabled: Boolean(priceListId),
@@ -138,7 +129,9 @@ export default function PriceListDetailsPage() {
   if (isLoading) {
     return (
       <div className="p-8 flex items-center justify-center h-64">
-        <div className="text-muted-foreground">{t('priceLists.loadingPriceList') || 'Loading price list...'}</div>
+        <div className="text-muted-foreground">
+          {t('priceLists.loadingPriceList') || 'Loading price list...'}
+        </div>
       </div>
     );
   }
@@ -157,7 +150,7 @@ export default function PriceListDetailsPage() {
     );
   }
 
-  const itemsCount = priceList.items?.length || 0;
+  const itemsCount = Array.isArray(priceList.items) ? priceList.items.length : 0;
 
   return (
     <div className="p-8 space-y-6">
@@ -168,7 +161,11 @@ export default function PriceListDetailsPage() {
           </p>
           <h1 className="text-3xl font-bold">{priceList.name}</h1>
           <p className="text-muted-foreground mt-1">
-            {t('priceLists.lastUpdated') || 'Last updated'}: {formatDateTime(priceList.updatedAt || priceList.createdAt)}
+            {t('priceLists.lastUpdated') || 'Last updated'}:{' '}
+            {formatDateTime(
+              (priceList.updatedAt as string | undefined) ||
+                (priceList.createdAt as string | undefined)
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -209,7 +206,9 @@ export default function PriceListDetailsPage() {
               <div className="mt-1">{statusBadge}</div>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t('priceLists.products') || 'Products'}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('priceLists.products') || 'Products'}
+              </p>
               <p className="text-lg font-semibold mt-1">
                 {t('priceLists.itemsCount', { count: itemsCount }) || `${itemsCount} items`}
               </p>
@@ -232,14 +231,18 @@ export default function PriceListDetailsPage() {
               </div>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t('priceLists.clientGroup') || 'Client Group'}</p>
-              <p className="mt-1">{priceList.clientGroup || '-'}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('priceLists.clientGroup') || 'Client Group'}
+              </p>
+              <p className="mt-1">{String(priceList.clientGroup || '-')}</p>
             </div>
           </div>
 
           {priceList.description && (
             <div className="mt-6">
-              <p className="text-sm text-muted-foreground">{t('priceLists.description') || 'Description'}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('priceLists.description') || 'Description'}
+              </p>
               <p className="mt-1">{priceList.description}</p>
             </div>
           )}
@@ -267,15 +270,21 @@ export default function PriceListDetailsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {priceList.items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">
-                      <div>{item.product?.name || item.productName || t('priceLists.unknownProduct') || 'Unknown product'}</div>
-                      <p className="text-xs text-muted-foreground">{item.productId}</p>
-                    </TableCell>
-                    <TableCell>{formatPrice(item.price)}</TableCell>
-                  </TableRow>
-                ))}
+                {Array.isArray(priceList.items) &&
+                  priceList.items.map((item) => (
+                    <TableRow key={item.productId}>
+                      <TableCell className="font-medium">
+                        <div>
+                          {item.product?.name ||
+                            item.productName ||
+                            t('priceLists.unknownProduct') ||
+                            'Unknown product'}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{item.productId}</p>
+                      </TableCell>
+                      <TableCell>{formatPrice(item.price)}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           )}
@@ -284,4 +293,3 @@ export default function PriceListDetailsPage() {
     </div>
   );
 }
-

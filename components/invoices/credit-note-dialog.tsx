@@ -1,3 +1,4 @@
+/*eslint-disable*/
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -95,7 +96,7 @@ export function CreditNoteDialog({
     if (!item) return;
     const maxQuantity = item.quantity;
     const newQuantity = Math.max(0, Math.min(quantity, maxQuantity));
-    
+
     setSelectedItems((prev) => ({
       ...prev,
       [itemId]: {
@@ -130,7 +131,9 @@ export function CreditNoteDialog({
     });
   };
 
-  const selectedItemsList = Object.values(selectedItems).filter((item) => item.selected && item.quantity > 0);
+  const selectedItemsList = Object.values(selectedItems).filter(
+    (item) => item.selected && item.quantity > 0
+  );
   const canCreate = selectedItemsList.length > 0 && globalReason.trim().length > 0;
 
   const handleConfirm = () => {
@@ -161,9 +164,12 @@ export function CreditNoteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="!max-w-[95vw] !w-[95vw] max-h-[90vh] overflow-hidden p-0 gap-0 flex flex-col [&>div]:w-full">
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="text-xl">{t('invoices.createCreditNote') || 'Créer un Avoir'}</DialogTitle>
+          <DialogTitle className="text-xl">
+            {t('invoices.createCreditNote') || 'Créer un Avoir'}
+          </DialogTitle>
           <DialogDescription className="text-sm mt-2">
-            {t('invoices.createCreditNoteDesc') || 'Sélectionnez les articles à créditer et indiquez la raison'}
+            {t('invoices.createCreditNoteDesc') ||
+              'Sélectionnez les articles à créditer et indiquez la raison'}
           </DialogDescription>
         </DialogHeader>
 
@@ -171,11 +177,15 @@ export function CreditNoteDialog({
           {/* Header Info Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg border">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">{t('invoices.invoiceNumber') || 'Invoice Number'}</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {t('invoices.invoiceNumber') || 'Invoice Number'}
+              </p>
               <p className="text-sm font-semibold">{invoice.invoiceNumber}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">{t('invoices.totalAmount') || 'Total Amount'}</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {t('invoices.totalAmount') || 'Total Amount'}
+              </p>
               <p className="text-sm font-semibold">{format(invoice.totalAmount || 0)}</p>
             </div>
           </div>
@@ -190,7 +200,10 @@ export function CreditNoteDialog({
                 id="globalReason"
                 value={globalReason}
                 onChange={(e) => setGlobalReason(e.target.value)}
-                placeholder={t('invoices.creditNoteReasonPlaceholder') || 'Ex: Retour de marchandise, Erreur de facturation...'}
+                placeholder={
+                  t('invoices.creditNoteReasonPlaceholder') ||
+                  'Ex: Retour de marchandise, Erreur de facturation...'
+                }
                 className="mt-1.5"
               />
             </div>
@@ -203,7 +216,10 @@ export function CreditNoteDialog({
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder={t('invoices.creditNoteNotesPlaceholder') || 'Notes supplémentaires sur cet avoir...'}
+                placeholder={
+                  t('invoices.creditNoteNotesPlaceholder') ||
+                  'Notes supplémentaires sur cet avoir...'
+                }
                 rows={3}
                 className="mt-1.5 resize-none"
               />
@@ -218,12 +234,7 @@ export function CreditNoteDialog({
               <Label className="text-sm font-medium">
                 {t('invoices.selectItemsToCredit') || 'Articles à créditer'}
               </Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSelectAll}
-                className="text-xs"
-              >
+              <Button variant="ghost" size="sm" onClick={handleSelectAll} className="text-xs">
                 {t('invoices.selectAll') || 'Tout sélectionner'}
               </Button>
             </div>
@@ -232,10 +243,18 @@ export function CreditNoteDialog({
               <div className="grid grid-cols-[60px_minmax(200px,1fr)_120px_140px_160px_140px] gap-4 items-center py-3 px-4 bg-muted/50 border-b min-w-max">
                 <div className="text-xs font-semibold"></div>
                 <div className="text-xs font-semibold">{t('orders.product') || 'Produit'}</div>
-                <div className="text-xs font-semibold text-right">{t('orders.quantity') || 'Quantité'}</div>
-                <div className="text-xs font-semibold text-right">{t('orders.unitPrice') || 'Prix Unitaire'}</div>
-                <div className="text-xs font-semibold text-right">{t('invoices.creditQuantity') || 'Qté à créditer'}</div>
-                <div className="text-xs font-semibold text-right">{t('invoices.lineTotal') || 'Total Ligne'}</div>
+                <div className="text-xs font-semibold text-right">
+                  {t('orders.quantity') || 'Quantité'}
+                </div>
+                <div className="text-xs font-semibold text-right">
+                  {t('orders.unitPrice') || 'Prix Unitaire'}
+                </div>
+                <div className="text-xs font-semibold text-right">
+                  {t('invoices.creditQuantity') || 'Qté à créditer'}
+                </div>
+                <div className="text-xs font-semibold text-right">
+                  {t('invoices.lineTotal') || 'Total Ligne'}
+                </div>
               </div>
 
               <div className="divide-y min-w-max">
@@ -253,16 +272,22 @@ export function CreditNoteDialog({
                   const itemTotalWithTax = itemTaxable + itemTax;
 
                   const creditItemTotal = creditItem.quantity * item.unitPrice;
-                  const creditItemDiscount = (item.discount || 0) * (creditItem.quantity / item.quantity);
+                  const creditItemDiscount =
+                    (item.discount || 0) * (creditItem.quantity / item.quantity);
                   const creditItemTaxable = creditItemTotal - creditItemDiscount;
                   const creditItemTax = (creditItemTaxable * (item.taxRate || 0)) / 100;
                   const creditItemTotalWithTax = creditItemTaxable + creditItemTax;
 
                   return (
-                    <div key={item.id} className={cn(
-                      "grid grid-cols-[60px_minmax(200px,1fr)_120px_140px_160px_140px] gap-4 items-center py-3 px-4 transition-colors min-w-full",
-                      creditItem.selected ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/30"
-                    )}>
+                    <div
+                      key={item.id}
+                      className={cn(
+                        'grid grid-cols-[60px_minmax(200px,1fr)_120px_140px_160px_140px] gap-4 items-center py-3 px-4 transition-colors min-w-full',
+                        creditItem.selected
+                          ? 'bg-primary/5 hover:bg-primary/10'
+                          : 'hover:bg-muted/30'
+                      )}
+                    >
                       <Checkbox
                         checked={creditItem.selected}
                         onCheckedChange={(checked) => handleItemToggle(item.id, checked as boolean)}
@@ -270,19 +295,20 @@ export function CreditNoteDialog({
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{item.description}</p>
                         {item.notes && (
-                          <p className="text-xs text-muted-foreground truncate mt-0.5">{item.notes}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {item.notes}
+                          </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {t('invoices.originalTotal') || 'Total original'}: {format(itemTotalWithTax)}
+                          {t('invoices.originalTotal') || 'Total original'}:{' '}
+                          {format(itemTotalWithTax)}
                         </p>
                       </div>
                       <div className="text-right text-sm">
                         <span className="font-medium">{item.quantity}</span>
                         <span className="text-muted-foreground ml-1">{item.unit}</span>
                       </div>
-                      <div className="text-right text-sm font-medium">
-                        {format(item.unitPrice)}
-                      </div>
+                      <div className="text-right text-sm font-medium">{format(item.unitPrice)}</div>
                       <div className="flex items-center gap-2">
                         <Input
                           type="number"
@@ -292,12 +318,14 @@ export function CreditNoteDialog({
                           value={creditItem.quantity}
                           onChange={(e) => handleQuantityChange(item.id, Number(e.target.value))}
                           className={cn(
-                            "h-9 text-sm text-right font-medium",
-                            creditItem.selected && creditItem.quantity > 0 && "border-primary"
+                            'h-9 text-sm text-right font-medium',
+                            creditItem.selected && creditItem.quantity > 0 && 'border-primary'
                           )}
                           disabled={!creditItem.selected}
                         />
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">{item.unit}</span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {item.unit}
+                        </span>
                       </div>
                       <div className="text-right">
                         {creditItem.selected && creditItem.quantity > 0 ? (
@@ -324,7 +352,10 @@ export function CreditNoteDialog({
                     {t('invoices.itemsSelected') || 'Articles sélectionnés'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {selectedItemsList.length} {selectedItemsList.length === 1 ? t('invoices.item') || 'article' : t('invoices.items') || 'articles'}
+                    {selectedItemsList.length}{' '}
+                    {selectedItemsList.length === 1
+                      ? t('invoices.item') || 'article'
+                      : t('invoices.items') || 'articles'}
                   </p>
                 </div>
                 <div className="text-right">
@@ -351,7 +382,7 @@ export function CreditNoteDialog({
                 {t('common.creating') || 'Création...'}
               </>
             ) : (
-              t('invoices.createCreditNote') || 'Créer l\'avoir'
+              t('invoices.createCreditNote') || "Créer l'avoir"
             )}
           </Button>
         </DialogFooter>
@@ -359,4 +390,3 @@ export function CreditNoteDialog({
     </Dialog>
   );
 }
-

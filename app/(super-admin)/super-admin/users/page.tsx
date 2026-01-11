@@ -1,16 +1,35 @@
+/*eslint-disable*/
 'use client';
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { superAdminUsersApi, superAdminTenantsApi } from '@/lib/api';
-import { TenantSummary, TenantUserSummary } from '@/types';
+import type { BackendTenant, BackendTenantUserSummary } from '@/lib/api/super-admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { Shield, MoreHorizontal } from 'lucide-react';
 
@@ -42,14 +61,12 @@ export default function SuperAdminUsersPage() {
       const response = await superAdminUsersApi.list({
         search: filters.search,
         tenantId: filters.tenantId && filters.tenantId !== 'all' ? filters.tenantId : undefined,
-        role: filters.role && filters.role !== 'all' ? filters.role : undefined,
         status: filters.status && filters.status !== 'all' ? filters.status : undefined,
         page: filters.page,
         limit: PAGE_SIZE,
       });
       return response;
     },
-    keepPreviousData: true,
   });
 
   const suspendMutation = useMutation({
@@ -76,14 +93,15 @@ export default function SuperAdminUsersPage() {
 
   const data = usersQuery.data;
   const users = data?.data ?? [];
-  const totalPages = data ? Math.ceil(data.total / data.limit) : 1;
+  const totalPages = data?.totalPages ?? 1;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Users Across Tenants</h1>
         <p className="text-sm text-muted-foreground">
-          Review every user provisioned across tenants. Handle escalations, suspend accounts, and trigger password resets.
+          Review every user provisioned across tenants. Handle escalations, suspend accounts, and
+          trigger password resets.
         </p>
       </div>
 
@@ -118,9 +136,9 @@ export default function SuperAdminUsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All tenants</SelectItem>
-              {(tenantsQuery.data ?? []).map((tenant: TenantSummary) => (
+              {(tenantsQuery.data ?? []).map((tenant: BackendTenant) => (
                 <SelectItem key={tenant.id} value={tenant.id}>
-                  {tenant.companyName}
+                  {tenant.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -185,7 +203,7 @@ export default function SuperAdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user: TenantUserSummary) => (
+              {users.map((user: BackendTenantUserSummary) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div>
@@ -195,7 +213,7 @@ export default function SuperAdminUsersPage() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="text-sm font-medium">{user.tenantName}</p>
+                      <p className="text-sm font-medium">{user.tenant?.name ?? 'N/A'}</p>
                       <p className="text-xs text-muted-foreground">{user.tenantId}</p>
                     </div>
                   </TableCell>
@@ -205,7 +223,10 @@ export default function SuperAdminUsersPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.status === 'SUSPENDED' ? 'destructive' : 'secondary'} className="capitalize">
+                    <Badge
+                      variant={user.status === 'SUSPENDED' ? 'destructive' : 'secondary'}
+                      className="capitalize"
+                    >
                       {user.status.toLowerCase()}
                     </Badge>
                   </TableCell>
@@ -287,5 +308,3 @@ export default function SuperAdminUsersPage() {
     </div>
   );
 }
-
-

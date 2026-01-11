@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderStatusesApi } from '@/lib/api';
+import { OrderStatusItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,16 +26,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-interface OrderStatus {
-  id: string;
-  name: string;
-  slug: string;
-  color: string;
-  position: number;
-  isSystem: boolean;
-  isActive: boolean;
-}
-
 export default function OrderStatusesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -48,12 +39,23 @@ export default function OrderStatusesPage() {
   const [newStatusSlug, setNewStatusSlug] = useState('');
   const [newStatusColor, setNewStatusColor] = useState('#3b82f6');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [draggedItem, setDraggedItem] = useState<OrderStatus | null>(null);
+  const [draggedItem, setDraggedItem] = useState<OrderStatusItem | null>(null);
 
-  const { data: statuses = [], isLoading, error } = useQuery({
+  const {
+    data: statusesData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['order-statuses'],
     queryFn: orderStatusesApi.getAll,
   });
+
+  const statuses: OrderStatusItem[] = (statusesData ?? []).map((status) => ({
+    ...status,
+    color: status.color ?? '#64748b',
+    position: status.position ?? 0,
+    isActive: status.isActive ?? true,
+  }));
 
   console.log('Order Statuses Query:', { statuses, isLoading, error });
 
@@ -73,7 +75,8 @@ export default function OrderStatusesPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => orderStatusesApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<OrderStatusItem> }) =>
+      orderStatusesApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['order-statuses'] });
       toast.success(t('orderStatuses.updateSuccess') || 'Status updated successfully');
@@ -91,8 +94,12 @@ export default function OrderStatusesPage() {
       toast.success(t('orderStatuses.deleteSuccess') || 'Status deleted successfully');
       setDeleteId(null);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('orderStatuses.deleteError') || 'Failed to delete status');
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('orderStatuses.deleteError') || 'Failed to delete status');
     },
   });
 
@@ -112,10 +119,16 @@ export default function OrderStatusesPage() {
       toast.error(t('orderStatuses.nameRequired') || 'Name is required');
       return;
     }
-    
+
     // Auto-generate slug if not provided
-    const slug = newStatusSlug || newStatusName.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
+    const slug =
+      newStatusSlug ||
+      newStatusName
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+
     createMutation.mutate({
       name: newStatusName,
       slug: slug,
@@ -123,7 +136,7 @@ export default function OrderStatusesPage() {
     });
   };
 
-  const handleEdit = (status: OrderStatus) => {
+  const handleEdit = (status: OrderStatusItem) => {
     setEditingId(status.id);
     setEditName(status.name);
     setEditColor(status.color);
@@ -144,7 +157,7 @@ export default function OrderStatusesPage() {
     });
   };
 
-  const handleDragStart = (status: OrderStatus) => {
+  const handleDragStart = (status: OrderStatusItem) => {
     setDraggedItem(status);
   };
 
@@ -152,17 +165,17 @@ export default function OrderStatusesPage() {
     e.preventDefault();
   };
 
-  const handleDrop = (targetStatus: OrderStatus) => {
+  const handleDrop = (targetStatus: OrderStatusItem) => {
     if (!draggedItem || draggedItem.id === targetStatus.id) return;
 
     const sortedStatuses = [...statuses].sort((a, b) => a.position - b.position);
-    const draggedIndex = sortedStatuses.findIndex(s => s.id === draggedItem.id);
-    const targetIndex = sortedStatuses.findIndex(s => s.id === targetStatus.id);
+    const draggedIndex = sortedStatuses.findIndex((s) => s.id === draggedItem.id);
+    const targetIndex = sortedStatuses.findIndex((s) => s.id === targetStatus.id);
 
     sortedStatuses.splice(draggedIndex, 1);
     sortedStatuses.splice(targetIndex, 0, draggedItem);
 
-    const newOrder = sortedStatuses.map(s => s.id);
+    const newOrder = sortedStatuses.map((s) => s.id);
     reorderMutation.mutate(newOrder);
     setDraggedItem(null);
   };
@@ -187,11 +200,16 @@ export default function OrderStatusesPage() {
     <div className="space-y-6 pb-8">
       {/* Header with back button */}
       <div className="space-y-4">
-        <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/settings')} className="mb-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard/settings')}
+          className="mb-2"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('common.back') || 'Back to Settings'}
         </Button>
-        
+
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -218,7 +236,9 @@ export default function OrderStatusesPage() {
       {showAddForm && (
         <Card className="border-primary/50 shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">{t('orderStatuses.newStatus') || 'New Status'}</CardTitle>
+            <CardTitle className="text-lg">
+              {t('orderStatuses.newStatus') || 'New Status'}
+            </CardTitle>
             <CardDescription>
               {t('orderStatuses.newStatusDescription') || 'Add a new status to your order workflow'}
             </CardDescription>
@@ -235,7 +255,13 @@ export default function OrderStatusesPage() {
                   onChange={(e) => {
                     setNewStatusName(e.target.value);
                     // Auto-generate slug as user types
-                    setNewStatusSlug(e.target.value.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''));
+                    setNewStatusSlug(
+                      e.target.value
+                        .toLowerCase()
+                        .trim()
+                        .replace(/\s+/g, '-')
+                        .replace(/[^a-z0-9-]/g, '')
+                    );
                   }}
                   placeholder={t('orderStatuses.namePlaceholder') || 'e.g., In Transit'}
                   className="h-10"
@@ -287,8 +313,8 @@ export default function OrderStatusesPage() {
         <CardContent>
           <div className="space-y-2">
             {statuses
-              .sort((a: OrderStatus, b: OrderStatus) => a.position - b.position)
-              .map((status: OrderStatus) => (
+              .sort((a: OrderStatusItem, b: OrderStatusItem) => a.position - b.position)
+              .map((status: OrderStatusItem) => (
                 <div
                   key={status.id}
                   draggable={!status.isSystem}
@@ -300,7 +326,7 @@ export default function OrderStatusesPage() {
                   {!status.isSystem && (
                     <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
                   )}
-                  
+
                   {editingId === status.id ? (
                     <>
                       <Input
@@ -323,11 +349,10 @@ export default function OrderStatusesPage() {
                     </>
                   ) : (
                     <>
-                      <Badge
-                        style={{ backgroundColor: status.color }}
-                        className="text-white"
-                      >
-                        {status.isSystem ? t(`orderStatuses.systemStatuses.${status.slug}`) || status.name : status.name}
+                      <Badge style={{ backgroundColor: status.color }} className="text-white">
+                        {status.isSystem
+                          ? t(`orderStatuses.systemStatuses.${status.slug}`) || status.name
+                          : status.name}
                       </Badge>
                       {status.isSystem && (
                         <Badge variant="outline" className="text-xs">
@@ -342,19 +367,11 @@ export default function OrderStatusesPage() {
                           onCheckedChange={() => handleToggleActive(status.id, status.isActive)}
                         />
                       </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEdit(status)}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => handleEdit(status)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       {!status.isSystem && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setDeleteId(status.id)}
-                        >
+                        <Button size="sm" variant="ghost" onClick={() => setDeleteId(status.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       )}
@@ -371,7 +388,8 @@ export default function OrderStatusesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('orderStatuses.deleteTitle') || 'Delete Status'}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('orderStatuses.deleteConfirm') || 'Are you sure you want to delete this status? This action cannot be undone.'}
+              {t('orderStatuses.deleteConfirm') ||
+                'Are you sure you want to delete this status? This action cannot be undone.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

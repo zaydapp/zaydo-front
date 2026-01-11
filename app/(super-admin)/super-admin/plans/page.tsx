@@ -3,31 +3,33 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { superAdminPlansApi, superAdminModulesApi } from '@/lib/api';
-import { SubscriptionPlan, ModuleDefinition } from '@/types';
+import { ModuleDefinition } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { PlanForm, PlanFormValues } from '@/components/super-admin/plans/plan-form';
+import { SubscriptionPlanWithTenants } from '@/lib/api/super-admin';
 import { toast } from 'sonner';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 
+/*eslint-disable */
 export default function SuperAdminPlansPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlanWithTenants | null>(null);
   const queryClient = useQueryClient();
 
   const plansQuery = useQuery({
     queryKey: ['super-admin', 'plans', 'all'],
     queryFn: async () => {
       const response = await superAdminPlansApi.list();
-      return response.data;
+      return response.data ?? [];
     },
   });
 
@@ -35,7 +37,7 @@ export default function SuperAdminPlansPage() {
     queryKey: ['super-admin', 'modules', 'all'],
     queryFn: async () => {
       const response = await superAdminModulesApi.list();
-      return response.data;
+      return response;
     },
   });
 
@@ -89,7 +91,7 @@ export default function SuperAdminPlansPage() {
     setDialogOpen(true);
   };
 
-  const handleEdit = (plan: SubscriptionPlan) => {
+  const handleEdit = (plan: SubscriptionPlanWithTenants) => {
     setEditingPlan(plan);
     setDialogOpen(true);
   };
@@ -100,7 +102,8 @@ export default function SuperAdminPlansPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Subscription Plans</h1>
           <p className="text-sm text-muted-foreground">
-            Configure pricing, included modules, and seat limits. Use these plans to manage billing and tenant entitlements.
+            Configure pricing, included modules, and seat limits. Use these plans to manage billing
+            and tenant entitlements.
           </p>
         </div>
         <Button onClick={handleCreate}>
@@ -137,41 +140,43 @@ export default function SuperAdminPlansPage() {
             <CardContent className="space-y-4 text-sm">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-muted-foreground">Monthly price</p>
-                  <p className="text-lg font-semibold">${plan.priceMonthly.toLocaleString()}</p>
+                  <p className="text-muted-foreground">Billing cycle</p>
+                  <p className="text-lg font-semibold">{plan.billingCycle}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Yearly price</p>
-                  <p className="text-lg font-semibold">${plan.priceYearly.toLocaleString()}</p>
+                  <p className="text-muted-foreground">Price</p>
+                  <p className="text-lg font-semibold">
+                    ${plan.price.toLocaleString()} {plan.currency}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Max users</p>
-                  <p className="text-lg font-semibold">{plan.maxUsers.toLocaleString()}</p>
+                  <p className="text-lg font-semibold">
+                    {plan.maxUsers?.toLocaleString() ?? 'Unlimited'}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Trial period</p>
-                  <p className="text-lg font-semibold">
-                    {typeof plan.trialPeriodDays === 'number' ? `${plan.trialPeriodDays} days` : 'No trial'}
-                  </p>
+                  <p className="text-muted-foreground">Status</p>
+                  <p className="text-lg font-semibold">{plan.isActive ? 'Active' : 'Inactive'}</p>
                 </div>
               </div>
               <div>
-                <p className="text-muted-foreground">Included modules</p>
+                <p className="text-muted-foreground">Features</p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {plan.includedModuleKeys.length ? (
-                    plan.includedModuleKeys.map((moduleKey) => (
-                      <Badge key={moduleKey} variant="outline">
-                        {moduleKey}
+                  {plan.features && plan.features.length > 0 ? (
+                    plan.features.map((feature) => (
+                      <Badge key={feature} variant="outline">
+                        {feature}
                       </Badge>
                     ))
                   ) : (
-                    <p className="text-xs text-muted-foreground">No modules bundled.</p>
+                    <p className="text-xs text-muted-foreground">No features bundled.</p>
                   )}
                 </div>
               </div>
               <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
-                {plan.tenantCount
-                  ? `${plan.tenantCount} tenants subscribed (${plan.activeTenantIds.length} active).`
+                {plan._count?.tenants
+                  ? `${plan._count.tenants} tenants subscribed.`
                   : 'No tenants currently on this plan.'}
               </div>
             </CardContent>
@@ -187,7 +192,9 @@ export default function SuperAdminPlansPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{editingPlan ? 'Edit subscription plan' : 'Create subscription plan'}</DialogTitle>
+            <DialogTitle>
+              {editingPlan ? 'Edit subscription plan' : 'Create subscription plan'}
+            </DialogTitle>
           </DialogHeader>
           <PlanForm
             modules={modules as ModuleDefinition[]}
@@ -210,5 +217,3 @@ export default function SuperAdminPlansPage() {
     </div>
   );
 }
-
-

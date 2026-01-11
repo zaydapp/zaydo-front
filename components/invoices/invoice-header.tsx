@@ -19,12 +19,19 @@ export function InvoiceHeader({ fromOrder, order }: InvoiceHeaderProps) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex items-center gap-4 flex-1">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label={t('common.back') || 'Back'}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          aria-label={t('common.back') || 'Back'}
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-bold tracking-tight">{t('invoices.newInvoice') || 'Nouvelle facture'}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t('invoices.newInvoice') || 'Nouvelle facture'}
+            </h1>
             <Badge variant="secondary" className="text-xs">
               {t('invoices.statusDraft') || 'Brouillon'}
             </Badge>
@@ -33,7 +40,8 @@ export function InvoiceHeader({ fromOrder, order }: InvoiceHeaderProps) {
             {fromOrder && order
               ? t('invoices.orderBannerDescription', { number: order.orderNumber }) ||
                 `Facture générée à partir de la commande #${order.orderNumber}`
-              : t('invoices.createFromScratch') || 'Remplissez les détails de la facture manuellement.'}
+              : t('invoices.createFromScratch') ||
+                'Remplissez les détails de la facture manuellement.'}
           </p>
         </div>
       </div>
@@ -51,4 +59,3 @@ export function InvoiceHeader({ fromOrder, order }: InvoiceHeaderProps) {
     </div>
   );
 }
-

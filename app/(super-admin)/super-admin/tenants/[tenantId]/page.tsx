@@ -1,32 +1,33 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, PencilLine } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { TenantDetailsTabs } from "../components/TenantDetailsTabs";
-import { useTenantsStore } from "@/store/tenantsStore";
+import { useEffect, useState, useMemo } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, PencilLine } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { TenantDetailsTabs } from '../components/TenantDetailsTabs';
+import { useTenantsStore } from '@/store/tenantsStore';
 import {
   superAdminPlansApi,
   superAdminTenantsApi,
   superAdminUsersApi,
   BackendTenantUserSummary,
-} from "@/lib/api";
-import { TenantCreateInput, TenantUpdateInput, TenantStatus, TenantUserSummary } from "@/types";
-import { toast } from "sonner";
-import { TenantFormModal } from "../components/TenantFormModal";
+} from '@/lib/api';
+import { TenantCreateInput, TenantUpdateInput, TenantStatus, TenantUserSummary } from '@/types';
+import { toast } from 'sonner';
+import { TenantFormModal } from '../components/TenantFormModal';
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (
-    typeof error === "object" &&
+    typeof error === 'object' &&
     error !== null &&
-    "response" in error &&
+    'response' in error &&
     (error as { response?: { data?: { message?: unknown } } }).response?.data?.message
   ) {
-    const message = (error as { response?: { data?: { message?: unknown } } }).response?.data?.message;
-    if (typeof message === "string") {
+    const message = (error as { response?: { data?: { message?: unknown } } }).response?.data
+      ?.message;
+    if (typeof message === 'string') {
       return message;
     }
   }
@@ -41,7 +42,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 export default function TenantDetailsPage() {
   const params = useParams<{ tenantId: string }>();
   const router = useRouter();
-  const tenantId = params?.tenantId ?? "";
+  const tenantId = params?.tenantId ?? '';
 
   const fetchTenantById = useTenantsStore((state) => state.fetchTenantById);
   const selectedTenant = useTenantsStore((state) => state.selectedTenant);
@@ -69,10 +70,10 @@ export default function TenantDetailsPage() {
     return {
       id: user.id,
       tenantId: user.tenantId,
-      tenantName: user.tenant?.name ?? "",
+      tenantName: user.tenant?.name ?? '',
       email: user.email,
-      firstName: user.firstName ?? "",
-      lastName: user.lastName ?? "",
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
       role: roleMap[user.role] ?? user.role,
       status: user.status,
       lastLoginAt: user.lastLoginAt ?? undefined,
@@ -80,8 +81,12 @@ export default function TenantDetailsPage() {
     };
   };
 
-  const { data: usersData, isLoading: usersLoading, refetch: refetchUsers } = useQuery({
-    queryKey: ["super-admin", "tenants", tenantId, "users"],
+  const {
+    data: usersData,
+    isLoading: usersLoading,
+    refetch: refetchUsers,
+  } = useQuery({
+    queryKey: ['super-admin', 'tenants', tenantId, 'users'],
     queryFn: async () => {
       const response = await superAdminUsersApi.list({
         tenantId,
@@ -90,14 +95,19 @@ export default function TenantDetailsPage() {
       });
       return {
         data: (response.data ?? []).map(mapUser),
-        pagination: response.pagination,
+        pagination: {
+          total: response.total,
+          page: response.page,
+          limit: response.limit,
+          totalPages: response.totalPages,
+        },
       };
     },
     enabled: Boolean(tenantId),
   });
 
   const { data: plansData } = useQuery({
-    queryKey: ["super-admin", "plans", "combo"],
+    queryKey: ['super-admin', 'plans', 'combo'],
     queryFn: async () => {
       const response = await superAdminPlansApi.list();
       return response.data;
@@ -133,10 +143,10 @@ export default function TenantDetailsPage() {
       await superAdminTenantsApi.updateStatus(tenantId, { status });
       await fetchTenantById(tenantId);
       await fetchTenants();
-      toast.success(`Tenant ${status === "ACTIVE" ? "activated" : "suspended"}`);
+      toast.success(`Tenant ${status === 'ACTIVE' ? 'activated' : 'suspended'}`);
     } catch (error: unknown) {
-      console.error("Failed to update tenant status", error);
-      toast.error(getErrorMessage(error, "Unable to update tenant status"));
+      console.error('Failed to update tenant status', error);
+      toast.error(getErrorMessage(error, 'Unable to update tenant status'));
     } finally {
       setStatusUpdating(false);
     }
@@ -155,11 +165,11 @@ export default function TenantDetailsPage() {
     try {
       await updateTenant(tenantId, values as TenantUpdateInput);
       await Promise.all([fetchTenantById(tenantId), fetchTenants()]);
-      toast.success("Tenant updated successfully");
+      toast.success('Tenant updated successfully');
       setModalOpen(false);
     } catch (error: unknown) {
-      console.error("Failed to update tenant", error);
-      toast.error(getErrorMessage(error, "Unable to update tenant"));
+      console.error('Failed to update tenant', error);
+      toast.error(getErrorMessage(error, 'Unable to update tenant'));
     } finally {
       setIsSubmitting(false);
     }
@@ -204,7 +214,7 @@ export default function TenantDetailsPage() {
       const targetUrl =
         response.redirectUrl ??
         `${window.location.origin}/impersonate?token=${encodeURIComponent(response.token)}`;
-      
+
       // Open in new tab after successful API call
       window.open(targetUrl, '_blank', 'noopener,noreferrer');
       toast.success(`Opening session as ${user.email} in a new tab.`);
@@ -220,7 +230,7 @@ export default function TenantDetailsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => router.push("/super-admin/tenants")}>
+          <Button variant="ghost" onClick={() => router.push('/super-admin/tenants')}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to tenants
           </Button>
@@ -272,6 +282,3 @@ export default function TenantDetailsPage() {
     </div>
   );
 }
-
-
-

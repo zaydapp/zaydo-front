@@ -21,5 +21,3 @@ const Checkbox = ({ className, ...props }: CheckboxPrimitive.CheckboxProps) => (
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
 export { Checkbox };
-
-

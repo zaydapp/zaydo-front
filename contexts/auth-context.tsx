@@ -26,16 +26,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check if user is already logged in
     const initAuth = async () => {
       try {
+        if (typeof window === 'undefined') {
+          setIsLoading(false);
+          return;
+        }
         // Check sessionStorage first (impersonated sessions), then localStorage (regular sessions)
         const sessionUser = sessionStorage.getItem('user');
         const localUser = localStorage.getItem('user');
         const storedUser = sessionUser || localUser;
-        
+
         console.log('=== AUTH CONTEXT INIT ===');
         console.log('sessionStorage user:', sessionUser ? 'EXISTS' : 'NULL');
         console.log('localStorage user:', localUser ? 'EXISTS' : 'NULL');
         console.log('Using:', sessionUser ? 'sessionStorage' : localUser ? 'localStorage' : 'NONE');
-        
+
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           console.log('Loaded user:', parsedUser);
@@ -43,16 +47,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error('Failed to restore user:', error);
-        // Clear both storages on error
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        sessionStorage.removeItem('user');
-        sessionStorage.removeItem('tenantId');
-        sessionStorage.removeItem('impersonated');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('tenantId');
+        if (typeof window !== 'undefined') {
+          // Clear both storages on error
+          sessionStorage.removeItem('accessToken');
+          sessionStorage.removeItem('refreshToken');
+          sessionStorage.removeItem('user');
+          sessionStorage.removeItem('tenantId');
+          sessionStorage.removeItem('impersonated');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          localStorage.removeItem('tenantId');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -66,23 +72,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Call the actual backend API
       const response: AuthResponse = await authApi.login(credentials);
       
-      // Store tokens and user data
-      localStorage.setItem('accessToken', response.accessToken);
-      if (response.refreshToken) {
-        localStorage.setItem('refreshToken', response.refreshToken);
+      if (typeof window !== 'undefined') {
+        // Store tokens and user data
+        localStorage.setItem('accessToken', response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
+        }
+        localStorage.setItem('user', JSON.stringify(response.user));
+        if (response.user.tenantId) {
+          localStorage.setItem('tenantId', response.user.tenantId);
+        }
       }
-      localStorage.setItem('user', JSON.stringify(response.user));
-      if (response.user.tenantId) {
-        localStorage.setItem('tenantId', response.user.tenantId);
-      }
-      
+
       setUser(response.user);
-      
+
       toast.success('Login successful!');
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      const errorMessage = error?.response?.data?.message || 'Invalid credentials. Please try again.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Invalid credentials. Please try again.';
       toast.error(errorMessage);
       throw error;
     }
@@ -95,25 +104,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Check if this is an impersonated session
-      const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
-      
-      // Clear appropriate storage
-      if (isImpersonated) {
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        sessionStorage.removeItem('user');
-        sessionStorage.removeItem('tenantId');
-        sessionStorage.removeItem('impersonated');
-      } else {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('tenantId');
+      if (typeof window !== 'undefined') {
+        // Check if this is an impersonated session
+        const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
+        
+        // Clear appropriate storage
+        if (isImpersonated) {
+          sessionStorage.removeItem('accessToken');
+          sessionStorage.removeItem('refreshToken');
+          sessionStorage.removeItem('user');
+          sessionStorage.removeItem('tenantId');
+          sessionStorage.removeItem('impersonated');
+        } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          localStorage.removeItem('tenantId');
+        }
       }
-      
+
       setUser(null);
-      
+
       toast.info('Logged out successfully');
       router.push('/login');
     }
@@ -121,12 +132,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = (updatedUser: User) => {
     setUser(updatedUser);
-    // Update in the appropriate storage
-    const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
-    if (isImpersonated) {
-      sessionStorage.setItem('user', JSON.stringify(updatedUser));
-    } else {
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+    if (typeof window !== 'undefined') {
+      // Update in the appropriate storage
+      const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
+      if (isImpersonated) {
+        sessionStorage.setItem('user', JSON.stringify(updatedUser));
+      } else {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
     }
   };
 

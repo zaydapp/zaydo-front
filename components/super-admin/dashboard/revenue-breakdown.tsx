@@ -8,7 +8,11 @@ interface RevenueBreakdownProps {
   isLoading?: boolean;
 }
 
-export function RevenueBreakdown({ data, title = 'Revenue by Plan', isLoading }: RevenueBreakdownProps) {
+export function RevenueBreakdown({
+  data,
+  title = 'Revenue by Plan',
+  isLoading,
+}: RevenueBreakdownProps) {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -24,7 +28,12 @@ export function RevenueBreakdown({ data, title = 'Revenue by Plan', isLoading }:
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="planName" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value / 1000}k`} tickLine={false} axisLine={false} />
+              <YAxis
+                tick={{ fontSize: 12 }}
+                tickFormatter={(value) => `$${value / 1000}k`}
+                tickLine={false}
+                axisLine={false}
+              />
               <Tooltip
                 formatter={(value: number) => `$${value.toLocaleString()}`}
                 labelClassName="text-sm font-medium"
@@ -42,5 +51,3 @@ export function RevenueBreakdown({ data, title = 'Revenue by Plan', isLoading }:
     </Card>
   );
 }
-
-

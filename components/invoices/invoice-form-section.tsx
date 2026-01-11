@@ -11,7 +11,12 @@ interface InvoiceFormSectionProps {
   className?: string;
 }
 
-export function InvoiceFormSection({ title, description, children, className }: InvoiceFormSectionProps) {
+export function InvoiceFormSection({
+  title,
+  description,
+  children,
+  className,
+}: InvoiceFormSectionProps) {
   return (
     <Card className={cn('shadow-md rounded-xl', className)}>
       <CardHeader className="pb-4">
@@ -22,4 +27,3 @@ export function InvoiceFormSection({ title, description, children, className }: 
     </Card>
   );
 }
-

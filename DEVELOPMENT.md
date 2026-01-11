@@ -3,18 +3,22 @@
 ## 📋 Quick Start
 
 ### Run Development Server
+
 ```bash
 npm run dev
 ```
+
 Visit: http://localhost:3000
 
 ### Login Demo Credentials
+
 - Email: `admin@demo.com`
 - Password: `demo123`
 
 ## 🎯 What's Implemented
 
 ### ✅ Fully Functional
+
 1. **Authentication System**
    - Login page with form validation
    - JWT token management with auto-refresh
@@ -50,6 +54,7 @@ Visit: http://localhost:3000
    - User menu with profile/settings
 
 ### 🚧 Placeholder Pages (Ready for Implementation)
+
 - Clients
 - Suppliers
 - Orders
@@ -61,11 +66,13 @@ Visit: http://localhost:3000
 ## 🏗️ Architecture
 
 ### State Management
+
 - **React Query**: Server state caching and synchronization
 - **Context API**: Global state (auth, tenant, theme)
 - **React Hook Form**: Form state
 
 ### API Integration
+
 - Axios client with interceptors
 - Automatic JWT injection
 - Token refresh handling
@@ -73,6 +80,7 @@ Visit: http://localhost:3000
 - Error handling
 
 ### Component Structure
+
 ```
 Components are organized by feature:
 - ui/          → shadcn/ui base components
@@ -83,12 +91,14 @@ Components are organized by feature:
 ## 🔧 Key Files
 
 ### Configuration
+
 - `app/layout.tsx` - Root layout with providers
 - `tailwind.config.ts` - TailwindCSS configuration
 - `components.json` - shadcn/ui configuration
 - `.env.local` - Environment variables
 
 ### Core Logic
+
 - `contexts/auth-context.tsx` - Authentication logic
 - `contexts/tenant-context.tsx` - Multi-tenant logic
 - `lib/api/client.ts` - Axios instance
@@ -96,6 +106,7 @@ Components are organized by feature:
 - `types/index.ts` - TypeScript types
 
 ### Pages
+
 - `app/(auth)/login/page.tsx` - Login page
 - `app/(dashboard)/dashboard/page.tsx` - Dashboard overview
 - `app/(dashboard)/dashboard/products/page.tsx` - Products page
@@ -104,12 +115,15 @@ Components are organized by feature:
 ## 🎨 Styling
 
 ### Theme
+
 - Uses CSS variables for theming
 - Dark mode via `next-themes`
 - shadcn/ui components are fully themed
 
 ### Tailwind Classes
+
 Common patterns:
+
 - Cards: `Card`, `CardHeader`, `CardTitle`, `CardContent`
 - Buttons: `Button` with variants (default, outline, ghost)
 - Tables: `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableCell`
@@ -117,6 +131,7 @@ Common patterns:
 ## 📊 Data Flow
 
 ### Reading Data
+
 ```typescript
 // Use React Query
 const { data, isLoading } = useQuery({
@@ -126,6 +141,7 @@ const { data, isLoading } = useQuery({
 ```
 
 ### Mutating Data
+
 ```typescript
 // Use React Query mutations
 const mutation = useMutation({
@@ -138,6 +154,7 @@ const mutation = useMutation({
 ```
 
 ### Forms
+
 ```typescript
 // React Hook Form + Zod
 const schema = z.object({
@@ -172,18 +189,22 @@ const { register, handleSubmit } = useForm({
 ## 🚀 Adding New Features
 
 ### Add New Page
+
 1. Create page file: `app/(dashboard)/dashboard/[name]/page.tsx`
 2. Add route to sidebar: `components/layout/sidebar.tsx`
 3. Add API functions: `lib/api/index.ts`
 4. Add types: `types/index.ts`
 
 ### Add New Component
+
 1. Create in appropriate folder (`ui/`, `layout/`, or `dashboard/`)
 2. Export from component file
 3. Import where needed
 
 ### Add New API Endpoint
+
 1. Add function to `lib/api/index.ts`:
+
 ```typescript
 export const myApi = {
   getAll: async () => {
@@ -198,20 +219,24 @@ export const myApi = {
 ### Common Issues
 
 **Error: Module not found**
+
 - Run `npm install`
 - Check import paths use `@/` alias
 
 **API not working**
+
 - Check `.env.local` has correct API URL
 - Verify backend is running
 - Check Network tab in DevTools
 
 **Styles not applying**
+
 - Restart dev server
 - Check Tailwind config
 - Verify class names
 
 **Auth not working**
+
 - Clear localStorage
 - Check JWT token format
 - Verify backend auth endpoints

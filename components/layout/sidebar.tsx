@@ -122,9 +122,7 @@ export function Sidebar() {
     }
 
     // Show item if tenant has at least one of the required modules enabled
-    return item.requiredModules.some((moduleKey) =>
-      tenant.enabledModules?.includes(moduleKey)
-    );
+    return item.requiredModules.some((moduleKey) => tenant.enabledModules?.includes(moduleKey));
   });
 
   return (
@@ -137,9 +135,7 @@ export function Sidebar() {
                 {tenant?.name?.charAt(0).toUpperCase() || 'Z'}
               </span>
             </div>
-            <span className="text-xl font-bold truncate">
-              {tenant?.name || 'Zaydo'}
-            </span>
+            <span className="text-xl font-bold truncate">{tenant?.name || 'Zaydo'}</span>
           </Link>
         ) : (
           <Link href="/dashboard" className="flex items-center justify-center">
@@ -157,7 +153,9 @@ export function Sidebar() {
             <SidebarMenu>
               {visibleNavItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== '/dashboard' && pathname.startsWith(item.href));
                 const title = t(item.titleKey);
 
                 return (

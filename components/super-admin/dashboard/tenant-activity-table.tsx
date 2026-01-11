@@ -63,12 +63,12 @@ const mockActivities: TenantActivity[] = [
   },
 ];
 
-export function TenantActivityTable({ data = mockActivities, isLoading }: TenantActivityTableProps) {
+export function TenantActivityTable({
+  data = mockActivities,
+  isLoading,
+}: TenantActivityTableProps) {
   const getActivityBadge = (type: TenantActivity['type']) => {
-    const variants: Record<
-      TenantActivity['type'],
-      { label: string; className: string }
-    > = {
+    const variants: Record<TenantActivity['type'], { label: string; className: string }> = {
       login: {
         label: 'Login',
         className: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',

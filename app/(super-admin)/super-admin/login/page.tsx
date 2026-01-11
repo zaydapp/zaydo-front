@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -61,18 +60,14 @@ export default function SuperAdminLoginPage() {
             SA
           </div>
           <h1 className="mt-4 text-2xl font-bold tracking-tight">SaaS Owner Sign In</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Access the global control center for tenants, billing, and analytics.
-          </p>
-          <p className="mt-2 text-xs font-medium text-primary">
-            Demo credentials: super.admin@zaydo.local / ChangeMe123!
-          </p>
         </div>
 
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Welcome back</CardTitle>
-            <CardDescription>Secure access is restricted to the SaaS owner and trusted operators.</CardDescription>
+            <CardDescription>
+              Secure access is restricted to the SaaS owner and trusted operators.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -84,11 +79,18 @@ export default function SuperAdminLoginPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" autoComplete="current-password" {...register('password')} />
-                {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  {...register('password')}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="rememberMe"
@@ -99,9 +101,6 @@ export default function SuperAdminLoginPage() {
                     Keep me signed in
                   </Label>
                 </div>
-                <Link href="/super-admin/support" className="text-sm font-medium text-primary hover:underline">
-                  Need help?
-                </Link>
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -117,13 +116,7 @@ export default function SuperAdminLoginPage() {
             </form>
           </CardContent>
         </Card>
-
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Protected area. All actions are logged and monitored.
-        </p>
       </div>
     </div>
   );
 }
-
-

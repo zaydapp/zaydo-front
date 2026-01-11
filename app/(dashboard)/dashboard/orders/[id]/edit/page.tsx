@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { ordersApi, orderStatusesApi } from '@/lib/api';
+import { Order, OrderItem } from '@/types';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,22 +56,23 @@ export default function EditOrderPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => ordersApi.update(orderId, data),
+    mutationFn: (data: { statusId: string | number; notes?: string; deliveryDate?: string }) =>
+      ordersApi.update(orderId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success('Commande mise à jour avec succès');
       router.push(`/dashboard/orders/${orderId}`);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Erreur lors de la mise à jour');
+    onError: () => {
+      toast.error('Erreur lors de la mise à jour');
     },
   });
 
   // Initialize form when order loads
   const [isInitialized, setIsInitialized] = useState(false);
   if (order && !isInitialized) {
-    const statusValue = typeof order.status === 'string' ? order.status : (order.status as any)?.slug || 'DRAFT';
+    const statusValue = String(order.status || 'DRAFT');
     setStatus(statusValue);
     setNotes(order.notes || '');
     setDeliveryDate(order.deliveryDate ? format(new Date(order.deliveryDate), 'yyyy-MM-dd') : '');
@@ -80,13 +82,22 @@ export default function EditOrderPage() {
   const handleSave = async () => {
     try {
       // Find the status ID based on slug
-      const selectedStatus = orderStatuses?.find((s: any) => s.slug === status);
+      type OrderStatusObj = {
+        id: string;
+        slug: string;
+        name: string;
+        color?: string;
+        isSystem?: boolean;
+      };
+      const selectedStatus = (orderStatuses as OrderStatusObj[] | undefined)?.find(
+        (s: OrderStatusObj) => s.slug === status
+      );
       const statusId = selectedStatus?.id || status;
 
       await updateMutation.mutateAsync({
         statusId,
         notes,
-        deliveryDate: deliveryDate ? new Date(deliveryDate).toISOString() : null,
+        deliveryDate: deliveryDate ? new Date(deliveryDate).toISOString() : undefined,
       });
     } catch (error) {
       console.error('Update error:', error);
@@ -94,7 +105,16 @@ export default function EditOrderPage() {
   };
 
   const getStatusIcon = (statusSlug: string) => {
-    const statusObj = orderStatuses?.find((s: any) => s.slug === statusSlug);
+    type OrderStatusObj = {
+      id: string;
+      slug: string;
+      name: string;
+      color?: string;
+      isSystem?: boolean;
+    };
+    const statusObj = (orderStatuses as OrderStatusObj[] | undefined)?.find(
+      (s: OrderStatusObj) => s.slug === statusSlug
+    );
     if (statusSlug === 'COMPLETED') return <CheckCircle2 className="h-5 w-5" />;
     if (statusSlug === 'CANCELLED') return <XCircle className="h-5 w-5" />;
     if (statusSlug === 'IN_PROGRESS') return <Clock className="h-5 w-5" />;
@@ -102,7 +122,16 @@ export default function EditOrderPage() {
   };
 
   const getStatusColor = (statusSlug: string) => {
-    const statusObj = orderStatuses?.find((s: any) => s.slug === statusSlug);
+    type OrderStatusObj = {
+      id: string;
+      slug: string;
+      name: string;
+      color?: string;
+      isSystem?: boolean;
+    };
+    const statusObj = (orderStatuses as OrderStatusObj[] | undefined)?.find(
+      (s: OrderStatusObj) => s.slug === statusSlug
+    );
     if (statusObj?.color) {
       return `text-white`; // Will be applied via inline style
     }
@@ -137,11 +166,7 @@ export default function EditOrderPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.back()}
-        >
+        <Button variant="outline" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -170,27 +195,46 @@ export default function EditOrderPage() {
                 ) : (
                   <Select value={status} onValueChange={setStatus}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('orders.selectStatus') || 'Sélectionner un statut'} />
+                      <SelectValue
+                        placeholder={t('orders.selectStatus') || 'Sélectionner un statut'}
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      {orderStatuses?.map((st: any) => (
-                        <SelectItem key={st.id} value={st.slug}>
-                          <span className="flex items-center gap-2">
-                            {getStatusIcon(st.slug)}
-                            {st.isSystem ? t(`orderStatuses.systemStatuses.${st.slug}`) || st.name : st.name}
-                          </span>
-                        </SelectItem>
-                      ))}
+                      {orderStatuses?.map(
+                        (st: {
+                          id: string;
+                          slug: string;
+                          name: string;
+                          color?: string;
+                          isSystem?: boolean;
+                        }) => (
+                          <SelectItem key={st.id} value={st.slug}>
+                            <span className="flex items-center gap-2">
+                              {getStatusIcon(st.slug)}
+                              {st.isSystem
+                                ? t(`orderStatuses.systemStatuses.${st.slug}`) || st.name
+                                : st.name}
+                            </span>
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 )}
                 {status && (
-                  <div 
+                  <div
                     className={`p-3 rounded-lg ${getStatusColor(status)}`}
                     style={{
-                      backgroundColor: orderStatuses?.find((s: any) => s.slug === status)?.color + '20',
-                      color: orderStatuses?.find((s: any) => s.slug === status)?.color,
-                      borderColor: orderStatuses?.find((s: any) => s.slug === status)?.color,
+                      backgroundColor:
+                        ((
+                          orderStatuses as Array<{ slug: string; color?: string }> | undefined
+                        )?.find((s) => s.slug === status)?.color || '') + '20',
+                      color: (
+                        orderStatuses as Array<{ slug: string; color?: string }> | undefined
+                      )?.find((s) => s.slug === status)?.color,
+                      borderColor: (
+                        orderStatuses as Array<{ slug: string; color?: string }> | undefined
+                      )?.find((s) => s.slug === status)?.color,
                       borderWidth: '1px',
                     }}
                   >
@@ -198,8 +242,12 @@ export default function EditOrderPage() {
                       {getStatusIcon(status)}
                       <span className="font-medium">
                         {(() => {
-                          const currentStatus = orderStatuses?.find((s: any) => s.slug === status);
-                          return currentStatus?.isSystem 
+                          const currentStatus = (
+                            orderStatuses as
+                              | Array<{ slug: string; isSystem?: boolean; name: string }>
+                              | undefined
+                          )?.find((s) => s.slug === status);
+                          return currentStatus?.isSystem
                             ? t(`orderStatuses.systemStatuses.${status}`) || currentStatus.name
                             : currentStatus?.name || status;
                         })()}
@@ -270,17 +318,27 @@ export default function EditOrderPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                      {order?.items?.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.productName}</TableCell>
-                          <TableCell className="text-right">{item.quantity} {item.unit}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(Number(item.unitPrice))}</TableCell>
-                          <TableCell className="text-right font-medium">{formatCurrency(Number(item.totalPrice))}</TableCell>
-                        </TableRow>
-                      ))}
+                    {order?.items?.map((item: OrderItem) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.productName}</TableCell>
+                        <TableCell className="text-right">
+                          {item.quantity} {item.unit}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(Number(item.unitPrice))}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(Number(item.totalPrice))}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                     <TableRow className="bg-muted/50 font-semibold">
-                      <TableCell colSpan={3} className="text-right">Total:</TableCell>
-                      <TableCell className="text-right">{formatCurrency(Number(order.totalAmount))}</TableCell>
+                      <TableCell colSpan={3} className="text-right">
+                        Total:
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(Number(order.totalAmount))}
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -321,7 +379,9 @@ export default function EditOrderPage() {
               )}
               <div>
                 <p className="text-sm text-muted-foreground">Montant Total</p>
-                <p className="text-2xl font-bold text-primary">{formatCurrency(Number(order.totalAmount))}</p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatCurrency(Number(order.totalAmount))}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -329,11 +389,7 @@ export default function EditOrderPage() {
           {/* Actions */}
           <Card>
             <CardContent className="pt-6 space-y-2">
-              <Button
-                onClick={handleSave}
-                disabled={updateMutation.isPending}
-                className="w-full"
-              >
+              <Button onClick={handleSave} disabled={updateMutation.isPending} className="w-full">
                 {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Enregistrer les modifications
               </Button>

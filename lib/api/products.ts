@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from './index';
-import { Product } from '@/types';
+import { Product, StockMovement } from '@/types';
 
 // React Query hooks for Products
 export const useProducts = (params?: {
@@ -52,7 +52,7 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Product> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<Product> }) =>
       productsApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -87,7 +87,7 @@ export const useAddStockMovement = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: any) => productsApi.addStockMovement(data),
+    mutationFn: (data: Partial<StockMovement>) => productsApi.addStockMovement(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stock-movements'] });

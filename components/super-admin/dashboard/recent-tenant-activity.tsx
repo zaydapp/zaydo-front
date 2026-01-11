@@ -73,10 +73,22 @@ const mockData: TenantActivityItem[] = [
 export function RecentTenantActivity({ data = mockData, isLoading }: RecentTenantActivityProps) {
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { label: string; className: string }> = {
-      new: { label: 'New Order', className: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' },
-      trial: { label: 'In Progress', className: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300' },
-      active: { label: 'Completed', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' },
-      suspended: { label: 'On Hold', className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300' },
+      new: {
+        label: 'New Order',
+        className: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+      },
+      trial: {
+        label: 'In Progress',
+        className: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
+      },
+      active: {
+        label: 'Completed',
+        className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+      },
+      suspended: {
+        label: 'On Hold',
+        className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300',
+      },
     };
 
     const variant = variants[status] || variants.new;
@@ -91,10 +103,7 @@ export function RecentTenantActivity({ data = mockData, isLoading }: RecentTenan
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div className="flex items-center gap-4">
-          <Input
-            placeholder="Filter orders..."
-            className="h-9 w-[250px] bg-background"
-          />
+          <Input placeholder="Filter orders..." className="h-9 w-[250px] bg-background" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-9">

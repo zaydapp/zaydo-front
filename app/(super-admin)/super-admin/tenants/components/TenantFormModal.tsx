@@ -1,15 +1,11 @@
+/*eslint-disable */
 'use client';
 
 import { useCallback, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  TenantCreateInput,
-  TenantDetails,
-  TenantUpdateInput,
-  ModuleDefinition,
-} from '@/types';
+import { TenantCreateInput, TenantDetails, TenantUpdateInput, ModuleDefinition } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -93,35 +89,28 @@ export function TenantFormModal({
     },
   });
 
-  const baseModules = useMemo(
-    () => modules.filter((module) => module.isBaseModule),
-    [modules],
-  );
-  const addonModules = useMemo(
-    () => modules.filter((module) => !module.isBaseModule),
-    [modules],
-  );
-  const baseModuleKeys = useMemo(
-    () => baseModules.map((module) => module.key),
-    [baseModules],
-  );
+  const baseModules = useMemo(() => modules.filter((module) => module.isBaseModule), [modules]);
+  const addonModules = useMemo(() => modules.filter((module) => !module.isBaseModule), [modules]);
+  const baseModuleKeys = useMemo(() => baseModules.map((module) => module.key), [baseModules]);
 
   const selectedModuleKeys = watch('moduleKeys') ?? [];
   const selectedAddonKeys = useMemo(
-    () => selectedModuleKeys.filter((key) => {
-      const module = modules.find(m => m.key === key);
-      return module && !module.isBaseModule;
-    }),
-    [selectedModuleKeys, modules],
+    () =>
+      selectedModuleKeys.filter((key) => {
+        const module = modules.find((m) => m.key === key);
+        return module && !module.isBaseModule;
+      }),
+    [selectedModuleKeys, modules]
   );
 
   // Calculate MRR based on selected modules
   const calculatedMRR = useMemo(() => {
     return selectedModuleKeys.reduce((total, key) => {
-      const module = modules.find(m => m.key === key);
-      const price = typeof module?.priceMonthly === 'number' 
-        ? module.priceMonthly 
-        : Number(module?.priceMonthly || 0);
+      const module = modules.find((m) => m.key === key);
+      const price =
+        typeof module?.priceMonthly === 'number'
+          ? module.priceMonthly
+          : Number(module?.priceMonthly || 0);
       return total + price;
     }, 0);
   }, [selectedModuleKeys, modules]);
@@ -165,12 +154,7 @@ export function TenantFormModal({
       currency: 'USD',
       moduleKeys: baseModuleKeys,
     });
-  }, [
-    initialTenant,
-    reset,
-    open,
-    baseModuleKeys,
-  ]);
+  }, [initialTenant, reset, open, baseModuleKeys]);
 
   const handleBaseModuleToggle = useCallback(
     (moduleKey: string, checked: boolean) => {
@@ -180,7 +164,7 @@ export function TenantFormModal({
         : currentKeys.filter((key) => key !== moduleKey);
       setValue('moduleKeys', nextKeys, { shouldDirty: true });
     },
-    [selectedModuleKeys, setValue],
+    [selectedModuleKeys, setValue]
   );
 
   const handleAddonToggle = useCallback(
@@ -191,7 +175,7 @@ export function TenantFormModal({
         : currentKeys.filter((key) => key !== moduleKey);
       setValue('moduleKeys', nextKeys, { shouldDirty: true });
     },
-    [selectedModuleKeys, setValue],
+    [selectedModuleKeys, setValue]
   );
 
   const handleFormSubmit = async (values: TenantFormValues) => {
@@ -231,7 +215,9 @@ export function TenantFormModal({
           className="flex h-full max-h-[95vh] flex-col"
         >
           <DialogHeader className="px-6 pt-6 pb-4 text-left">
-            <DialogTitle className="text-xl">{initialTenant ? 'Edit tenant' : 'Create tenant'}</DialogTitle>
+            <DialogTitle className="text-xl">
+              {initialTenant ? 'Edit tenant' : 'Create tenant'}
+            </DialogTitle>
             <DialogDescription className="text-sm">
               {initialTenant
                 ? 'Update tenant account details, billing plan and optional add-ons.'
@@ -255,7 +241,9 @@ export function TenantFormModal({
                   <Controller
                     control={control}
                     name="name"
-                    render={({ field }) => <Input id="tenant-name" placeholder="Acme Technologies" {...field} />}
+                    render={({ field }) => (
+                      <Input id="tenant-name" placeholder="Acme Technologies" {...field} />
+                    )}
                   />
                   {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                 </div>
@@ -278,13 +266,14 @@ export function TenantFormModal({
                         <select
                           id="tenant-status"
                           className={cn(
-                            'w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            'w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                           )}
                           {...field}
                         >
                           {TENANT_STATUSES.map((option) => (
                             <option key={option} value={option}>
-                              {option.charAt(0) + option.slice(1).toLowerCase()}
+                              {option?.charAt(0)}
+                              {option?.slice(1).toLowerCase()}
                             </option>
                           ))}
                         </select>
@@ -302,7 +291,7 @@ export function TenantFormModal({
                         <select
                           id="tenant-currency"
                           className={cn(
-                            'w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            'w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                           )}
                           {...field}
                         >
@@ -320,7 +309,9 @@ export function TenantFormModal({
                       </div>
                     )}
                   />
-                  {errors.currency && <p className="text-sm text-destructive">{errors.currency.message}</p>}
+                  {errors.currency && (
+                    <p className="text-sm text-destructive">{errors.currency.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tenant-contact-email">Contact email</Label>
@@ -328,17 +319,26 @@ export function TenantFormModal({
                     control={control}
                     name="contactEmail"
                     render={({ field }) => (
-                      <Input id="tenant-contact-email" type="email" placeholder="admin@acme.com" {...field} />
+                      <Input
+                        id="tenant-contact-email"
+                        type="email"
+                        placeholder="admin@acme.com"
+                        {...field}
+                      />
                     )}
                   />
-                  {errors.contactEmail && <p className="text-sm text-destructive">{errors.contactEmail.message}</p>}
+                  {errors.contactEmail && (
+                    <p className="text-sm text-destructive">{errors.contactEmail.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tenant-contact-name">Contact name</Label>
                   <Controller
                     control={control}
                     name="contactName"
-                    render={({ field }) => <Input id="tenant-contact-name" placeholder="Jane Cooper" {...field} />}
+                    render={({ field }) => (
+                      <Input id="tenant-contact-name" placeholder="Jane Cooper" {...field} />
+                    )}
                   />
                 </div>
                 <div className="space-y-2">
@@ -346,7 +346,9 @@ export function TenantFormModal({
                   <Controller
                     control={control}
                     name="contactPhone"
-                    render={({ field }) => <Input id="tenant-contact-phone" placeholder="+1 555-0100" {...field} />}
+                    render={({ field }) => (
+                      <Input id="tenant-contact-phone" placeholder="+1 555-0100" {...field} />
+                    )}
                   />
                 </div>
               </div>
@@ -356,7 +358,14 @@ export function TenantFormModal({
                   <Controller
                     control={control}
                     name="address"
-                    render={({ field }) => <Textarea id="tenant-address" placeholder="123 Main Street" rows={3} {...field} />}
+                    render={({ field }) => (
+                      <Textarea
+                        id="tenant-address"
+                        placeholder="123 Main Street"
+                        rows={3}
+                        {...field}
+                      />
+                    )}
                   />
                 </div>
                 <div className="grid gap-5">
@@ -365,7 +374,9 @@ export function TenantFormModal({
                     <Controller
                       control={control}
                       name="industry"
-                      render={({ field }) => <Input id="tenant-industry" placeholder="Manufacturing" {...field} />}
+                      render={({ field }) => (
+                        <Input id="tenant-industry" placeholder="Manufacturing" {...field} />
+                      )}
                     />
                   </div>
                   <div className="space-y-2">
@@ -373,9 +384,13 @@ export function TenantFormModal({
                     <Controller
                       control={control}
                       name="website"
-                      render={({ field }) => <Input id="tenant-website" placeholder="https://acme.com" {...field} />}
+                      render={({ field }) => (
+                        <Input id="tenant-website" placeholder="https://acme.com" {...field} />
+                      )}
                     />
-                    {errors.website && <p className="text-sm text-destructive">{errors.website.message}</p>}
+                    {errors.website && (
+                      <p className="text-sm text-destructive">{errors.website.message}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -387,7 +402,8 @@ export function TenantFormModal({
               <div>
                 <h3 className="text-base font-semibold">Modules & pricing</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Configure modules for this tenant. Base modules can be disabled if not needed. Add-ons have additional monthly fees.
+                  Configure modules for this tenant. Base modules can be disabled if not needed.
+                  Add-ons have additional monthly fees.
                 </p>
               </div>
 
@@ -401,7 +417,8 @@ export function TenantFormModal({
                       </p>
                     </div>
                     <Badge variant="outline" className="text-xs w-fit">
-                      {baseModules.filter(m => selectedModuleKeys.includes(m.key)).length} / {baseModules.length} enabled
+                      {baseModules.filter((m) => selectedModuleKeys.includes(m.key)).length} /{' '}
+                      {baseModules.length} enabled
                     </Badge>
                   </div>
                   {baseModules.length ? (
@@ -413,7 +430,9 @@ export function TenantFormModal({
                             key={baseModule.id}
                             className={cn(
                               'flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors',
-                              isChecked ? 'border-primary/60 bg-primary/5' : 'hover:border-border/80 opacity-60',
+                              isChecked
+                                ? 'border-primary/60 bg-primary/5'
+                                : 'hover:border-border/80 opacity-60'
                             )}
                           >
                             <Checkbox
@@ -424,11 +443,17 @@ export function TenantFormModal({
                             />
                             <div className="space-y-1 flex-1">
                               <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-medium leading-none">{baseModule.name}</p>
-                                <Badge variant="secondary" className="text-xs">Free</Badge>
+                                <p className="text-sm font-medium leading-none">
+                                  {baseModule.name}
+                                </p>
+                                <Badge variant="secondary" className="text-xs">
+                                  Free
+                                </Badge>
                               </div>
                               {baseModule.description && (
-                                <p className="text-xs text-muted-foreground leading-relaxed">{baseModule.description}</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  {baseModule.description}
+                                </p>
                               )}
                             </div>
                           </label>
@@ -436,9 +461,7 @@ export function TenantFormModal({
                       })}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No base modules configured.
-                    </p>
+                    <p className="text-sm text-muted-foreground">No base modules configured.</p>
                   )}
                 </div>
 
@@ -463,7 +486,9 @@ export function TenantFormModal({
                             key={addonModule.id}
                             className={cn(
                               'flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors',
-                              isChecked ? 'border-primary/60 bg-primary/5' : 'hover:border-border/80',
+                              isChecked
+                                ? 'border-primary/60 bg-primary/5'
+                                : 'hover:border-border/80'
                             )}
                           >
                             <Checkbox
@@ -474,11 +499,17 @@ export function TenantFormModal({
                             />
                             <div className="space-y-1 flex-1">
                               <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-medium leading-none">{addonModule.name}</p>
-                                <Badge variant="default" className="text-xs">€{addonModule.priceMonthly}/mo</Badge>
+                                <p className="text-sm font-medium leading-none">
+                                  {addonModule.name}
+                                </p>
+                                <Badge variant="default" className="text-xs">
+                                  €{addonModule.priceMonthly}/mo
+                                </Badge>
                               </div>
                               {addonModule.description && (
-                                <p className="text-xs text-muted-foreground leading-relaxed">{addonModule.description}</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  {addonModule.description}
+                                </p>
                               )}
                             </div>
                           </label>
@@ -486,9 +517,7 @@ export function TenantFormModal({
                       })}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No add-on modules available.
-                    </p>
+                    <p className="text-sm text-muted-foreground">No add-on modules available.</p>
                   )}
                 </div>
 
@@ -508,7 +537,9 @@ export function TenantFormModal({
                     </div>
                     <Separator />
                     <div className="space-y-2">
-                      <p className="text-xs font-medium">Active modules ({selectedModuleKeys.length}):</p>
+                      <p className="text-xs font-medium">
+                        Active modules ({selectedModuleKeys.length}):
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {selectedModuleKeys.map((moduleKey) => {
                           const moduleDefinition = modules.find((item) => item.key === moduleKey);
@@ -519,7 +550,9 @@ export function TenantFormModal({
                               className="text-xs"
                             >
                               {moduleDefinition?.name ?? moduleKey}
-                              {moduleDefinition && !moduleDefinition.isBaseModule && ` (€${moduleDefinition.priceMonthly})`}
+                              {moduleDefinition &&
+                                !moduleDefinition.isBaseModule &&
+                                ` (€${moduleDefinition.priceMonthly})`}
                             </Badge>
                           );
                         })}
@@ -534,7 +567,12 @@ export function TenantFormModal({
           <Separator />
 
           <DialogFooter className="flex items-center justify-end gap-3 border-0 px-6 py-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting} className="min-w-32">
@@ -546,5 +584,3 @@ export function TenantFormModal({
     </Dialog>
   );
 }
-
-

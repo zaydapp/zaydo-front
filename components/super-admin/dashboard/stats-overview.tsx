@@ -21,7 +21,7 @@ interface StatCardProps {
 function StatCard({ label, value, change, isLoading, format = 'number' }: StatCardProps) {
   const formatValue = (val: string | number) => {
     if (typeof val === 'string') return val;
-    
+
     switch (format) {
       case 'currency':
         return `$${val.toLocaleString()}`;
@@ -54,8 +54,8 @@ function StatCard({ label, value, change, isLoading, format = 'number' }: StatCa
                   <span
                     className={cn(
                       'text-xs font-medium',
-                      change >= 0 
-                        ? 'text-emerald-600 dark:text-emerald-400' 
+                      change >= 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
                         : 'text-red-600 dark:text-red-400'
                     )}
                   >
@@ -89,17 +89,13 @@ export function StatsOverview({ data, isLoading }: StatsOverviewProps) {
     },
     {
       label: 'Total Expense',
-      value: data?.churnedTenantsThisMonth 
-        ? (data.churnedTenantsThisMonth * 1000) 
-        : 0,
+      value: data?.churnedTenantsThisMonth ? data.churnedTenantsThisMonth * 1000 : 0,
       format: 'currency' as const,
       change: -6.0,
     },
     {
       label: 'Total Sales Tax',
-      value: data?.monthlyRecurringRevenue 
-        ? Math.round(data.monthlyRecurringRevenue * 0.08) 
-        : 0,
+      value: data?.monthlyRecurringRevenue ? Math.round(data.monthlyRecurringRevenue * 0.08) : 0,
       format: 'currency' as const,
       change: 5.0,
     },

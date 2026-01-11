@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useState } from 'react';
 import { TenantSetting } from '@/types';
@@ -42,10 +41,12 @@ export function SettingsList({ category }: SettingsListProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentSetting, setCurrentSetting] = useState<TenantSetting | null>(null);
-  const [editValue, setEditValue] = useState<any>(null);
-  const [editItems, setEditItems] = useState<any[]>([]);
+  const [editValue, setEditValue] = useState<
+    string | number | Record<string, string | number> | Array<Record<string, unknown>> | null
+  >(null);
+  const [editItems, setEditItems] = useState<Array<Record<string, unknown>>>([]);
 
-  const settings: TenantSetting[] = settingsData || [];
+  const settings = (settingsData || []) as TenantSetting[];
 
   const handleEdit = (setting: TenantSetting) => {
     if (setting.isSystem) {
@@ -53,8 +54,8 @@ export function SettingsList({ category }: SettingsListProps) {
       return;
     }
     setCurrentSetting(setting);
-    setEditValue(setting.value);
-    
+    setEditValue(setting.value as string | number | Record<string, string | number> | null);
+
     // Convert value to editable format
     if (Array.isArray(setting.value)) {
       if (typeof setting.value[0] === 'object') {
@@ -65,15 +66,13 @@ export function SettingsList({ category }: SettingsListProps) {
     } else {
       setEditItems([]);
     }
-    
+
     setEditDialogOpen(true);
   };
 
   const handleAddItem = () => {
     const isComplex = editItems.length > 0 && editItems[0].label !== undefined;
-    const newItem = isComplex
-      ? { value: '', label: '' }
-      : { value: '' };
+    const newItem = isComplex ? { value: '', label: '' } : { value: '' };
     setEditItems([...editItems, newItem]);
   };
 
@@ -81,7 +80,7 @@ export function SettingsList({ category }: SettingsListProps) {
     setEditItems(editItems.filter((_, i) => i !== index));
   };
 
-  const handleItemChange = (index: number, field: string, value: any) => {
+  const handleItemChange = (index: number, field: string, value: string | number | boolean) => {
     const newItems = [...editItems];
     newItems[index] = { ...newItems[index], [field]: value };
     setEditItems(newItems);
@@ -100,18 +99,26 @@ export function SettingsList({ category }: SettingsListProps) {
     if (!currentSetting) return;
 
     try {
-      let finalValue = editValue;
-      
+      let finalValue:
+        | string
+        | number
+        | Record<string, string | number>
+        | Array<Record<string, unknown>>
+        | null = editValue;
+
       // Convert items back to proper format
       if (editItems.length > 0) {
         if (editItems[0].label !== undefined) {
           // Complex objects (clients, products, etc.)
-          finalValue = editItems.filter(item => item.value || item.label);
+          finalValue = editItems.filter((item) => item.value || item.label) as Record<
+            string,
+            unknown
+          >[];
         } else {
           // Simple arrays (units)
           finalValue = editItems
-            .map(item => item.value)
-            .filter(v => v && v.trim());
+            .map((item) => item.value)
+            .filter((v) => v && String(v).trim()) as unknown as Array<Record<string, unknown>>;
         }
       }
 
@@ -143,7 +150,10 @@ export function SettingsList({ category }: SettingsListProps) {
     }
   };
 
-  const renderValue = (value: any, category: string) => {
+  const renderValue = (
+    value: string | number | Record<string, unknown> | Array<Record<string, unknown>> | unknown[],
+    category: string
+  ) => {
     if (Array.isArray(value)) {
       return (
         <div className="flex flex-wrap gap-1">
@@ -152,7 +162,9 @@ export function SettingsList({ category }: SettingsListProps) {
             if (typeof item === 'object') {
               displayText = item.label || item.value || item.name;
               // Try to translate the value
-              const valueKey = (item.value || item.label || item.name || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+              const valueKey = (item.value || item.label || item.name || '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '_');
               const translationKey = `settingsPage.settingValues.${category}.${valueKey}`;
               const translated = t(translationKey);
               if (translated !== translationKey) {
@@ -161,7 +173,9 @@ export function SettingsList({ category }: SettingsListProps) {
             } else {
               displayText = String(item);
               // Try to translate simple string values
-              const valueKey = String(item).toLowerCase().replace(/[^a-z0-9]/g, '_');
+              const valueKey = String(item)
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '_');
               const translationKey = `settingsPage.settingValues.${category}.${valueKey}`;
               const translated = t(translationKey);
               if (translated !== translationKey) {
@@ -181,7 +195,11 @@ export function SettingsList({ category }: SettingsListProps) {
       // Display object properties in a readable format
       if (value.code && value.symbol) {
         // Currency format
-        return <span>{value.code} ({value.symbol})</span>;
+        return (
+          <span>
+            {String(value.code)} ({String(value.symbol)})
+          </span>
+        );
       }
       return (
         <div className="text-sm space-y-1">
@@ -199,26 +217,27 @@ export function SettingsList({ category }: SettingsListProps) {
   const renderEditDialog = () => {
     if (!currentSetting) return null;
 
-    const isSimpleArray = Array.isArray(currentSetting.value) && 
+    const isSimpleArray =
+      Array.isArray(currentSetting.value) &&
       (currentSetting.value.length === 0 || typeof currentSetting.value[0] !== 'object');
-    const isComplexArray = Array.isArray(currentSetting.value) && 
-      currentSetting.value.length > 0 && typeof currentSetting.value[0] === 'object';
-    const isObject = !Array.isArray(currentSetting.value) && 
-      typeof currentSetting.value === 'object';
+    const isComplexArray =
+      Array.isArray(currentSetting.value) &&
+      currentSetting.value.length > 0 &&
+      typeof currentSetting.value[0] === 'object';
+    const isObject =
+      !Array.isArray(currentSetting.value) && typeof currentSetting.value === 'object';
 
     return (
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('settingsPage.editValue')}</DialogTitle>
-            <DialogDescription>
-              {currentSetting.description}
-            </DialogDescription>
+            <DialogDescription>{currentSetting.description}</DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {/* Simple Array (units) */}
-            {(isSimpleArray || editItems.length > 0 && editItems[0].label === undefined) && (
+            {(isSimpleArray || (editItems.length > 0 && editItems[0].label === undefined)) && (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <Label>{t('settingsPage.valueLabel')}</Label>
@@ -230,15 +249,11 @@ export function SettingsList({ category }: SettingsListProps) {
                 {editItems.map((item, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
-                      value={item.value}
+                      value={String(item.value || '')}
                       onChange={(e) => handleItemChange(index, 'value', e.target.value)}
                       placeholder={t('settingsPage.enterValue')}
                     />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveItem(index)}
-                    >
+                    <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
@@ -259,12 +274,10 @@ export function SettingsList({ category }: SettingsListProps) {
                 {editItems.map((item, index) => (
                   <div key={index} className="border rounded-lg p-3 space-y-2">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">{t('settingsPage.itemNumber', { number: index + 1 }) || `Item ${index + 1}`}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveItem(index)}
-                      >
+                      <span className="text-sm font-medium">
+                        {t('settingsPage.itemNumber', { number: index + 1 }) || `Item ${index + 1}`}
+                      </span>
+                      <Button variant="ghost" size="sm" onClick={() => handleRemoveItem(index)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -272,7 +285,7 @@ export function SettingsList({ category }: SettingsListProps) {
                       <div>
                         <Label className="text-xs">{t('settingsPage.valueLabel')}</Label>
                         <Input
-                          value={item.value || ''}
+                          value={String(item.value || '')}
                           onChange={(e) => handleItemChange(index, 'value', e.target.value)}
                           placeholder={t('settingsPage.valuePlaceholder') || 'VALUE'}
                         />
@@ -280,7 +293,7 @@ export function SettingsList({ category }: SettingsListProps) {
                       <div>
                         <Label className="text-xs">{t('settingsPage.labelLabel')}</Label>
                         <Input
-                          value={item.label || ''}
+                          value={String(item.label || '')}
                           onChange={(e) => handleItemChange(index, 'label', e.target.value)}
                           placeholder={t('settingsPage.labelPlaceholder') || 'Display Label'}
                         />
@@ -291,8 +304,10 @@ export function SettingsList({ category }: SettingsListProps) {
                         <Label className="text-xs">{t('settingsPage.rateLabel')}</Label>
                         <Input
                           type="number"
-                          value={item.rate || 0}
-                          onChange={(e) => handleItemChange(index, 'rate', parseFloat(e.target.value))}
+                          value={Number(item.rate) || 0}
+                          onChange={(e) =>
+                            handleItemChange(index, 'rate', parseFloat(e.target.value))
+                          }
                         />
                       </div>
                     )}
@@ -301,16 +316,20 @@ export function SettingsList({ category }: SettingsListProps) {
                         <Label className="text-xs">{t('settingsPage.daysLabel')}</Label>
                         <Input
                           type="number"
-                          value={item.days || 0}
-                          onChange={(e) => handleItemChange(index, 'days', parseInt(e.target.value))}
+                          value={Number(item.days) || 0}
+                          onChange={(e) =>
+                            handleItemChange(index, 'days', parseInt(e.target.value))
+                          }
                         />
                       </div>
                     )}
                     {item.isDefault !== undefined && (
                       <div className="flex items-center gap-2">
                         <Switch
-                          checked={item.isDefault || false}
-                          onCheckedChange={(checked) => handleItemChange(index, 'isDefault', checked)}
+                          checked={Boolean(item.isDefault)}
+                          onCheckedChange={(checked) =>
+                            handleItemChange(index, 'isDefault', checked)
+                          }
                         />
                         <Label className="text-xs">{t('settingsPage.isDefaultLabel')}</Label>
                       </div>
@@ -330,7 +349,12 @@ export function SettingsList({ category }: SettingsListProps) {
                       <Label className="text-xs capitalize">{key}</Label>
                       <Input
                         value={String(value)}
-                        onChange={(e) => setEditValue({ ...editValue, [key]: e.target.value })}
+                        onChange={(e) =>
+                          setEditValue({
+                            ...(editValue as Record<string, string | number>),
+                            [key]: e.target.value,
+                          } as Record<string, string | number>)
+                        }
                       />
                     </div>
                   ))}
@@ -338,12 +362,15 @@ export function SettingsList({ category }: SettingsListProps) {
               </div>
             )}
           </div>
-          
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setEditDialogOpen(false);
-              setEditItems([]);
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditDialogOpen(false);
+                setEditItems([]);
+              }}
+            >
               {t('common.cancel')}
             </Button>
             <Button onClick={handleSaveEdit} disabled={updateSetting.isPending}>
@@ -360,7 +387,9 @@ export function SettingsList({ category }: SettingsListProps) {
   }
 
   if (!settings || settings.length === 0) {
-    return <div className="text-center py-8 text-muted-foreground">{t('settingsPage.noSettings')}</div>;
+    return (
+      <div className="text-center py-8 text-muted-foreground">{t('settingsPage.noSettings')}</div>
+    );
   }
 
   return (
@@ -389,7 +418,17 @@ export function SettingsList({ category }: SettingsListProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{renderValue(setting.value, category)}</TableCell>
+                <TableCell>
+                  {renderValue(
+                    setting.value as
+                      | string
+                      | number
+                      | Record<string, unknown>
+                      | Array<Record<string, unknown>>
+                      | unknown[],
+                    category
+                  )}
+                </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {setting.description}
                 </TableCell>
@@ -426,9 +465,7 @@ export function SettingsList({ category }: SettingsListProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('settingsPage.deleteValue')}</DialogTitle>
-            <DialogDescription>
-              {t('settingsPage.deleteConfirm')}
-            </DialogDescription>
+            <DialogDescription>{t('settingsPage.deleteConfirm')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>

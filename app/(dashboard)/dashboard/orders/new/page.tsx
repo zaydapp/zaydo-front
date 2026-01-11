@@ -3,12 +3,31 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ordersApi, clientsApi, suppliersApi, productsApi, priceListsApi, orderStatusesApi } from '@/lib/api';
+import {
+  ordersApi,
+  clientsApi,
+  suppliersApi,
+  productsApi,
+  priceListsApi,
+  orderStatusesApi,
+} from '@/lib/api';
+import { Product, Client, Supplier } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Plus, Trash2, ShoppingCart, TrendingDown, UserPlus, Building2, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  ShoppingCart,
+  TrendingDown,
+  UserPlus,
+  Building2,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -98,8 +117,10 @@ export default function NewOrderPage() {
 
   const clients = clientsData?.data || [];
   const suppliers = suppliersData?.data || [];
-  const products = productsData?.data || [];
-  const statuses = statusesData.filter((s: any) => s.isActive).sort((a: any, b: any) => a.position - b.position);
+  const products = productsData?.data || ([] as Product[]);
+  const statuses = statusesData
+    .filter((s: { isActive?: boolean }) => s.isActive)
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
   // Create client mutation
   const createClientMutation = useMutation({
@@ -163,20 +184,22 @@ export default function NewOrderPage() {
       toast.error(t('orders.selectSupplier'));
       return;
     }
-    if (items.length === 0 || items.some(item => !item.productId || item.quantity <= 0 || item.unitPrice <= 0)) {
+    if (
+      items.length === 0 ||
+      items.some((item) => !item.productId || item.quantity <= 0 || item.unitPrice <= 0)
+    ) {
       toast.error(t('orders.invalidItems'));
       return;
     }
 
     createMutation.mutate({
       type: orderType,
-      statusId,
       clientId: orderType === 'CLIENT_ORDER' ? clientId : undefined,
       supplierId: orderType === 'SUPPLIER_ORDER' ? supplierId : undefined,
       orderDate,
       deliveryDate: deliveryDate || undefined,
       notes,
-      items: items.map(item => ({
+      items: items.map((item) => ({
         productId: item.productId,
         productName: item.productName,
         quantity: item.quantity,
@@ -188,14 +211,17 @@ export default function NewOrderPage() {
   };
 
   const addItem = () => {
-    setItems([...items, { productId: '', productName: '', quantity: 1, unit: '', unitPrice: 0, notes: '' }]);
+    setItems([
+      ...items,
+      { productId: '', productName: '', quantity: 1, unit: '', unitPrice: 0, notes: '' },
+    ]);
   };
 
   const removeItem = (index: number) => {
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const updateItem = (index: number, field: keyof OrderItem, value: any) => {
+  const updateItem = (index: number, field: keyof OrderItem, value: OrderItem[keyof OrderItem]) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
@@ -203,43 +229,49 @@ export default function NewOrderPage() {
 
   const handleProductSelect = async (index: number, productId: string) => {
     console.log('handleProductSelect called', { index, productId, products });
-    const product = products.find((p: any) => p.id === productId);
+    const product = products.find((p: Product) => p.id === productId);
     console.log('Found product:', product);
     if (product) {
       let defaultPrice = 0;
-      
+
       // For client orders, try to get price from active price list first
       if (orderType === 'CLIENT_ORDER') {
         try {
-          const priceData = await priceListsApi.getProductPrice(productId, orderDate || new Date().toISOString());
+          const priceData = await priceListsApi.getProductPrice(
+            productId,
+            orderDate || new Date().toISOString()
+          );
           console.log('Price data from API:', priceData);
-          
+
           // The API returns the price directly (number or string) or null
           if (priceData !== null && priceData !== undefined) {
-            defaultPrice = parseFloat(priceData as any) || 0;
+            defaultPrice = parseFloat(priceData as unknown as string) || 0;
             console.log('Got price from price list:', defaultPrice);
           } else {
             // Fallback to product selling price
-            defaultPrice = (product as any).sellingPrice || 0;
+            const prodWithPrices = product as Product & { sellingPrice?: number };
+            defaultPrice = prodWithPrices.sellingPrice || 0;
             console.log('No price list data, using product selling price:', defaultPrice);
           }
         } catch (error) {
           console.error('Error fetching price from price list:', error);
           // If no price list found, use product selling price
-          defaultPrice = (product as any).sellingPrice || 0;
+          const prodWithPrices = product as Product & { sellingPrice?: number };
+          defaultPrice = prodWithPrices.sellingPrice || 0;
           console.log('Fallback to product selling price:', defaultPrice);
         }
       } else {
         // For supplier orders, use purchase price
-        defaultPrice = (product as any).purchasePrice || 0;
+        const prodWithPrices = product as Product & { purchasePrice?: number };
+        defaultPrice = prodWithPrices.purchasePrice || 0;
         console.log('Using product purchase price:', defaultPrice);
       }
-      
+
       console.log('Updating item with:', {
         productId,
         productName: product.name,
         unit: product.unit,
-        unitPrice: defaultPrice
+        unitPrice: defaultPrice,
       });
       // Update all fields at once to avoid race conditions
       const newItems = [...items];
@@ -248,7 +280,7 @@ export default function NewOrderPage() {
         productId,
         productName: product.name,
         unit: product.unit,
-        unitPrice: defaultPrice
+        unitPrice: defaultPrice,
       };
       console.log('New items array:', newItems);
       setItems(newItems);
@@ -258,7 +290,7 @@ export default function NewOrderPage() {
   };
 
   const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   };
 
   const canProceedToNextStep = () => {
@@ -268,17 +300,22 @@ export default function NewOrderPage() {
       if (orderType === 'SUPPLIER_ORDER') return !!supplierId;
     }
     if (currentStep === 3) {
-      return items.length > 0 && items.every(item => item.productId && item.quantity > 0 && item.unitPrice > 0);
+      return (
+        items.length > 0 &&
+        items.every((item) => item.productId && item.quantity > 0 && item.unitPrice > 0)
+      );
     }
     return true;
   };
 
   const nextStep = () => {
     if (canProceedToNextStep()) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      setCurrentStep((prev) => Math.min(prev + 1, 4));
     } else {
       if (currentStep === 2) {
-        toast.error(orderType === 'CLIENT_ORDER' ? t('orders.selectClient') : t('orders.selectSupplier'));
+        toast.error(
+          orderType === 'CLIENT_ORDER' ? t('orders.selectClient') : t('orders.selectSupplier')
+        );
       } else if (currentStep === 3) {
         toast.error(t('orders.invalidItems'));
       }
@@ -286,19 +323,14 @@ export default function NewOrderPage() {
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   return (
     <div className="space-y-6 max-w-6xl pb-16">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-          className="h-8 w-8"
-        >
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
@@ -316,25 +348,23 @@ export default function NewOrderPage() {
                 <div className="flex flex-col items-center gap-2 flex-1">
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all",
+                      'w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all',
                       currentStep > step.number
-                        ? "bg-green-500 text-white"
+                        ? 'bg-green-500 text-white'
                         : currentStep === step.number
-                        ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
-                        : "bg-muted text-muted-foreground"
+                          ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
+                          : 'bg-muted text-muted-foreground'
                     )}
                   >
-                    {currentStep > step.number ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      step.number
-                    )}
+                    {currentStep > step.number ? <Check className="h-5 w-5" /> : step.number}
                   </div>
                   <div className="text-center hidden md:block">
-                    <p className={cn(
-                      "text-sm font-medium",
-                      currentStep >= step.number ? "text-foreground" : "text-muted-foreground"
-                    )}>
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        currentStep >= step.number ? 'text-foreground' : 'text-muted-foreground'
+                      )}
+                    >
                       {step.title}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
@@ -343,8 +373,8 @@ export default function NewOrderPage() {
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "h-0.5 flex-1 mx-2 transition-all",
-                      currentStep > step.number ? "bg-green-500" : "bg-muted"
+                      'h-0.5 flex-1 mx-2 transition-all',
+                      currentStep > step.number ? 'bg-green-500' : 'bg-muted'
                     )}
                   />
                 )}
@@ -368,7 +398,7 @@ export default function NewOrderPage() {
                   type="button"
                   onClick={() => setOrderType('CLIENT_ORDER')}
                   className={cn(
-                    "relative flex flex-col items-center gap-4 p-8 rounded-xl border-2 transition-all",
+                    'relative flex flex-col items-center gap-4 p-8 rounded-xl border-2 transition-all',
                     orderType === 'CLIENT_ORDER'
                       ? 'border-green-500 bg-green-500/5 shadow-lg scale-105'
                       : 'border-border hover:border-green-500/50 hover:bg-accent/50'
@@ -381,20 +411,26 @@ export default function NewOrderPage() {
                       </div>
                     </div>
                   )}
-                  <div className={cn(
-                    "rounded-full p-4",
-                    orderType === 'CLIENT_ORDER' ? 'bg-green-500/10' : 'bg-muted'
-                  )}>
-                    <ShoppingCart className={cn(
-                      "h-8 w-8",
-                      orderType === 'CLIENT_ORDER' ? 'text-green-500' : 'text-muted-foreground'
-                    )} />
+                  <div
+                    className={cn(
+                      'rounded-full p-4',
+                      orderType === 'CLIENT_ORDER' ? 'bg-green-500/10' : 'bg-muted'
+                    )}
+                  >
+                    <ShoppingCart
+                      className={cn(
+                        'h-8 w-8',
+                        orderType === 'CLIENT_ORDER' ? 'text-green-500' : 'text-muted-foreground'
+                      )}
+                    />
                   </div>
                   <div className="text-center">
-                    <p className={cn(
-                      "text-lg font-semibold",
-                      orderType === 'CLIENT_ORDER' ? 'text-green-600' : 'text-foreground'
-                    )}>
+                    <p
+                      className={cn(
+                        'text-lg font-semibold',
+                        orderType === 'CLIENT_ORDER' ? 'text-green-600' : 'text-foreground'
+                      )}
+                    >
                       {t('orders.client_order')}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -407,7 +443,7 @@ export default function NewOrderPage() {
                   type="button"
                   onClick={() => setOrderType('SUPPLIER_ORDER')}
                   className={cn(
-                    "relative flex flex-col items-center gap-4 p-8 rounded-xl border-2 transition-all",
+                    'relative flex flex-col items-center gap-4 p-8 rounded-xl border-2 transition-all',
                     orderType === 'SUPPLIER_ORDER'
                       ? 'border-orange-500 bg-orange-500/5 shadow-lg scale-105'
                       : 'border-border hover:border-orange-500/50 hover:bg-accent/50'
@@ -420,20 +456,26 @@ export default function NewOrderPage() {
                       </div>
                     </div>
                   )}
-                  <div className={cn(
-                    "rounded-full p-4",
-                    orderType === 'SUPPLIER_ORDER' ? 'bg-orange-500/10' : 'bg-muted'
-                  )}>
-                    <TrendingDown className={cn(
-                      "h-8 w-8",
-                      orderType === 'SUPPLIER_ORDER' ? 'text-orange-500' : 'text-muted-foreground'
-                    )} />
+                  <div
+                    className={cn(
+                      'rounded-full p-4',
+                      orderType === 'SUPPLIER_ORDER' ? 'bg-orange-500/10' : 'bg-muted'
+                    )}
+                  >
+                    <TrendingDown
+                      className={cn(
+                        'h-8 w-8',
+                        orderType === 'SUPPLIER_ORDER' ? 'text-orange-500' : 'text-muted-foreground'
+                      )}
+                    />
                   </div>
                   <div className="text-center">
-                    <p className={cn(
-                      "text-lg font-semibold",
-                      orderType === 'SUPPLIER_ORDER' ? 'text-orange-600' : 'text-foreground'
-                    )}>
+                    <p
+                      className={cn(
+                        'text-lg font-semibold',
+                        orderType === 'SUPPLIER_ORDER' ? 'text-orange-600' : 'text-foreground'
+                      )}
+                    >
                       {t('orders.supplier_order')}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -462,7 +504,7 @@ export default function NewOrderPage() {
                       <SearchableSelect
                         value={clientId}
                         onValueChange={setClientId}
-                        options={clients.map((client: any) => ({
+                        options={clients.map((client: Client) => ({
                           value: client.id,
                           label: client.name,
                         }))}
@@ -490,7 +532,7 @@ export default function NewOrderPage() {
                       <SearchableSelect
                         value={supplierId}
                         onValueChange={setSupplierId}
-                        options={suppliers.map((supplier: any) => ({
+                        options={suppliers.map((supplier: Supplier) => ({
                           value: supplier.id,
                           label: supplier.name,
                         }))}
@@ -518,12 +560,14 @@ export default function NewOrderPage() {
                   <SearchableSelect
                     value={statusId}
                     onValueChange={setStatusId}
-                    options={statuses.map((status: any) => ({
-                      value: status.id,
-                      label: status.isSystem 
-                        ? t(`orderStatuses.systemStatuses.${status.slug}`)
-                        : status.name,
-                    }))}
+                    options={statuses.map(
+                      (status: { id: string; isSystem?: boolean; slug: string; name: string }) => ({
+                        value: status.id,
+                        label: status.isSystem
+                          ? t(`orderStatuses.systemStatuses.${status.slug}`)
+                          : status.name,
+                      })
+                    )}
                     placeholder={t('orders.selectStatus')}
                     searchPlaceholder={t('common.search')}
                     emptyText={t('orderStatuses.noStatuses')}
@@ -587,7 +631,9 @@ export default function NewOrderPage() {
               {items.map((item, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-4 bg-muted/30">
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-sm font-semibold">{t('orders.item')} {index + 1}</Label>
+                    <Label className="text-sm font-semibold">
+                      {t('orders.item')} {index + 1}
+                    </Label>
                     {items.length > 1 && (
                       <Button
                         type="button"
@@ -610,7 +656,7 @@ export default function NewOrderPage() {
                           console.log('Product selected:', value);
                           handleProductSelect(index, value);
                         }}
-                        options={products.map((product: any) => ({
+                        options={products.map((product: Product) => ({
                           value: product.id,
                           label: `${product.name} (${product.unit})`,
                         }))}
@@ -632,7 +678,9 @@ export default function NewOrderPage() {
                         min="1"
                         step="1"
                         value={item.quantity}
-                        onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          updateItem(index, 'quantity', parseFloat(e.target.value) || 0)
+                        }
                         required
                       />
                     </div>
@@ -644,7 +692,9 @@ export default function NewOrderPage() {
                         min="0"
                         step="0.01"
                         value={item.unitPrice}
-                        onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)
+                        }
                         required
                       />
                     </div>
@@ -697,12 +747,7 @@ export default function NewOrderPage() {
                       </>
                     )}
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCurrentStep(1)}
-                  >
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setCurrentStep(1)}>
                     {t('common.edit')}
                   </Button>
                 </div>
@@ -715,16 +760,11 @@ export default function NewOrderPage() {
                     </p>
                     <p className="font-semibold">
                       {orderType === 'CLIENT_ORDER'
-                        ? clients.find(c => c.id === clientId)?.name
-                        : suppliers.find(s => s.id === supplierId)?.name}
+                        ? clients.find((c) => c.id === clientId)?.name
+                        : suppliers.find((s) => s.id === supplierId)?.name}
                     </p>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCurrentStep(2)}
-                  >
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setCurrentStep(2)}>
                     {t('common.edit')}
                   </Button>
                 </div>
@@ -758,11 +798,15 @@ export default function NewOrderPage() {
                   </div>
                   <div className="space-y-2">
                     {items.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                      >
                         <div>
                           <p className="font-medium">{item.productName}</p>
                           <p className="text-sm text-muted-foreground">
-                            {item.quantity} {item.unit} × {new Intl.NumberFormat('fr-TN', {
+                            {item.quantity} {item.unit} ×{' '}
+                            {new Intl.NumberFormat('fr-TN', {
                               style: 'currency',
                               currency: 'TND',
                             }).format(item.unitPrice)}
@@ -803,39 +847,23 @@ export default function NewOrderPage() {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between gap-3 sticky bottom-0 bg-background/95 backdrop-blur-sm p-4 border-t rounded-lg">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={prevStep}
-            disabled={currentStep === 1}
-          >
+          <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 1}>
             <ChevronLeft className="h-4 w-4 mr-2" />
             {t('common.previous')}
           </Button>
 
           <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => router.back()}
-            >
+            <Button type="button" variant="ghost" onClick={() => router.back()}>
               {t('common.cancel')}
             </Button>
-            
+
             {currentStep < 4 ? (
-              <Button
-                type="button"
-                onClick={nextStep}
-              >
+              <Button type="button" onClick={nextStep}>
                 {t('common.next')}
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
-              <Button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="min-w-[120px]"
-              >
+              <Button type="submit" disabled={createMutation.isPending} className="min-w-[120px]">
                 {createMutation.isPending ? t('common.creating') : t('orders.createOrder')}
               </Button>
             )}
@@ -848,9 +876,7 @@ export default function NewOrderPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('clients.addClient')}</DialogTitle>
-            <DialogDescription>
-              {t('clients.addClientDescription')}
-            </DialogDescription>
+            <DialogDescription>{t('clients.addClientDescription')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -883,11 +909,7 @@ export default function NewOrderPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsClientDialogOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setIsClientDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button
@@ -915,9 +937,7 @@ export default function NewOrderPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('suppliers.addSupplier')}</DialogTitle>
-            <DialogDescription>
-              {t('suppliers.addSupplierDescription')}
-            </DialogDescription>
+            <DialogDescription>{t('suppliers.addSupplierDescription')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -950,11 +970,7 @@ export default function NewOrderPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsSupplierDialogOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setIsSupplierDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button

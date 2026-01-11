@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { superAdminSettingsApi, superAdminDashboardApi } from '@/lib/api';
 import { SuperAdminSettingsPayload } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,8 +59,9 @@ export default function SuperAdminBillingPage() {
       queryClient.invalidateQueries({ queryKey: ['super-admin', 'settings'] });
       setStripeDialogOpen(false);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update Stripe settings');
+    onError: (error: Error) => {
+      const message = axios.isAxiosError(error) ? error.response?.data?.message : error.message;
+      toast.error(message || 'Failed to update Stripe settings');
     },
   });
 
@@ -115,7 +117,8 @@ export default function SuperAdminBillingPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Billing & Stripe</h1>
         <p className="text-sm text-muted-foreground">
-          Monitor revenue performance and keep Stripe credentials up to date for seamless tenant billing.
+          Monitor revenue performance and keep Stripe credentials up to date for seamless tenant
+          billing.
         </p>
       </div>
 
@@ -127,7 +130,9 @@ export default function SuperAdminBillingPage() {
                 <DollarSign className="h-4 w-4 text-primary" />
                 Monthly revenue
               </CardTitle>
-              <CardDescription>Recurring revenue generated across all active tenants.</CardDescription>
+              <CardDescription>
+                Recurring revenue generated across all active tenants.
+              </CardDescription>
             </div>
             <Button variant="outline" size="icon" onClick={() => dashboardQuery.refetch()}>
               <RefreshCcw className="h-4 w-4" />
@@ -147,7 +152,9 @@ export default function SuperAdminBillingPage() {
           <CardHeader className="flex flex-row items-start justify-between space-y-0">
             <div>
               <CardTitle className="text-base font-semibold">Stripe integration</CardTitle>
-              <CardDescription>Connect your billing provider to sync invoices, subscriptions, and MRR.</CardDescription>
+              <CardDescription>
+                Connect your billing provider to sync invoices, subscriptions, and MRR.
+              </CardDescription>
             </div>
             <Badge variant={stripe?.isConfigured ? 'default' : 'secondary'}>
               {stripe?.isConfigured ? 'Configured' : 'Not configured'}
@@ -168,7 +175,9 @@ export default function SuperAdminBillingPage() {
             </div>
             <div className="text-xs text-muted-foreground">
               Last synced:{' '}
-              {stripe?.lastSyncedAt ? new Date(stripe.lastSyncedAt).toLocaleString() : 'Never synced'}
+              {stripe?.lastSyncedAt
+                ? new Date(stripe.lastSyncedAt).toLocaleString()
+                : 'Never synced'}
             </div>
             <Button onClick={handleOpenStripeDialog}>Edit Stripe credentials</Button>
           </CardContent>
@@ -180,7 +189,8 @@ export default function SuperAdminBillingPage() {
           <DialogHeader>
             <DialogTitle>Update Stripe credentials</DialogTitle>
             <DialogDescription>
-              Enter secure keys generated from your Stripe dashboard. Secret values are stored encrypted.
+              Enter secure keys generated from your Stripe dashboard. Secret values are stored
+              encrypted.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -201,7 +211,9 @@ export default function SuperAdminBillingPage() {
                 type="password"
                 placeholder="sk_live_..."
                 value={stripeForm.secretKey}
-                onChange={(event) => setStripeForm((prev) => ({ ...prev, secretKey: event.target.value }))}
+                onChange={(event) =>
+                  setStripeForm((prev) => ({ ...prev, secretKey: event.target.value }))
+                }
               />
               <p className="text-xs text-muted-foreground">
                 Leave blank to keep the existing secret key.
@@ -218,11 +230,17 @@ export default function SuperAdminBillingPage() {
                   setStripeForm((prev) => ({ ...prev, webhookSecret: event.target.value }))
                 }
               />
-              <p className="text-xs text-muted-foreground">Leave blank to keep the existing webhook secret.</p>
+              <p className="text-xs text-muted-foreground">
+                Leave blank to keep the existing webhook secret.
+              </p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setStripeDialogOpen(false)} disabled={updateSettingsMutation.isPending}>
+            <Button
+              variant="ghost"
+              onClick={() => setStripeDialogOpen(false)}
+              disabled={updateSettingsMutation.isPending}
+            >
               Cancel
             </Button>
             <Button onClick={handleSaveStripe} disabled={updateSettingsMutation.isPending}>
@@ -234,5 +252,3 @@ export default function SuperAdminBillingPage() {
     </div>
   );
 }
-
-

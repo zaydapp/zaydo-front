@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './button';
 import { Dialog, DialogContent } from './dialog';
@@ -22,12 +23,22 @@ export function ImageGallery({
 }: ImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
-  // Update current index when initialIndex changes
+  // Reset current index when dialog opens
   useEffect(() => {
-    if (open) {
-      setCurrentIndex(initialIndex);
-    }
-  }, [initialIndex, open]);
+    setCurrentIndex(initialIndex);
+  }, [initialIndex]);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleThumbnailClick = (index: number) => {
+    setCurrentIndex(index);
+  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -46,18 +57,6 @@ export function ImageGallery({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, currentIndex]);
-
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  const handleThumbnailClick = (index: number) => {
-    setCurrentIndex(index);
-  };
 
   if (!images || images.length === 0) return null;
 
@@ -91,9 +90,11 @@ export function ImageGallery({
 
             {/* Main image */}
             <div className="relative max-w-full max-h-full flex items-center justify-center">
-              <img
+              <Image
                 src={images[currentIndex]}
                 alt={`${alt} ${currentIndex + 1}`}
+                width={800}
+                height={600}
                 className="max-w-full max-h-[calc(90vh-200px)] w-auto h-auto object-contain"
               />
             </div>
@@ -132,9 +133,11 @@ export function ImageGallery({
                         : 'opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img
+                    <Image
                       src={image}
                       alt={`Thumbnail ${index + 1}`}
+                      width={80}
+                      height={80}
                       className="h-20 w-20 object-cover"
                     />
                   </button>

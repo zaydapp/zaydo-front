@@ -50,8 +50,21 @@ export interface TenantSummary {
   status: TenantStatus;
   monthlyRecurringRevenue: number;
   activeModuleKeys: string[];
+  currentPlanId: string;
+  currentPlanName: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TenantBilling {
+  planId: string;
+  planName: string;
+  status: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
+  renewalDate?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  monthlyRecurringRevenue: number;
+  lifetimeValue: number;
 }
 
 export interface TenantDetails extends TenantSummary {
@@ -60,6 +73,7 @@ export interface TenantDetails extends TenantSummary {
   website?: string;
   modules: TenantModuleAssignment[];
   settings?: Array<{ key: string; value: unknown }>;
+  billing: TenantBilling;
   userCount: number;
   activeUserCount: number;
   usage: {
@@ -108,11 +122,19 @@ export interface ModuleUsageDatum {
   totalTenantCount: number;
 }
 
+export interface RevenueByPlanDatum {
+  planId: string;
+  planName: string;
+  mrr: number;
+  tenantCount: number;
+}
+
 export interface SuperAdminDashboardData {
   kpis: GlobalKpiStats;
   growthSeries: TimeSeriesPoint[];
   revenueSeries: TimeSeriesPoint[];
   moduleUsage: ModuleUsageDatum[];
+  revenueByPlan?: RevenueByPlanDatum[];
 }
 
 export interface AuditLogEntry {
@@ -197,5 +219,3 @@ export interface TenantUpdateInput {
   currency?: string;
   moduleKeys?: string[];
 }
-
-

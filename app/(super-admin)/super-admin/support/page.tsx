@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Mail } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Mail } from 'lucide-react';
 
 export default function SuperAdminSupportPage() {
   return (
@@ -10,14 +10,17 @@ export default function SuperAdminSupportPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Owner Support</h1>
         <p className="text-sm text-muted-foreground">
-          Need help? Reach out to the engineering team or review platform documentation for advanced configuration support.
+          Need help? Reach out to the engineering team or review platform documentation for advanced
+          configuration support.
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Contact Engineering</CardTitle>
-          <CardDescription>Escalate incidents or request new features for the SaaS control plane.</CardDescription>
+          <CardDescription>
+            Escalate incidents or request new features for the SaaS control plane.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <p>Email: support@yourcompany.com</p>
@@ -32,5 +35,3 @@ export default function SuperAdminSupportPage() {
     </div>
   );
 }
-
-

@@ -31,4 +31,3 @@ export function useInvoice(id: string | undefined) {
     enabled: !!id,
   });
 }
-

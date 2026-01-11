@@ -60,11 +60,13 @@ export function SuperAdminKpiSummary({ data, isLoading }: KpiSummaryProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {KPI_ITEMS.map((item) => {
-        const value = data ? data[item.key] ?? 0 : 0;
+        const value = data ? (data[item.key] ?? 0) : 0;
         return (
           <Card key={item.key} className={cn(item.highlight && 'border-primary/50 shadow-sm')}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{item.label}</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {item.label}
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-2xl font-semibold">
               {isLoading ? (
@@ -79,5 +81,3 @@ export function SuperAdminKpiSummary({ data, isLoading }: KpiSummaryProps) {
     </div>
   );
 }
-
-

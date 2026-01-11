@@ -43,7 +43,9 @@ export function InvoiceSummary({
         <CardContent className="space-y-4">
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">{t('invoices.subtotal') || 'Sous-total'}</span>
+              <span className="text-muted-foreground">
+                {t('invoices.subtotal') || 'Sous-total'}
+              </span>
               <span className="font-medium">{format(subtotal)}</span>
             </div>
             <div className="flex items-center justify-between">
@@ -87,20 +89,27 @@ export function InvoiceSummary({
             className="w-full h-11 text-base font-semibold"
             onClick={onSaveDraft}
             disabled={isSaving || !canSubmit}
-            aria-label={onValidate ? (t('invoices.saveAsDraft') || 'Enregistrer comme Brouillon') : (t('common.save') || 'Enregistrer')}
+            aria-label={
+              onValidate
+                ? t('invoices.saveAsDraft') || 'Enregistrer comme Brouillon'
+                : t('common.save') || 'Enregistrer'
+            }
           >
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 {t('common.saving') || 'Enregistrement...'}
               </>
+            ) : onValidate ? (
+              t('invoices.saveAsDraft') || 'Enregistrer comme Brouillon'
             ) : (
-              onValidate ? (t('invoices.saveAsDraft') || 'Enregistrer comme Brouillon') : (t('common.save') || 'Enregistrer')
+              t('common.save') || 'Enregistrer'
             )}
           </Button>
           {!canSubmit && (
             <p className="text-xs text-muted-foreground text-center pt-2">
-              {t('invoices.clientRequired') || 'Sélectionnez une commande avec un client avant d\'émettre la facture.'}
+              {t('invoices.clientRequired') ||
+                "Sélectionnez une commande avec un client avant d'émettre la facture."}
             </p>
           )}
         </CardContent>
@@ -108,4 +117,3 @@ export function InvoiceSummary({
     </div>
   );
 }
-

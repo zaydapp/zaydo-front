@@ -1,18 +1,19 @@
 'use client';
 
 import { useMemo } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { TenantDetails, TenantUserSummary, ModuleDefinition } from '@/types';
 import {
   Loader2,
@@ -153,7 +154,9 @@ export function TenantDetailsTabs({
                     <Mail className="h-4 w-4 text-muted-foreground" />
                     {tenant.contact.email || 'No email on file'}
                   </div>
-                  {tenant.contact.name && <p className="text-muted-foreground">{tenant.contact.name}</p>}
+                  {tenant.contact.name && (
+                    <p className="text-muted-foreground">{tenant.contact.name}</p>
+                  )}
                   {tenant.contact.phone && (
                     <p className="text-muted-foreground">{tenant.contact.phone}</p>
                   )}
@@ -215,7 +218,9 @@ export function TenantDetailsTabs({
               <Card className="bg-muted/40 shadow-none">
                 <CardHeader className="pb-2">
                   <CardDescription>Plan</CardDescription>
-                  <CardTitle className="text-base font-semibold">{tenant.billing.planName}</CardTitle>
+                  <CardTitle className="text-base font-semibold">
+                    {tenant.billing.planName}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs text-muted-foreground">
                   Status {tenant.billing.status.toLowerCase()} · MRR $
@@ -241,7 +246,9 @@ export function TenantDetailsTabs({
                   className="flex flex-col gap-2 rounded-md border bg-muted/40 p-4"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold">{definition?.name ?? assignment.moduleName}</p>
+                    <p className="text-sm font-semibold">
+                      {definition?.name ?? assignment.moduleName}
+                    </p>
                     <Badge variant="secondary">Included</Badge>
                   </div>
                   {definition?.description && (
@@ -258,7 +265,9 @@ export function TenantDetailsTabs({
         <Card>
           <CardHeader>
             <CardTitle>Optional add-ons</CardTitle>
-            <CardDescription>Enable extra capabilities tailored to the tenant&apos;s needs.</CardDescription>
+            <CardDescription>
+              Enable extra capabilities tailored to the tenant&apos;s needs.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {addOnModules.length ? (
@@ -268,7 +277,9 @@ export function TenantDetailsTabs({
                   className="flex items-start justify-between gap-4 rounded-md border p-4"
                 >
                   <div>
-                    <p className="text-sm font-semibold">{definition?.name ?? assignment.moduleName}</p>
+                    <p className="text-sm font-semibold">
+                      {definition?.name ?? assignment.moduleName}
+                    </p>
                     {definition?.description && (
                       <p className="text-xs text-muted-foreground">{definition.description}</p>
                     )}
@@ -280,7 +291,9 @@ export function TenantDetailsTabs({
                   </div>
                   <Switch
                     checked={assignment.isEnabled}
-                    onCheckedChange={(checked) => onToggleModule(assignment.moduleId, Boolean(checked))}
+                    onCheckedChange={(checked) =>
+                      onToggleModule(assignment.moduleId, Boolean(checked))
+                    }
                     disabled={togglingModuleId === assignment.moduleId}
                   />
                 </div>
@@ -338,8 +351,8 @@ export function TenantDetailsTabs({
             <div>
               <CardTitle>Tenant users</CardTitle>
               <CardDescription>
-                All users provisioned under this tenant workspace. Use the connect action to launch a tenant
-                session in a separate tab (ideally an incognito window).
+                All users provisioned under this tenant workspace. Use the connect action to launch
+                a tenant session in a separate tab (ideally an incognito window).
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" className="gap-2" disabled>
@@ -373,7 +386,9 @@ export function TenantDetailsTabs({
 
                       return (
                         <TableRow key={user.id}>
-                          <TableCell>{`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || '—'}</TableCell>
+                          <TableCell>
+                            {`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || '—'}
+                          </TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>
                             <Badge variant="secondary" className="uppercase">
@@ -381,12 +396,16 @@ export function TenantDetailsTabs({
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={user.status === 'SUSPENDED' ? 'destructive' : 'outline'}>
+                            <Badge
+                              variant={user.status === 'SUSPENDED' ? 'destructive' : 'outline'}
+                            >
                               {user.status.toLowerCase()}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}
+                            {user.lastLoginAt
+                              ? new Date(user.lastLoginAt).toLocaleString()
+                              : 'Never'}
                           </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
@@ -399,7 +418,9 @@ export function TenantDetailsTabs({
                                 <DropdownMenuItem
                                   className="gap-2"
                                   onClick={() => onImpersonateUser(user)}
-                                  disabled={Boolean(impersonatingUserId && impersonatingUserId !== user.id)}
+                                  disabled={Boolean(
+                                    impersonatingUserId && impersonatingUserId !== user.id
+                                  )}
                                 >
                                   {impersonatingUserId === user.id ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
@@ -495,5 +516,3 @@ export function TenantDetailsTabs({
     </Tabs>
   );
 }
-
-

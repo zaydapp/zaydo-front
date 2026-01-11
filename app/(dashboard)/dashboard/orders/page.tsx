@@ -33,11 +33,12 @@ export default function OrdersPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['orders', search, activeTab],
-    queryFn: () => ordersApi.getAll({
-      search,
-      type: activeTab !== 'ALL' ? activeTab as OrderType : undefined,
-      take: 50,
-    }),
+    queryFn: () =>
+      ordersApi.getAll({
+        search,
+        type: activeTab !== 'ALL' ? (activeTab as OrderType) : undefined,
+        take: 50,
+      }),
   });
 
   const { data: stats } = useQuery({
@@ -70,7 +71,11 @@ export default function OrdersPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t('orders.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('orders.subtitle')}</p>
         </div>
-        <Button onClick={() => router.push('/dashboard/orders/new')} size="default" className="shadow-sm">
+        <Button
+          onClick={() => router.push('/dashboard/orders/new')}
+          size="default"
+          className="shadow-sm"
+        >
           <Plus className="mr-2 h-4 w-4" />
           {t('orders.addOrder')}
         </Button>
@@ -89,7 +94,9 @@ export default function OrdersPage() {
           <div className="rounded-lg border bg-card p-6">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-green-500" />
-              <p className="text-sm font-medium text-muted-foreground">{t('orders.clientOrders')}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                {t('orders.clientOrders')}
+              </p>
             </div>
             <p className="text-2xl font-bold mt-2">{stats.clientOrders}</p>
             <p className="text-xs text-muted-foreground mt-1">
@@ -99,7 +106,9 @@ export default function OrdersPage() {
           <div className="rounded-lg border bg-card p-6">
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-orange-500" />
-              <p className="text-sm font-medium text-muted-foreground">{t('orders.supplierOrders')}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                {t('orders.supplierOrders')}
+              </p>
             </div>
             <p className="text-2xl font-bold mt-2">{stats.supplierOrders}</p>
             <p className="text-xs text-muted-foreground mt-1">
@@ -109,7 +118,9 @@ export default function OrdersPage() {
           <div className="rounded-lg border bg-card p-6">
             <div className="flex items-center gap-2">
               <Package className="h-5 w-5 text-muted-foreground" />
-              <p className="text-sm font-medium text-muted-foreground">{t('orders.completedOrders')}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                {t('orders.completedOrders')}
+              </p>
             </div>
             <p className="text-2xl font-bold mt-2">{stats.completedOrders}</p>
           </div>
@@ -117,7 +128,11 @@ export default function OrdersPage() {
       )}
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as typeof activeTab)}
+        className="space-y-6"
+      >
         <div className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-10 -mx-6 px-6 pb-0">
           <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide pb-3">
             {['ALL', 'CLIENT_ORDER', 'SUPPLIER_ORDER'].map((tab) => (
@@ -125,14 +140,10 @@ export default function OrdersPage() {
                 key={tab}
                 onClick={() => setActiveTab(tab as typeof activeTab)}
                 className={`relative px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap rounded-t-lg ${
-                  activeTab === tab
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                  activeTab === tab ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <span className="relative z-10">
-                  {t(`orders.${tab.toLowerCase()}`)}
-                </span>
+                <span className="relative z-10">{t(`orders.${tab.toLowerCase()}`)}</span>
                 {activeTab === tab && (
                   <span className="absolute inset-x-0 -bottom-3 h-0.5 bg-primary rounded-full" />
                 )}
@@ -155,7 +166,8 @@ export default function OrdersPage() {
                 />
               </div>
               <div className="text-sm text-muted-foreground">
-                {data?.pagination.total || 0} {t('common.results', { count: data?.pagination.total || 0 })}
+                {data?.pagination.total || 0}{' '}
+                {t('common.results', { count: data?.pagination.total || 0 })}
               </div>
             </div>
 
@@ -179,7 +191,7 @@ interface OrdersTableProps {
   isLoading: boolean;
   onView: (id: string) => void;
   onDelete: (id: string) => void;
-  deleteMutation: any;
+  deleteMutation: { isPending?: boolean; mutate: (id: string) => void };
 }
 
 function OrdersTable({ orders, isLoading, onView, onDelete, deleteMutation }: OrdersTableProps) {
@@ -245,18 +257,9 @@ function OrdersTable({ orders, isLoading, onView, onDelete, deleteMutation }: Or
                   {formatCurrency(Number(order.totalAmount))}
                 </TableCell>
                 <TableCell>
-                  <span 
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    style={{ 
-                      backgroundColor: order.status?.color ? `${order.status.color}20` : '#f3f4f6',
-                      color: order.status?.color || '#6b7280',
-                      border: `1px solid ${order.status?.color || '#e5e7eb'}`
-                    }}
-                  >
-                    {order.status?.isSystem 
-                      ? t(`orderStatuses.systemStatuses.${order.status.slug}`)
-                      : order.status?.name}
-                  </span>
+                  <Badge variant="outline">
+                    {t(`orders.status.${order.status?.toLowerCase()}`)}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">

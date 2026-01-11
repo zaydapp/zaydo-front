@@ -8,6 +8,7 @@ import { clientsApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTenantSettings } from '@/hooks/useTenantSettings';
+import { TenantSetting } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,12 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, User, Building2, AlertCircle, Loader2 } from 'lucide-react';
 import { ClientKind } from '@/types';
 
@@ -51,7 +47,7 @@ export default function EditClientPage() {
 
   // Fetch client types from tenant settings
   const { data: settingsData } = useTenantSettings('clients');
-  const clientTypesSetting = settingsData?.find((s: any) => s.key === 'clients.types');
+  const clientTypesSetting = settingsData?.find((s) => s?.key === 'clients.types');
   const clientTypes = (clientTypesSetting?.value as Array<{ value: string; label: string }>) || [
     { value: 'INDIVIDUAL', label: 'Individual' },
     { value: 'COMPANY', label: 'Company' },
@@ -102,8 +98,12 @@ export default function EditClientPage() {
       toast.success(t('clients.clientUpdated'));
       router.push('/dashboard/clients');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('clients.updateError'));
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('clients.updateError'));
     },
   });
 
@@ -114,8 +114,12 @@ export default function EditClientPage() {
       toast.success(t('clients.clientDeleted'));
       router.push('/dashboard/clients');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || t('clients.deleteError'));
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || t('clients.deleteError'));
     },
   });
 
@@ -142,9 +146,7 @@ export default function EditClientPage() {
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <AlertCircle className="h-12 w-12 text-muted-foreground" />
         <p className="text-muted-foreground">{t('clients.notFound')}</p>
-        <Button onClick={() => router.push('/dashboard/clients')}>
-          {t('common.back')}
-        </Button>
+        <Button onClick={() => router.push('/dashboard/clients')}>{t('common.back')}</Button>
       </div>
     );
   }
@@ -154,11 +156,7 @@ export default function EditClientPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -166,11 +164,7 @@ export default function EditClientPage() {
             <p className="text-muted-foreground">{t('clients.editClientDescription')}</p>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={deleteMutation.isPending}
-        >
+        <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
           {deleteMutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -194,7 +188,9 @@ export default function EditClientPage() {
               <CardContent className="space-y-4">
                 {/* Client Type */}
                 <div className="space-y-2">
-                  <Label>{t('clients.kind')} <span className="text-destructive">*</span></Label>
+                  <Label>
+                    {t('clients.kind')} <span className="text-destructive">*</span>
+                  </Label>
                   <Controller
                     name="kind"
                     control={control}
@@ -205,10 +201,11 @@ export default function EditClientPage() {
                           {clientTypes.slice(0, 2).map((type, index) => {
                             const valueKey = type.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
                             const translationKey = `settings.settingValues.clients.${valueKey}`;
-                            const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
+                            const label =
+                              t(translationKey) !== translationKey ? t(translationKey) : type.label;
                             const isIndividual = index === 0;
                             const isSelected = field.value === type.value;
-                            
+
                             return (
                               <button
                                 key={type.value}
@@ -216,19 +213,27 @@ export default function EditClientPage() {
                                 onClick={() => field.onChange(type.value)}
                                 className={`p-3 border-2 rounded-lg transition-all ${
                                   isSelected
-                                    ? (isIndividual ? 'border-blue-500 bg-blue-500/5' : 'border-purple-500 bg-purple-500/5')
-                                    : (isIndividual ? 'border-border hover:border-blue-500/50' : 'border-border hover:border-purple-500/50')
+                                    ? isIndividual
+                                      ? 'border-blue-500 bg-blue-500/5'
+                                      : 'border-purple-500 bg-purple-500/5'
+                                    : isIndividual
+                                      ? 'border-border hover:border-blue-500/50'
+                                      : 'border-border hover:border-purple-500/50'
                                 }`}
                               >
                                 <div className="flex items-center gap-2">
                                   {isIndividual ? (
-                                    <User className={`h-5 w-5 ${
-                                      isSelected ? 'text-blue-600' : 'text-muted-foreground'
-                                    }`} />
+                                    <User
+                                      className={`h-5 w-5 ${
+                                        isSelected ? 'text-blue-600' : 'text-muted-foreground'
+                                      }`}
+                                    />
                                   ) : (
-                                    <Building2 className={`h-5 w-5 ${
-                                      isSelected ? 'text-purple-600' : 'text-muted-foreground'
-                                    }`} />
+                                    <Building2
+                                      className={`h-5 w-5 ${
+                                        isSelected ? 'text-purple-600' : 'text-muted-foreground'
+                                      }`}
+                                    />
                                   )}
                                   <p className="text-sm font-medium">{label}</p>
                                 </div>
@@ -241,8 +246,11 @@ export default function EditClientPage() {
                             {clientTypes.slice(2).map((type) => {
                               const valueKey = type.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
                               const translationKey = `settings.settingValues.clients.${valueKey}`;
-                              const label = t(translationKey) !== translationKey ? t(translationKey) : type.label;
-                              
+                              const label =
+                                t(translationKey) !== translationKey
+                                  ? t(translationKey)
+                                  : type.label;
+
                               return (
                                 <button
                                   key={type.value}

@@ -10,7 +10,10 @@ const PUBLIC_ROUTES = ['/super-admin/login', '/super-admin/support'];
 export function SuperAdminRouteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
-  const isPublicRoute = useMemo(() => PUBLIC_ROUTES.some((route) => pathname.startsWith(route)), [pathname]);
+  const isPublicRoute = useMemo(
+    () => PUBLIC_ROUTES.some((route) => pathname.startsWith(route)),
+    [pathname]
+  );
 
   if (isPublicRoute) {
     return <>{children}</>;
@@ -22,5 +25,3 @@ export function SuperAdminRouteShell({ children }: { children: ReactNode }) {
     </SuperAdminProtected>
   );
 }
-
-

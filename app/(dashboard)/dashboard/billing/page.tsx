@@ -3,13 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -88,17 +82,46 @@ function StatCard({
 }
 
 // Mobile Invoice Card Component
-function InvoiceCardMobile({ invoice, format }: { invoice: Invoice; format: (value: number) => string }) {
+function InvoiceCardMobile({
+  invoice,
+  format: formatCurrency,
+}: {
+  invoice: Invoice;
+  format: (value: number) => string;
+}) {
   const { t } = useTranslation();
   const router = useRouter();
 
   const getStatusBadge = (status: InvoiceStatus) => {
-    const statusMap: Record<InvoiceStatus, { label: string; variant: 'default' | 'secondary' | 'destructive'; className?: string }> = {
-      DRAFT: { label: t('invoices.status.draft') || 'Brouillon', variant: 'secondary' },
-      SENT: { label: t('invoices.status.validated') || 'Validée', variant: 'default' },
-      PAID: { label: t('invoices.status.paid') || 'Payée', variant: 'default', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-      OVERDUE: { label: t('invoices.status.overdue') || 'En retard', variant: 'destructive' },
-      CANCELLED: { label: t('invoices.status.cancelled') || 'Annulée', variant: 'secondary' },
+    const statusMap: Record<
+      InvoiceStatus,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive';
+        className?: string;
+      }
+    > = {
+      DRAFT: {
+        label: t('invoices.status.draft') || 'Brouillon',
+        variant: 'secondary',
+      },
+      SENT: {
+        label: t('invoices.status.validated') || 'Validée',
+        variant: 'default',
+      },
+      PAID: {
+        label: t('invoices.status.paid') || 'Payée',
+        variant: 'default',
+        className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      },
+      OVERDUE: {
+        label: t('invoices.status.overdue') || 'En retard',
+        variant: 'destructive',
+      },
+      CANCELLED: {
+        label: t('invoices.status.cancelled') || 'Annulée',
+        variant: 'secondary',
+      },
     };
     const statusInfo = statusMap[status];
     return (
@@ -137,16 +160,16 @@ function InvoiceCardMobile({ invoice, format }: { invoice: Invoice; format: (val
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
-            <p className="text-muted-foreground">Date d'émission</p>
+            <p className="text-muted-foreground">Date d&apos;émission</p>
             <p className="font-medium">{format(new Date(invoice.issueDate), 'dd MMM yyyy')}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Date d'échéance</p>
+            <p className="text-muted-foreground">Date d&apos;échéance</p>
             <p className="font-medium">{format(new Date(invoice.dueDate), 'dd MMM yyyy')}</p>
           </div>
         </div>
         <div className="flex items-center justify-between pt-2 border-t">
-          <p className="text-lg font-bold">{format(invoice.totalAmount)}</p>
+          <p className="text-lg font-bold">{formatCurrency(invoice.totalAmount)}</p>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -154,11 +177,15 @@ function InvoiceCardMobile({ invoice, format }: { invoice: Invoice; format: (val
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => router.push(`/dashboard/billing/invoices/${invoice.id}`)}>
+              <DropdownMenuItem
+                onClick={() => router.push(`/dashboard/billing/invoices/${invoice.id}`)}
+              >
                 <Eye className="mr-2 h-4 w-4" />
                 {t('common.view') || 'Voir'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push(`/dashboard/billing/invoices/${invoice.id}/edit`)}>
+              <DropdownMenuItem
+                onClick={() => router.push(`/dashboard/billing/invoices/${invoice.id}/edit`)}
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 {t('common.edit') || 'Modifier'}
               </DropdownMenuItem>
@@ -187,7 +214,11 @@ export default function InvoicesPage() {
   const itemsPerPage = 10;
 
   // API calls
-  const { data: invoices = [], isLoading: isLoadingInvoices, error: invoicesError } = useInvoices({
+  const {
+    data: invoices = [],
+    isLoading: isLoadingInvoices,
+    error: invoicesError,
+  } = useInvoices({
     status: statusFilter !== 'all' ? statusFilter : undefined,
     clientId: clientFilter !== 'all' ? clientFilter : undefined,
     search: searchQuery || undefined,
@@ -224,7 +255,11 @@ export default function InvoicesPage() {
 
     const thisMonthInvoices = invoices.filter((inv) => {
       const date = new Date(inv.issueDate);
-      return date.getMonth() === currentMonth && date.getFullYear() === currentYear && inv.status !== InvoiceStatus.CANCELLED;
+      return (
+        date.getMonth() === currentMonth &&
+        date.getFullYear() === currentYear &&
+        inv.status !== InvoiceStatus.CANCELLED
+      );
     });
 
     const totalThisMonth = thisMonthInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
@@ -243,7 +278,9 @@ export default function InvoicesPage() {
     const drafts = stats.byStatus.draft || 0;
 
     // Credit notes - invoices with negative total or cancelled
-    const creditNotes = invoices.filter((inv) => Number(inv.totalAmount) < 0 || inv.status === InvoiceStatus.CANCELLED).length;
+    const creditNotes = invoices.filter(
+      (inv) => Number(inv.totalAmount) < 0 || inv.status === InvoiceStatus.CANCELLED
+    ).length;
 
     return {
       totalThisMonth,
@@ -277,12 +314,35 @@ export default function InvoicesPage() {
 
   // Status badge helper
   const getStatusBadge = (status: InvoiceStatus) => {
-    const statusMap: Record<InvoiceStatus, { label: string; variant: 'default' | 'secondary' | 'destructive'; className?: string }> = {
-      DRAFT: { label: t('invoices.status.draft') || 'Brouillon', variant: 'secondary' },
-      SENT: { label: t('invoices.status.validated') || 'Validée', variant: 'default' },
-      PAID: { label: t('invoices.status.paid') || 'Payée', variant: 'default', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-      OVERDUE: { label: t('invoices.status.overdue') || 'En retard', variant: 'destructive' },
-      CANCELLED: { label: t('invoices.status.cancelled') || 'Annulée', variant: 'secondary' },
+    const statusMap: Record<
+      InvoiceStatus,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive';
+        className?: string;
+      }
+    > = {
+      DRAFT: {
+        label: t('invoices.status.draft') || 'Brouillon',
+        variant: 'secondary',
+      },
+      SENT: {
+        label: t('invoices.status.validated') || 'Validée',
+        variant: 'default',
+      },
+      PAID: {
+        label: t('invoices.status.paid') || 'Payée',
+        variant: 'default',
+        className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      },
+      OVERDUE: {
+        label: t('invoices.status.overdue') || 'En retard',
+        variant: 'destructive',
+      },
+      CANCELLED: {
+        label: t('invoices.status.cancelled') || 'Annulée',
+        variant: 'secondary',
+      },
     };
     const statusInfo = statusMap[status];
     return (
@@ -335,7 +395,10 @@ export default function InvoicesPage() {
               className="pl-9"
             />
           </div>
-          <Button onClick={() => router.push('/dashboard/billing/invoices/new')} className="shrink-0">
+          <Button
+            onClick={() => router.push('/dashboard/billing/invoices/new')}
+            className="shrink-0"
+          >
             <Plus className="h-4 w-4 mr-2" />
             {t('invoices.newInvoice') || 'Nouvelle facture'}
           </Button>
@@ -397,32 +460,52 @@ export default function InvoicesPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Select value={statusFilter} onValueChange={(value) => {
-              setStatusFilter(value);
-              setCurrentPage(1);
-            }}>
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => {
+                setStatusFilter(value);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder={t('invoices.filter.status') || 'Statut'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('invoices.filter.allStatuses') || t('common.all') || 'All statuses'}</SelectItem>
-                <SelectItem value={InvoiceStatus.DRAFT}>{t('invoices.status.draft') || 'Brouillon'}</SelectItem>
-                <SelectItem value={InvoiceStatus.SENT}>{t('invoices.status.validated') || 'Validée'}</SelectItem>
-                <SelectItem value={InvoiceStatus.PAID}>{t('invoices.status.paid') || 'Payée'}</SelectItem>
-                <SelectItem value={InvoiceStatus.OVERDUE}>{t('invoices.status.overdue') || 'En retard'}</SelectItem>
-                <SelectItem value={InvoiceStatus.CANCELLED}>{t('invoices.status.cancelled') || 'Annulée'}</SelectItem>
+                <SelectItem value="all">
+                  {t('invoices.filter.allStatuses') || t('common.all') || 'All statuses'}
+                </SelectItem>
+                <SelectItem value={InvoiceStatus.DRAFT}>
+                  {t('invoices.status.draft') || 'Brouillon'}
+                </SelectItem>
+                <SelectItem value={InvoiceStatus.SENT}>
+                  {t('invoices.status.validated') || 'Validée'}
+                </SelectItem>
+                <SelectItem value={InvoiceStatus.PAID}>
+                  {t('invoices.status.paid') || 'Payée'}
+                </SelectItem>
+                <SelectItem value={InvoiceStatus.OVERDUE}>
+                  {t('invoices.status.overdue') || 'En retard'}
+                </SelectItem>
+                <SelectItem value={InvoiceStatus.CANCELLED}>
+                  {t('invoices.status.cancelled') || 'Annulée'}
+                </SelectItem>
               </SelectContent>
             </Select>
 
-            <Select value={clientFilter} onValueChange={(value) => {
-              setClientFilter(value);
-              setCurrentPage(1);
-            }}>
+            <Select
+              value={clientFilter}
+              onValueChange={(value) => {
+                setClientFilter(value);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder={t('invoices.filter.client') || 'Client'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('invoices.filter.allClients') || t('common.all') || 'All clients'}</SelectItem>
+                <SelectItem value="all">
+                  {t('invoices.filter.allClients') || t('common.all') || 'All clients'}
+                </SelectItem>
                 {uniqueClients.map((client) => (
                   <SelectItem key={client.id} value={client.id}>
                     {client.name}
@@ -464,13 +547,27 @@ export default function InvoicesPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold">{t('invoices.number') || 'N° Facture'}</TableHead>
-                    <TableHead className="font-semibold">{t('clients.client') || 'Client'}</TableHead>
-                    <TableHead className="font-semibold">{t('invoices.issueDate') || 'Date d\'émission'}</TableHead>
-                    <TableHead className="font-semibold">{t('invoices.dueDate') || 'Date d\'échéance'}</TableHead>
-                    <TableHead className="font-semibold text-right">{t('invoices.amount') || 'Montant (TTC)'}</TableHead>
-                    <TableHead className="font-semibold">{t('invoices.invoicestatus') || 'Statut'}</TableHead>
-                    <TableHead className="font-semibold text-right">{t('common.actions') || 'Actions'}</TableHead>
+                    <TableHead className="font-semibold">
+                      {t('invoices.number') || 'N° Facture'}
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      {t('clients.client') || 'Client'}
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      {t('invoices.issueDate') || 'Date d&apos;émission'}
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      {t('invoices.dueDate') || 'Date d&apos;échéance'}
+                    </TableHead>
+                    <TableHead className="font-semibold text-right">
+                      {t('invoices.amount') || 'Montant (TTC)'}
+                    </TableHead>
+                    <TableHead className="font-semibold">
+                      {t('invoices.invoicestatus') || 'Statut'}
+                    </TableHead>
+                    <TableHead className="font-semibold text-right">
+                      {t('common.actions') || 'Actions'}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -488,12 +585,8 @@ export default function InvoicesPage() {
                       <TableRow key={invoice.id} className="hover:bg-muted/30 transition-colors">
                         <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
                         <TableCell>{invoice.client?.name || 'N/A'}</TableCell>
-                        <TableCell>
-                          {format(new Date(invoice.issueDate), 'dd MMM yyyy')}
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(invoice.dueDate), 'dd MMM yyyy')}
-                        </TableCell>
+                        <TableCell>{format(new Date(invoice.issueDate), 'dd MMM yyyy')}</TableCell>
+                        <TableCell>{format(new Date(invoice.dueDate), 'dd MMM yyyy')}</TableCell>
                         <TableCell className="text-right font-semibold">
                           {formatCurrency(invoice.totalAmount)}
                         </TableCell>
@@ -506,11 +599,19 @@ export default function InvoicesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/billing/invoices/${invoice.id}`)}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(`/dashboard/billing/invoices/${invoice.id}`)
+                                }
+                              >
                                 <Eye className="mr-2 h-4 w-4" />
                                 {t('common.view') || 'Voir'}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => router.push(`/dashboard/billing/invoices/${invoice.id}/edit`)}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(`/dashboard/billing/invoices/${invoice.id}/edit`)
+                                }
+                              >
                                 <Edit className="mr-2 h-4 w-4" />
                                 {t('common.edit') || 'Modifier'}
                               </DropdownMenuItem>
@@ -573,8 +674,8 @@ export default function InvoicesPage() {
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {t('common.showing') || 'Affichage'} {(currentPage - 1) * itemsPerPage + 1} -{' '}
-            {Math.min(currentPage * itemsPerPage, filteredInvoices.length)} {t('common.of') || 'sur'}{' '}
-            {filteredInvoices.length}
+            {Math.min(currentPage * itemsPerPage, filteredInvoices.length)}{' '}
+            {t('common.of') || 'sur'} {filteredInvoices.length}
           </p>
           <div className="flex items-center gap-2">
             <Button

@@ -20,5 +20,3 @@ export function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
     </SidebarProvider>
   );
 }
-
-

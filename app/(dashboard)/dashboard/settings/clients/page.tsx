@@ -16,11 +16,16 @@ export default function ClientsPage() {
     <div className="space-y-6 pb-8">
       {/* Header with back button */}
       <div className="space-y-4">
-        <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/settings')} className="mb-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard/settings')}
+          className="mb-2"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('common.back') || 'Back to Settings'}
         </Button>
-        
+
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -32,7 +37,8 @@ export default function ClientsPage() {
               </h1>
             </div>
             <p className="text-muted-foreground ml-14">
-              {t('settings.categoryDescriptions.clients') || 'Client types, categories, and attributes'}
+              {t('settings.categoryDescriptions.clients') ||
+                'Client types, categories, and attributes'}
             </p>
           </div>
         </div>
@@ -44,7 +50,8 @@ export default function ClientsPage() {
         <CardHeader>
           <CardTitle>{t('settings.categories.clients') || 'Client Parameters'}</CardTitle>
           <CardDescription>
-            {t('settings.clientsDescription') || 'Configure client types and classification options'}
+            {t('settings.clientsDescription') ||
+              'Configure client types and classification options'}
           </CardDescription>
         </CardHeader>
         <CardContent>
