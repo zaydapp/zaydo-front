@@ -556,7 +556,7 @@ export default function NewOrderPage() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="statusId">{t('orders.status')} *</Label>
+                  <Label htmlFor="statusId">{t('orders.statusLabel')} *</Label>
                   <SearchableSelect
                     value={statusId}
                     onValueChange={setStatusId}

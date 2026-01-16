@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Call the actual backend API
       const response: AuthResponse = await authApi.login(credentials);
-      
+
       if (typeof window !== 'undefined') {
         // Store tokens and user data
         localStorage.setItem('accessToken', response.accessToken);
@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (typeof window !== 'undefined') {
         // Check if this is an impersonated session
         const isImpersonated = sessionStorage.getItem('impersonated') === 'true';
-        
+
         // Clear appropriate storage
         if (isImpersonated) {
           sessionStorage.removeItem('accessToken');

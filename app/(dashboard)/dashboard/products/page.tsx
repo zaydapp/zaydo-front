@@ -47,6 +47,8 @@ export default function ProductsPage() {
         type: activeTab as 'FINISHED_PRODUCT' | 'RAW_MATERIAL',
         take: 50,
       }),
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const deleteMutation = useMutation({

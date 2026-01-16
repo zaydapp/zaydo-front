@@ -20,7 +20,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Initialize i18n
-    const storedLang = typeof window !== 'undefined' ? (localStorage.getItem('i18nextLng') || 'en') : 'en';
+    const storedLang =
+      typeof window !== 'undefined' ? localStorage.getItem('i18nextLng') || 'en' : 'en';
     if (i18n.language !== storedLang) {
       i18n.changeLanguage(storedLang);
     }

@@ -114,6 +114,11 @@ function InvoiceCardMobile({
         variant: 'default',
         className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
       },
+      PARTIALLY_PAID: {
+        label: t('invoices.statusPartiallyPaid') || 'Partiellement payée',
+        variant: 'default',
+        className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      },
       OVERDUE: {
         label: t('invoices.status.overdue') || 'En retard',
         variant: 'destructive',
@@ -334,6 +339,11 @@ export default function InvoicesPage() {
         label: t('invoices.status.paid') || 'Payée',
         variant: 'default',
         className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      },
+      PARTIALLY_PAID: {
+        label: t('invoices.statusPartiallyPaid') || 'Partiellement payée',
+        variant: 'default',
+        className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
       },
       OVERDUE: {
         label: t('invoices.status.overdue') || 'En retard',

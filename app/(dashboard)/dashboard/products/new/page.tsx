@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { productsApi } from '@/lib/api';
 import { toast } from 'sonner';
@@ -45,6 +45,7 @@ interface ProductFormData {
 export default function NewProductPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
@@ -86,8 +87,11 @@ export default function NewProductPage() {
   const createMutation = useMutation({
     mutationFn: productsApi.create,
     onSuccess: () => {
+      // Invalidate all products queries - this will cause them to refetch on mount
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       toast.success(t('products.productCreated'));
-      router.push('/dashboard/products');
+      // Use replace instead of push to avoid adding to history
+      router.replace('/dashboard/products');
     },
     onError: (error: unknown) => {
       const message =
