@@ -214,7 +214,7 @@ export interface Order {
   supplierId?: string;
   client?: { id: string; name: string };
   supplier?: { id: string; name: string };
-  status: OrderStatus;
+  status: OrderStatusItem | OrderStatus; // Can be the relation object or enum
   orderDate: string;
   deliveryDate?: string;
   totalAmount: number;
@@ -279,6 +279,7 @@ export enum InvoiceStatus {
   PAID = 'PAID',
   OVERDUE = 'OVERDUE',
   CANCELLED = 'CANCELLED',
+  PARTIALLY_PAID = 'PARTIALLY_PAID',
 }
 
 export type InvoiceNumberingResetFrequency = 'NEVER' | 'YEARLY' | 'MONTHLY';

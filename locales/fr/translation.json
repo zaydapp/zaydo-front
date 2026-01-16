@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "welcome": "Bienvenue",
     "loading": "Chargement...",
@@ -483,7 +483,6 @@
     "orderDate": "Date de Commande",
     "deliveryDate": "Date de Livraison",
     "totalAmount": "Montant Total",
-    "status": "Statut",
     "selectStatus": "Sélectionner le statut",
     "searchPlaceholder": "Rechercher par numéro de commande...",
     "noOrders": "Aucune commande trouvée",
@@ -515,6 +514,19 @@
     "status_processing": "En Traitement",
     "status_shipped": "Expédié",
     "status_delivered": "Livré",
+    "statusLabel": "Statut",
+    "status": {
+      "pending": "En Attente",
+      "confirmed": "Confirmée",
+      "processing": "En Traitement",
+      "in_progress": "En Cours",
+      "shipped": "Expédié",
+      "delivered": "Livré",
+      "completed": "Terminée",
+      "cancelled": "Annulée",
+      "draft": "Brouillon",
+      "unknown": "Inconnu"
+    },
     "addOrderDescription": "Créer une nouvelle commande client ou fournisseur",
     "selectType": "Sélectionner le Type de Commande",
     "basicInformation": "Informations de Base",

@@ -258,7 +258,14 @@ function OrdersTable({ orders, isLoading, onView, onDelete, deleteMutation }: Or
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">
-                    {t(`orders.status.${order.status?.toLowerCase()}`)}
+                    {(() => {
+                      if (!order.status) return t('orders.status.unknown');
+                      if (typeof order.status === 'object' && 'slug' in order.status) {
+                        return t(`orders.status.${order.status.slug}`);
+                      }
+                      const statusStr = String(order.status).toLowerCase();
+                      return t(`orders.status.${statusStr}`);
+                    })()}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
