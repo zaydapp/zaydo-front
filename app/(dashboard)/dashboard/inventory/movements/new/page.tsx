@@ -19,7 +19,7 @@ import { useAddStockMovement } from '@/lib/api/inventory';
 import { useProducts } from '@/lib/api/products';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Search } from 'lucide-react';
 import Link from 'next/link';
 
 interface StockMovementForm {
@@ -41,6 +41,9 @@ export default function NewStockMovementPage() {
   const products = productsData?.data || [];
 
   const addMovementMutation = useAddStockMovement();
+
+  // Search state for products
+  const [productSearch, setProductSearch] = useState('');
 
   const {
     register,
@@ -69,6 +72,15 @@ export default function NewStockMovementPage() {
   const movementType = watch('type');
 
   const selectedProduct = products.find((p) => p.id === selectedProductId);
+
+  // Filter products based on search
+  const filteredProducts = products.filter((product) => {
+    const searchLower = productSearch.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(searchLower) ||
+      (product.sku && product.sku.toLowerCase().includes(searchLower))
+    );
+  });
 
   const onSubmit = async (data: StockMovementForm) => {
     try {
@@ -146,36 +158,115 @@ export default function NewStockMovementPage() {
             </div>
 
             {/* Product Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="productId">
+            <div className="space-y-3">
+              <Label htmlFor="productId" className="text-sm font-medium">
                 {t('inventory.movements.product')} <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={watch('productId')}
-                onValueChange={(value) => setValue('productId', value)}
-              >
-                <SelectTrigger id="productId">
-                  <SelectValue placeholder={t('inventory.movements.selectProduct')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name} {product.sku && `(${product.sku})`}
-                      {product.currentStock !== undefined && (
-                        <span className="text-muted-foreground ml-2">
-                          - {product.currentStock} {product.unit}
-                        </span>
+
+              {/* Selected Product Display */}
+              {selectedProduct ? (
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
+                  <div className="flex-1">
+                    <div className="font-medium">{selectedProduct.name}</div>
+                    {selectedProduct.sku && (
+                      <div className="text-sm text-muted-foreground">
+                        SKU: {selectedProduct.sku}
+                      </div>
+                    )}
+                    <div className="text-sm text-muted-foreground mt-1">
+                      {t('inventory.movements.currentStock')}:{' '}
+                      <span className="font-medium">{selectedProduct.currentStock || 0}</span>{' '}
+                      {selectedProduct.unit}
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setValue('productId', '');
+                      setProductSearch('');
+                    }}
+                  >
+                    {t('common.change')}
+                  </Button>
+                </div>
+              ) : (
+                /* Search Interface */
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder={t('inventory.movements.searchProduct')}
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      className="pl-10 h-11"
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Product Results */}
+                  {productSearch && (
+                    <div className="border rounded-lg shadow-sm bg-background max-h-64 overflow-y-auto">
+                      {filteredProducts.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">
+                          <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">{t('inventory.movements.noProductsFound')}</p>
+                        </div>
+                      ) : (
+                        <div className="py-1">
+                          {filteredProducts.slice(0, 8).map((product) => (
+                            <button
+                              key={product.id}
+                              type="button"
+                              onClick={() => {
+                                setValue('productId', product.id);
+                                setProductSearch('');
+                              }}
+                              className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b last:border-b-0"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium truncate">{product.name}</div>
+                                  {product.sku && (
+                                    <div className="text-sm text-muted-foreground">
+                                      SKU: {product.sku}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="text-right ml-4">
+                                  <div className="text-sm font-medium">
+                                    {product.currentStock || 0}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {product.unit}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                          {filteredProducts.length > 8 && (
+                            <div className="px-4 py-2 text-xs text-muted-foreground text-center">
+                              {t('common.showing')} 8 {t('common.of')} {filteredProducts.length}{' '}
+                              {t('common.results')}
+                            </div>
+                          )}
+                        </div>
                       )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedProduct && (
-                <p className="text-sm text-muted-foreground">
-                  {t('inventory.movements.currentStock')}: {selectedProduct.currentStock || 0}{' '}
-                  {selectedProduct.unit}
-                </p>
+                    </div>
+                  )}
+
+                  {!productSearch && (
+                    <div className="text-center p-6 border-2 border-dashed rounded-lg">
+                      <Search className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {t('inventory.movements.startTypingToSearch')}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
+
               {errors.productId && (
                 <p className="text-sm text-red-500">{errors.productId.message}</p>
               )}

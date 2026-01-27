@@ -91,6 +91,19 @@ export const authApi = {
     });
     return response.data;
   },
+
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/auth/change-password', data);
+    return response.data;
+  },
+
+  updateProfile: async (data: { firstName?: string; lastName?: string }): Promise<User> => {
+    const response = await apiClient.put<User>('/auth/profile', data);
+    return response.data;
+  },
 };
 
 // Dashboard API
@@ -174,6 +187,86 @@ export const productsApi = {
   }> => {
     const response = await apiClient.get('/tenant/products/stock-movements/history', { params });
     return response.data;
+  },
+
+  // Seasonal Stock Minimums
+  getSeasonalStockMinimums: async (
+    productId: string
+  ): Promise<
+    Array<{
+      id?: string;
+      name: string;
+      startMonth: number;
+      startDay: number;
+      endMonth: number;
+      endDay: number;
+      minStock: number;
+      isActive?: boolean;
+    }>
+  > => {
+    const response = await apiClient.get(`/tenant/products/${productId}/seasonal-stock-minimums`);
+    return response.data;
+  },
+
+  createSeasonalStockMinimum: async (
+    productId: string,
+    data: {
+      name: string;
+      startMonth: number;
+      startDay: number;
+      endMonth: number;
+      endDay: number;
+      minStock: number;
+      isActive?: boolean;
+    }
+  ): Promise<{
+    id?: string;
+    name: string;
+    startMonth: number;
+    startDay: number;
+    endMonth: number;
+    endDay: number;
+    minStock: number;
+    isActive?: boolean;
+  }> => {
+    const response = await apiClient.post(
+      `/tenant/products/${productId}/seasonal-stock-minimums`,
+      data
+    );
+    return response.data;
+  },
+
+  updateSeasonalStockMinimum: async (
+    productId: string,
+    seasonalId: string,
+    data: {
+      name?: string;
+      startMonth?: number;
+      startDay?: number;
+      endMonth?: number;
+      endDay?: number;
+      minStock?: number;
+      isActive?: boolean;
+    }
+  ): Promise<{
+    id?: string;
+    name: string;
+    startMonth: number;
+    startDay: number;
+    endMonth: number;
+    endDay: number;
+    minStock: number;
+    isActive?: boolean;
+  }> => {
+    const response = await apiClient.put(
+      `/tenant/products/${productId}/seasonal-stock-minimums/${seasonalId}`,
+      data
+    );
+    return response.data;
+  },
+
+  deleteSeasonalStockMinimum: async (productId: string, seasonalId: string): Promise<void> => {
+    await apiClient.delete(`/tenant/products/${productId}/seasonal-stock-minimums/${seasonalId}`);
   },
 };
 
@@ -322,7 +415,7 @@ export const ordersApi = {
   getAll: async (params?: {
     search?: string;
     type?: 'CLIENT_ORDER' | 'SUPPLIER_ORDER';
-    status?: 'DRAFT' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+    status?: string; // Allow any status string from database
     clientId?: string;
     supplierId?: string;
     startDate?: string;

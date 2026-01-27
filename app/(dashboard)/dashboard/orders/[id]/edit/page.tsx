@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
-import { ordersApi, orderStatusesApi } from '@/lib/api';
+import { format } from 'date-fns';
+import { ordersApi, orderStatusesApi, productsApi } from '@/lib/api';
 import { Order, OrderItem } from '@/types';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,9 +22,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle2, XCircle, Clock, Trash2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 import { useCurrency } from '@/hooks/use-currency';
 import {
   Table,
@@ -44,6 +45,7 @@ export default function EditOrderPage() {
   const [status, setStatus] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [deliveryDate, setDeliveryDate] = useState<string>('');
+  const [editableItems, setEditableItems] = useState<OrderItem[]>([]);
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', orderId],
@@ -55,9 +57,97 @@ export default function EditOrderPage() {
     queryFn: () => orderStatusesApi.getAll(),
   });
 
+  const { data: products } = useQuery({
+    queryKey: ['products'],
+    queryFn: () => productsApi.getAll(),
+  });
+
+  // Initialize editable items when order data changes
+  const getInitialEditableItems = useCallback(() => {
+    return order?.items ? [...order.items] : [];
+  }, [order]);
+
+  // Initialize form values when order loads
+  const getInitialFormValues = useCallback(() => {
+    if (!order) {
+      return { status: '', notes: '', deliveryDate: '' };
+    }
+
+    const statusValue = String((order.status as any)?.slug || 'DRAFT'); // eslint-disable-line @typescript-eslint/no-explicit-any
+    return {
+      status: statusValue,
+      notes: order.notes || '',
+      deliveryDate: order.deliveryDate ? format(new Date(order.deliveryDate), 'yyyy-MM-dd') : '',
+    };
+  }, [order]);
+
+  // Update form values when order loads
+  useEffect(() => {
+    const values = getInitialFormValues();
+    setStatus(values.status);
+    setNotes(values.notes);
+    setDeliveryDate(values.deliveryDate);
+  }, [getInitialFormValues]);
+
+  // Update editable items when order data changes
+  useEffect(() => {
+    setEditableItems(getInitialEditableItems());
+  }, [getInitialEditableItems]);
+
+  const updateItem = (index: number, field: keyof OrderItem, value: string) => {
+    const updatedItems = [...editableItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      [field]: value,
+    };
+
+    // Recalculate total price if quantity or unit price changes
+    if (field === 'quantity' || field === 'unitPrice') {
+      const quantity = parseFloat(value) || 0;
+      const unitPrice =
+        parseFloat(
+          field === 'quantity'
+            ? String(updatedItems[index].unitPrice)
+            : String(updatedItems[index].quantity)
+        ) || 0;
+      updatedItems[index].totalPrice = quantity * unitPrice;
+    }
+
+    setEditableItems(updatedItems);
+  };
+
+  const removeItem = (index: number) => {
+    const updatedItems = editableItems.filter((_, i) => i !== index);
+    setEditableItems(updatedItems);
+  };
+
+  const handleProductSelect = (index: number, productId: string) => {
+    const product = products?.data?.find((p) => p.id === productId);
+    if (product) {
+      const updatedItems = [...editableItems];
+      updatedItems[index] = {
+        ...updatedItems[index],
+        productId,
+        productName: product.name,
+        unit: product.unit,
+      };
+      setEditableItems(updatedItems);
+    }
+  };
+
   const updateMutation = useMutation({
-    mutationFn: (data: { statusId: string | number; notes?: string; deliveryDate?: string }) =>
-      ordersApi.update(orderId, data),
+    mutationFn: (data: {
+      statusId: string | number;
+      notes?: string;
+      deliveryDate?: string;
+      items?: Array<{
+        productId: string;
+        productName: string;
+        quantity: number;
+        unit: string;
+        price: number;
+      }>;
+    }) => ordersApi.update(orderId, data as any), // eslint-disable-line @typescript-eslint/no-explicit-any
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -68,16 +158,6 @@ export default function EditOrderPage() {
       toast.error('Erreur lors de la mise à jour');
     },
   });
-
-  // Initialize form when order loads
-  const [isInitialized, setIsInitialized] = useState(false);
-  if (order && !isInitialized) {
-    const statusValue = String(order.status || 'DRAFT');
-    setStatus(statusValue);
-    setNotes(order.notes || '');
-    setDeliveryDate(order.deliveryDate ? format(new Date(order.deliveryDate), 'yyyy-MM-dd') : '');
-    setIsInitialized(true);
-  }
 
   const handleSave = async () => {
     try {
@@ -98,6 +178,13 @@ export default function EditOrderPage() {
         statusId,
         notes,
         deliveryDate: deliveryDate ? new Date(deliveryDate).toISOString() : undefined,
+        items: editableItems.map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          quantity: Number(item.quantity),
+          unit: item.unit,
+          price: Number(item.unitPrice),
+        })),
       });
     } catch (error) {
       console.error('Update error:', error);
@@ -115,9 +202,9 @@ export default function EditOrderPage() {
     const statusObj = (orderStatuses as OrderStatusObj[] | undefined)?.find(
       (s: OrderStatusObj) => s.slug === statusSlug
     );
-    if (statusSlug === 'COMPLETED') return <CheckCircle2 className="h-5 w-5" />;
-    if (statusSlug === 'CANCELLED') return <XCircle className="h-5 w-5" />;
-    if (statusSlug === 'IN_PROGRESS') return <Clock className="h-5 w-5" />;
+    if (statusSlug === 'delivered') return <CheckCircle2 className="h-5 w-5" />;
+    if (statusSlug === 'cancelled') return <XCircle className="h-5 w-5" />;
+    if (statusSlug === 'processing') return <Clock className="h-5 w-5" />;
     return null;
   };
 
@@ -136,13 +223,14 @@ export default function EditOrderPage() {
       return `text-white`; // Will be applied via inline style
     }
     const colors: Record<string, string> = {
-      DRAFT: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-      CONFIRMED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-      IN_PROGRESS: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-      COMPLETED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-      CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+      pending: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+      confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      processing: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      shipped: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
     };
-    return colors[statusSlug] || colors.DRAFT;
+    return colors[statusSlug] || colors.pending;
   };
 
   if (isLoading) {
@@ -304,7 +392,28 @@ export default function EditOrderPage() {
           {/* Items */}
           <Card>
             <CardHeader>
-              <CardTitle>Articles</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Articles</CardTitle>
+                <Button
+                  onClick={() => {
+                    const newItem: OrderItem = {
+                      id: `temp-${Date.now()}`,
+                      orderId: orderId,
+                      productId: '',
+                      productName: '',
+                      quantity: 1,
+                      unit: '',
+                      unitPrice: 0,
+                      totalPrice: 0,
+                    };
+                    setEditableItems([...editableItems, newItem]);
+                  }}
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un article
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -315,20 +424,71 @@ export default function EditOrderPage() {
                       <TableHead className="text-right">Quantité</TableHead>
                       <TableHead className="text-right">Prix Unitaire</TableHead>
                       <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {order?.items?.map((item: OrderItem) => (
+                    {editableItems?.map((item: OrderItem, index: number) => (
                       <TableRow key={item.id}>
-                        <TableCell>{item.productName}</TableCell>
-                        <TableCell className="text-right">
-                          {item.quantity} {item.unit}
+                        <TableCell>
+                          <div className="space-y-2">
+                            <SearchableSelect
+                              value={item.productId}
+                              onValueChange={(value) => handleProductSelect(index, value)}
+                              options={
+                                products?.data?.map((product) => ({
+                                  value: product.id,
+                                  label: `${product.name} (${product.unit})`,
+                                })) || []
+                              }
+                              placeholder="Rechercher un produit..."
+                              searchPlaceholder="Rechercher..."
+                              emptyText="Aucun produit trouvé"
+                            />
+                            {/* {item.productName && (
+                              <p className="text-sm text-muted-foreground">
+                                Sélectionné: {item.productName} - Unité: {item.unit}
+                              </p>
+                            )} */}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatCurrency(Number(item.unitPrice))}
+                          <div className="flex items-center justify-end gap-2">
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                              className="w-20 text-right"
+                              min="0"
+                              step="0.01"
+                            />
+                            <span className="text-sm text-muted-foreground">{item.unit}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Input
+                            type="number"
+                            value={item.unitPrice}
+                            onChange={(e) => updateItem(index, 'unitPrice', e.target.value)}
+                            className="w-24 text-right"
+                            min="0"
+                            step="0.01"
+                          />
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(Number(item.totalPrice))}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeItem(index)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -337,8 +497,11 @@ export default function EditOrderPage() {
                         Total:
                       </TableCell>
                       <TableCell className="text-right">
-                        {formatCurrency(Number(order.totalAmount))}
+                        {formatCurrency(
+                          editableItems.reduce((sum, item) => sum + Number(item.totalPrice), 0)
+                        )}
                       </TableCell>
+                      <TableCell></TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -380,8 +543,16 @@ export default function EditOrderPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Montant Total</p>
                 <p className="text-2xl font-bold text-primary">
-                  {formatCurrency(Number(order.totalAmount))}
+                  {formatCurrency(
+                    editableItems.reduce((sum, item) => sum + Number(item.totalPrice), 0)
+                  )}
                 </p>
+                {editableItems.reduce((sum, item) => sum + Number(item.totalPrice), 0) !==
+                  Number(order.totalAmount) && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Original: {formatCurrency(Number(order.totalAmount))}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

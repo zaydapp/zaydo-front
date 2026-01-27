@@ -346,7 +346,17 @@
     "recordOutgoing": "Record outgoing stock from inventory",
     "stockAdded": "Stock added successfully",
     "stockRemoved": "Stock removed successfully",
-    "searchProduct": "Search product..."
+    "searchProduct": "Search product...",
+    "noProductsFound": "No products found.",
+    "startTypingToSearch": "Start typing to search for products",
+    "confirmDelete": "Are you sure you want to delete this stock movement? This action cannot be undone.",
+    "deleteSuccess": "Stock movement deleted successfully",
+    "editMovement": "Edit Stock Movement",
+    "editDescription": "Update the details of this stock movement",
+    "update": "Update",
+    "updateSuccess": "Stock movement updated successfully",
+    "notFound": "Stock movement not found",
+    "selectType": "Select movement type"
   },
   "clients": {
     "title": "Clients",

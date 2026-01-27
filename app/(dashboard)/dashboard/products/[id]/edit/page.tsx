@@ -29,8 +29,20 @@ import {
   Image as ImageIcon,
   AlertCircle,
   Loader2,
+  Plus,
+  Calendar,
+  Trash2,
+  Edit2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface ProductFormData {
   name: string;
@@ -55,6 +67,38 @@ export default function EditProductPage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [seasonalStockMinimums, setSeasonalStockMinimums] = useState<
+    Array<{
+      id?: string;
+      name: string;
+      startMonth: number;
+      startDay: number;
+      endMonth: number;
+      endDay: number;
+      minStock: number;
+      isActive?: boolean;
+    }>
+  >([]);
+  const [isSeasonalDialogOpen, setIsSeasonalDialogOpen] = useState(false);
+  const [editingSeasonal, setEditingSeasonal] = useState<{
+    id?: string;
+    name: string;
+    startMonth: number;
+    startDay: number;
+    endMonth: number;
+    endDay: number;
+    minStock: number;
+    isActive?: boolean;
+  } | null>(null);
+  const [seasonalFormData, setSeasonalFormData] = useState({
+    name: '',
+    startMonth: 6,
+    startDay: 1,
+    endMonth: 8,
+    endDay: 31,
+    minStock: 0,
+    isActive: true,
+  });
 
   // Fetch product types and units from tenant settings
   const { data: productsSettings } = useTenantSettings('products');
@@ -113,8 +157,16 @@ export default function EditProductPage() {
         setExistingImages(product.images);
         setMainImageIndex(product.mainImageIndex || 0);
       }
+
+      // Load seasonal stock minimums
+      if (product.seasonalStockMinimums) {
+        setSeasonalStockMinimums(product.seasonalStockMinimums);
+      } else {
+        // Fetch seasonal stock minimums if not included
+        productsApi.getSeasonalStockMinimums(productId).then(setSeasonalStockMinimums);
+      }
     }
-  }, [product, reset]);
+  }, [product, reset, productId]);
 
   const updateMutation = useMutation({
     mutationFn: (data: ProductFormData) => productsApi.update(productId, data),
@@ -577,6 +629,141 @@ export default function EditProductPage() {
                   <p className="text-xs text-muted-foreground">{t('products.minStockHelper')}</p>
                 </div>
 
+                {/* Seasonal Stock Minimums */}
+                <div className="space-y-3 pt-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base font-semibold">
+                        {t('products.seasonalStockMinimums')}
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('products.seasonalStockMinimumsDescription')}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingSeasonal(null);
+                        setSeasonalFormData({
+                          name: '',
+                          startMonth: 6,
+                          startDay: 1,
+                          endMonth: 8,
+                          endDay: 31,
+                          minStock: 0,
+                          isActive: true,
+                        });
+                        setIsSeasonalDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t('products.addSeasonalRange')}
+                    </Button>
+                  </div>
+
+                  {seasonalStockMinimums.length > 0 ? (
+                    <div className="space-y-2">
+                      {seasonalStockMinimums.map((seasonal) => {
+                        const months = [
+                          t('common.months.january'),
+                          t('common.months.february'),
+                          t('common.months.march'),
+                          t('common.months.april'),
+                          t('common.months.may'),
+                          t('common.months.june'),
+                          t('common.months.july'),
+                          t('common.months.august'),
+                          t('common.months.september'),
+                          t('common.months.october'),
+                          t('common.months.november'),
+                          t('common.months.december'),
+                        ];
+                        const startMonthName =
+                          months[seasonal.startMonth - 1] || seasonal.startMonth;
+                        const endMonthName = months[seasonal.endMonth - 1] || seasonal.endMonth;
+
+                        return (
+                          <div
+                            key={seasonal.id || `seasonal-${seasonal.name}`}
+                            className="flex items-center justify-between p-3 border rounded-lg bg-card"
+                          >
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">{seasonal.name}</span>
+                                {!seasonal.isActive && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {t('common.inactive')}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {startMonthName} {seasonal.startDay} - {endMonthName}{' '}
+                                {seasonal.endDay}
+                              </p>
+                              <p className="text-sm font-medium mt-1">
+                                {t('products.minStock')}: {Number(seasonal.minStock).toFixed(2)}{' '}
+                                {product?.unit}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditingSeasonal(seasonal);
+                                  setSeasonalFormData({
+                                    name: seasonal.name,
+                                    startMonth: seasonal.startMonth,
+                                    startDay: seasonal.startDay,
+                                    endMonth: seasonal.endMonth,
+                                    endDay: seasonal.endDay,
+                                    minStock: Number(seasonal.minStock),
+                                    isActive: seasonal.isActive ?? true,
+                                  });
+                                  setIsSeasonalDialogOpen(true);
+                                }}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={async () => {
+                                  if (confirm(t('products.confirmDeleteSeasonal'))) {
+                                    try {
+                                      await productsApi.deleteSeasonalStockMinimum(
+                                        productId,
+                                        seasonal.id!
+                                      );
+                                      setSeasonalStockMinimums((prev) =>
+                                        prev.filter((s) => s.id !== seasonal.id)
+                                      );
+                                      toast.success(t('products.seasonalDeleted'));
+                                    } catch (error) {
+                                      toast.error(t('products.seasonalDeleteError'));
+                                    }
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      {t('products.noSeasonalRanges')}
+                    </p>
+                  )}
+                </div>
+
                 <div className="pt-4 space-y-3 border-t">
                   <Button
                     type="submit"
@@ -609,6 +796,216 @@ export default function EditProductPage() {
           </div>
         </div>
       </form>
+
+      {/* Seasonal Stock Minimum Dialog */}
+      <Dialog open={isSeasonalDialogOpen} onOpenChange={setIsSeasonalDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingSeasonal ? t('products.editSeasonalRange') : t('products.addSeasonalRange')}
+            </DialogTitle>
+            <DialogDescription>{t('products.seasonalRangeDescription')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="seasonalName">
+                {t('products.seasonalName')} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="seasonalName"
+                value={seasonalFormData.name}
+                onChange={(e) => setSeasonalFormData({ ...seasonalFormData, name: e.target.value })}
+                placeholder={t('products.seasonalNamePlaceholder')}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="startMonth">
+                  {t('products.startMonth')} <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={seasonalFormData.startMonth.toString()}
+                  onValueChange={(value) =>
+                    setSeasonalFormData({ ...seasonalFormData, startMonth: parseInt(value) })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      t('common.months.january'),
+                      t('common.months.february'),
+                      t('common.months.march'),
+                      t('common.months.april'),
+                      t('common.months.may'),
+                      t('common.months.june'),
+                      t('common.months.july'),
+                      t('common.months.august'),
+                      t('common.months.september'),
+                      t('common.months.october'),
+                      t('common.months.november'),
+                      t('common.months.december'),
+                    ].map((month, index) => (
+                      <SelectItem key={index + 1} value={(index + 1).toString()}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="startDay">
+                  {t('products.startDay')} <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="startDay"
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={seasonalFormData.startDay}
+                  onChange={(e) =>
+                    setSeasonalFormData({
+                      ...seasonalFormData,
+                      startDay: parseInt(e.target.value) || 1,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="endMonth">
+                  {t('products.endMonth')} <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={seasonalFormData.endMonth.toString()}
+                  onValueChange={(value) =>
+                    setSeasonalFormData({ ...seasonalFormData, endMonth: parseInt(value) })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      t('common.months.january'),
+                      t('common.months.february'),
+                      t('common.months.march'),
+                      t('common.months.april'),
+                      t('common.months.may'),
+                      t('common.months.june'),
+                      t('common.months.july'),
+                      t('common.months.august'),
+                      t('common.months.september'),
+                      t('common.months.october'),
+                      t('common.months.november'),
+                      t('common.months.december'),
+                    ].map((month, index) => (
+                      <SelectItem key={index + 1} value={(index + 1).toString()}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endDay">
+                  {t('products.endDay')} <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="endDay"
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={seasonalFormData.endDay}
+                  onChange={(e) =>
+                    setSeasonalFormData({
+                      ...seasonalFormData,
+                      endDay: parseInt(e.target.value) || 1,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="seasonalMinStock">
+                {t('products.minStock')} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="seasonalMinStock"
+                type="number"
+                step="0.01"
+                min="0"
+                value={seasonalFormData.minStock}
+                onChange={(e) =>
+                  setSeasonalFormData({
+                    ...seasonalFormData,
+                    minStock: parseFloat(e.target.value) || 0,
+                  })
+                }
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsSeasonalDialogOpen(false);
+                setEditingSeasonal(null);
+              }}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!seasonalFormData.name || seasonalFormData.minStock < 0) {
+                  toast.error(t('products.fillAllFields'));
+                  return;
+                }
+
+                try {
+                  if (editingSeasonal) {
+                    await productsApi.updateSeasonalStockMinimum(
+                      productId,
+                      editingSeasonal.id!,
+                      seasonalFormData
+                    );
+                    setSeasonalStockMinimums((prev) =>
+                      prev.map((s) =>
+                        s.id === editingSeasonal.id ? { ...s, ...seasonalFormData } : s
+                      )
+                    );
+                    toast.success(t('products.seasonalUpdated'));
+                  } else {
+                    const newSeasonal = await productsApi.createSeasonalStockMinimum(
+                      productId,
+                      seasonalFormData
+                    );
+                    setSeasonalStockMinimums((prev) => [...prev, newSeasonal]);
+                    toast.success(t('products.seasonalCreated'));
+                  }
+                  setIsSeasonalDialogOpen(false);
+                  setEditingSeasonal(null);
+                } catch (error: unknown) {
+                  const errorMessage =
+                    error instanceof Error ? error.message : t('products.seasonalError');
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const axiosError = error as any;
+                  const responseMessage = axiosError?.response?.data?.message;
+                  toast.error(responseMessage || errorMessage);
+                }
+              }}
+            >
+              {editingSeasonal ? t('common.save') : t('common.create')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
