@@ -70,7 +70,12 @@ const inventoryApi = {
   },
 
   // Get stock movements
-  getStockMovements: async (params?: { productId?: string; skip?: number; take?: number }) => {
+  getStockMovements: async (params?: {
+    productId?: string;
+    productType?: 'RAW_MATERIAL' | 'FINISHED_PRODUCT';
+    skip?: number;
+    take?: number;
+  }) => {
     const response = await apiClient.get('/tenant/products/stock-movements', { params });
     return response.data;
   },
@@ -92,6 +97,23 @@ const inventoryApi = {
     const response = await apiClient.get('/tenant/products/stats');
     return response.data;
   },
+
+  // Delete stock movement
+  deleteStockMovement: async (id: string): Promise<void> => {
+    await apiClient.delete(`/tenant/products/stock-movements/${id}`);
+  },
+
+  // Get single stock movement
+  getStockMovement: async (id: string): Promise<StockMovement> => {
+    const response = await apiClient.get(`/tenant/products/stock-movements/${id}`);
+    return response.data;
+  },
+
+  // Update stock movement
+  updateStockMovement: async (id: string, data: CreateStockMovementDto): Promise<StockMovement> => {
+    const response = await apiClient.put(`/tenant/products/stock-movements/${id}`, data);
+    return response.data;
+  },
 };
 
 // React Query Hooks
@@ -105,12 +127,21 @@ export const useStockSummary = () => {
 
 export const useStockMovements = (params?: {
   productId?: string;
+  productType?: 'RAW_MATERIAL' | 'FINISHED_PRODUCT';
   skip?: number;
   take?: number;
 }) => {
   return useQuery({
-    queryKey: ['stock-movements', params],
+    queryKey: [
+      'stock-movements',
+      params?.productId,
+      params?.productType,
+      params?.skip,
+      params?.take,
+    ],
     queryFn: () => inventoryApi.getStockMovements(params),
+    refetchOnMount: true,
+    staleTime: 0, // Always consider data stale to ensure fresh data on tab change
   });
 };
 
@@ -119,6 +150,45 @@ export const useAddStockMovement = () => {
 
   return useMutation({
     mutationFn: inventoryApi.addStockMovement,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stock-movements'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['low-stock-alerts'] });
+      queryClient.invalidateQueries({ queryKey: ['product-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+};
+
+export const useDeleteStockMovement = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: inventoryApi.deleteStockMovement,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stock-movements'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['low-stock-alerts'] });
+      queryClient.invalidateQueries({ queryKey: ['product-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+};
+
+export const useStockMovement = (id: string) => {
+  return useQuery({
+    queryKey: ['stock-movement', id],
+    queryFn: () => inventoryApi.getStockMovement(id),
+    enabled: !!id,
+  });
+};
+
+export const useUpdateStockMovement = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, ...data }: { id: string } & CreateStockMovementDto) =>
+      inventoryApi.updateStockMovement(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock-movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock-summary'] });

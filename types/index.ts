@@ -49,6 +49,21 @@ export interface TenantSettings {
 }
 
 // Product Types
+export interface SeasonalStockMinimum {
+  id: string;
+  productId: string;
+  tenantId: string;
+  name: string;
+  startMonth: number; // 1-12
+  startDay: number; // 1-31
+  endMonth: number; // 1-12
+  endDay: number; // 1-31
+  minStock: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Product {
   id: string;
   tenantId: string;
@@ -63,6 +78,7 @@ export interface Product {
   notes?: string;
   images?: string[];
   mainImageIndex?: number;
+  seasonalStockMinimums?: SeasonalStockMinimum[];
   createdAt: string;
   updatedAt: string;
 }
@@ -175,10 +191,11 @@ export enum OrderType {
 }
 
 export enum OrderStatus {
-  DRAFT = 'DRAFT',
+  PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
+  PROCESSING = 'PROCESSING',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
 }
 

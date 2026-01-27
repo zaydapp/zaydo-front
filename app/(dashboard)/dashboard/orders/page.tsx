@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ordersApi } from '@/lib/api';
-import { Order, OrderType, OrderStatus } from '@/types';
+import { ordersApi, orderStatusesApi } from '@/lib/api';
+import { Order, OrderType, OrderStatusItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Eye, Trash2, Package, TrendingUp, TrendingDown } from 'lucide-react';
@@ -21,6 +21,13 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { format } from 'date-fns';
 
 export default function OrdersPage() {
@@ -30,13 +37,21 @@ export default function OrdersPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'CLIENT_ORDER' | 'SUPPLIER_ORDER'>('ALL');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+
+  // Fetch order statuses dynamically
+  const { data: orderStatuses } = useQuery({
+    queryKey: ['order-statuses'],
+    queryFn: () => orderStatusesApi.getAll(),
+  });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['orders', search, activeTab],
+    queryKey: ['orders', search, activeTab, selectedStatus],
     queryFn: () =>
       ordersApi.getAll({
         search,
         type: activeTab !== 'ALL' ? (activeTab as OrderType) : undefined,
+        status: selectedStatus || undefined,
         take: 50,
       }),
   });
@@ -165,6 +180,25 @@ export default function OrdersPage() {
                   className="pl-9 h-10 bg-background shadow-sm border-muted"
                 />
               </div>
+
+              {/* Status Filter */}
+              <Select
+                value={selectedStatus}
+                onValueChange={(value) => setSelectedStatus(value === 'all' ? '' : value)}
+              >
+                <SelectTrigger className="w-48 h-10 bg-background shadow-sm border-muted">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  {orderStatuses?.map((status) => (
+                    <SelectItem key={status.id} value={status.slug}>
+                      {status.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <div className="text-sm text-muted-foreground">
                 {data?.pagination.total || 0}{' '}
                 {t('common.results', { count: data?.pagination.total || 0 })}

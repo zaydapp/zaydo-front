@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
@@ -62,7 +62,7 @@ export default function EditPriceListPage() {
     enabled: Boolean(priceListId),
   });
 
-  const getInitialFormData = (): {
+  const getInitialFormData = useCallback((): {
     name: string;
     type: string;
     startDate: string;
@@ -116,7 +116,7 @@ export default function EditPriceListPage() {
       clientGroup: String(priceList.clientGroup || ''),
       items: newItems,
     };
-  };
+  }, [priceList]);
 
   const [formData, setFormData] = useState(() => getInitialFormData());
 
@@ -210,7 +210,7 @@ export default function EditPriceListPage() {
       isActive,
       description: description || undefined,
       clientGroup: clientGroup || undefined,
-      items: items.map(({ productId, price }) => ({ productId, price })),
+      items: items.map(({ productId, price }) => ({ productId, price: Number(price) })),
     });
   };
 

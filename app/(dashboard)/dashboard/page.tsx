@@ -21,7 +21,7 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
-import { dashboardApi, productsApi, ordersApi, clientsApi } from '@/lib/api';
+import { dashboardApi, productsApi, ordersApi, clientsApi, orderStatusesApi } from '@/lib/api';
 import { useCurrency } from '@/hooks/use-currency';
 
 export default function DashboardPage() {
@@ -50,15 +50,29 @@ export default function DashboardPage() {
     queryFn: () => ordersApi.getRecent(5),
   });
 
+  const { data: orderStatuses } = useQuery({
+    queryKey: ['order-statuses'],
+    queryFn: () => orderStatusesApi.getAll(),
+  });
+
   const { data: activeOrders, isLoading: activeOrdersLoading } = useQuery({
     queryKey: ['active-orders'],
     queryFn: async () => {
-      const [confirmedRes, progressRes] = await Promise.all([
-        ordersApi.getAll({ status: 'CONFIRMED', take: 100 }),
-        ordersApi.getAll({ status: 'IN_PROGRESS', take: 100 }),
-      ]);
-      return [...confirmedRes.data, ...progressRes.data];
+      if (!orderStatuses) return [];
+
+      // Get active statuses (confirmed and processing)
+      const activeStatusSlugs = orderStatuses
+        .filter((status) => status.slug === 'confirmed' || status.slug === 'processing')
+        .map((status) => status.slug);
+
+      const promises = activeStatusSlugs.map((status) =>
+        ordersApi.getAll({ status: status as string, take: 100 })
+      );
+
+      const responses = await Promise.all(promises);
+      return responses.flatMap((response) => response.data);
     },
+    enabled: !!orderStatuses,
   });
 
   const { data: clients, isLoading: clientsLoading } = useQuery({
@@ -70,25 +84,26 @@ export default function DashboardPage() {
   const totalClients = clients?.data?.length || 0;
 
   const getOrderStatusColor = (status: string | undefined) => {
-    const statusKey = status?.toUpperCase() || 'DRAFT';
+    const statusKey = status?.toLowerCase() || 'pending';
     const colors: Record<string, string> = {
-      DRAFT: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-      CONFIRMED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-      IN_PROGRESS: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-      COMPLETED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-      CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+      pending: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+      confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      processing: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      shipped: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
     };
-    return colors[statusKey] || colors.DRAFT;
+    return colors[statusKey] || colors.pending;
   };
 
   const getOrderStatusIcon = (status: string | undefined) => {
-    const statusKey = status?.toUpperCase() || 'DRAFT';
+    const statusKey = status?.toLowerCase() || 'pending';
     switch (statusKey) {
-      case 'COMPLETED':
+      case 'delivered':
         return <CheckCircle2 className="h-3 w-3" />;
-      case 'CANCELLED':
+      case 'cancelled':
         return <XCircle className="h-3 w-3" />;
-      case 'IN_PROGRESS':
+      case 'processing':
         return <Clock className="h-3 w-3" />;
       default:
         return null;
@@ -101,7 +116,6 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">{t('dashboard.title')}</h1>
-          <p className="text-muted-foreground mt-2 text-lg">{t('dashboard.subtitle')}</p>
         </div>
       </div>
 
@@ -240,7 +254,7 @@ export default function DashboardPage() {
                   variant="outline"
                   size="sm"
                   className="mt-4 w-full"
-                  onClick={() => router.push('/dashboard/inventory/alerts')}
+                  onClick={() => router.push('/dashboard/inventory')}
                 >
                   {t('common.viewAll')}
                 </Button>
@@ -479,13 +493,17 @@ export default function DashboardPage() {
               </div>
             )}
             {!lowStockLoading && lowStockProducts && lowStockProducts.length > 0 && (
-              <Button
-                variant="outline"
-                className="w-full mt-4"
-                onClick={() => router.push('/dashboard/inventory')}
-              >
-                {t('dashboard.viewAllProducts')}
-              </Button>
+              <div className="px-6 -mx-6 mt-4">
+                <div className="space-y-2">
+                  <Button
+                    variant="link"
+                    className="text-primary underline-offset-4 hover:underline h-9 px-4 py-2 w-full"
+                    onClick={() => router.push('/dashboard/products')}
+                  >
+                    {t('dashboard.viewAllProducts')}
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
