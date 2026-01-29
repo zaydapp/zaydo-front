@@ -78,9 +78,12 @@ export default function NewStockMovementPage() {
     const searchLower = productSearch.toLowerCase();
     return (
       product.name.toLowerCase().includes(searchLower) ||
-      (product.sku && product.sku.toLowerCase().includes(searchLower))
+      product.sku?.toLowerCase().includes(searchLower)
     );
   });
+
+  // Show search interface only if no product is selected and no preselected product
+  const showSearchInterface = !selectedProductId && !preselectedProductId;
 
   const onSubmit = async (data: StockMovementForm) => {
     try {
@@ -191,7 +194,7 @@ export default function NewStockMovementPage() {
                     {t('common.change')}
                   </Button>
                 </div>
-              ) : (
+              ) : showSearchInterface ? (
                 /* Search Interface */
                 <div className="space-y-2">
                   <div className="relative">
@@ -265,7 +268,17 @@ export default function NewStockMovementPage() {
                     </div>
                   )}
                 </div>
-              )}
+              ) : preselectedProductId ? (
+                /* Loading state for preselected product */
+                <div className="flex items-center justify-center p-6 border rounded-lg bg-muted/20">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-sm text-muted-foreground">
+                      {t('inventory.movements.loadingProduct')}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
 
               {errors.productId && (
                 <p className="text-sm text-red-500">{errors.productId.message}</p>

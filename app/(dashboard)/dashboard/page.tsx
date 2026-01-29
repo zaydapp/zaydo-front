@@ -263,10 +263,41 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10 border-blue-200 dark:border-blue-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium">Commandes Clients</CardTitle>
+              <ShoppingCart className="h-5 w-5 text-blue-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            {ordersLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
+                  {ordersStats?.clientOrders || 0}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formatCurrency(ordersStats?.totalRevenue || 0)} générés
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full"
+                  onClick={() => router.push('/dashboard/orders?type=client')}
+                >
+                  {t('common.viewAll')}
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/10 border-green-200 dark:border-green-800">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Commandes Terminées</CardTitle>
+              <CardTitle className="text-sm font-medium">Commandes Fournisseurs</CardTitle>
               <CheckCircle2 className="h-5 w-5 text-green-600" />
             </div>
           </CardHeader>
@@ -276,41 +307,10 @@ export default function DashboardPage() {
             ) : (
               <>
                 <div className="text-3xl font-bold text-green-700 dark:text-green-400">
-                  {ordersStats?.completedOrders || 0}
+                  {ordersStats?.supplierOrders || 0}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formatCurrency(ordersStats?.totalRevenue || 0)} générés
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4 w-full"
-                  onClick={() => router.push('/dashboard/orders')}
-                >
-                  {t('common.viewAll')}
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10 border-blue-200 dark:border-blue-800">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Dépenses Fournisseurs</CardTitle>
-              <TrendingDown className="h-5 w-5 text-blue-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {ordersLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
-                  {formatCurrency(ordersStats?.totalExpenses || 0)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {ordersStats?.supplierOrders || 0} commandes
+                  {formatCurrency(ordersStats?.totalExpenses || 0)} dépensés
                 </p>
                 <Button
                   variant="outline"
@@ -324,6 +324,71 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Expense Cards - Half Width */}
+        <div className="grid gap-6 md:grid-cols-2 lg:col-span-2">
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/20 dark:to-orange-900/10 border-orange-200 dark:border-orange-800">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">Dépenses Clients</CardTitle>
+                <TrendingUp className="h-5 w-5 text-orange-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {ordersLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <>
+                  <div className="text-3xl font-bold text-orange-700 dark:text-orange-400">
+                    {formatCurrency(ordersStats?.totalRevenue || 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {ordersStats?.clientOrders || 0} commandes
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full"
+                    onClick={() => router.push('/dashboard/orders?type=client')}
+                  >
+                    {t('common.viewAll')}
+                  </Button>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10 border-blue-200 dark:border-blue-800">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">Dépenses Fournisseurs</CardTitle>
+                <TrendingDown className="h-5 w-5 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {ordersLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <>
+                  <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
+                    {formatCurrency(ordersStats?.totalExpenses || 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {ordersStats?.supplierOrders || 0} commandes
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full"
+                    onClick={() => router.push('/dashboard/orders?type=supplier')}
+                  >
+                    {t('common.viewAll')}
+                  </Button>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Active Orders Section */}
@@ -498,7 +563,7 @@ export default function DashboardPage() {
                   <Button
                     variant="link"
                     className="text-primary underline-offset-4 hover:underline h-9 px-4 py-2 w-full"
-                    onClick={() => router.push('/dashboard/products')}
+                    onClick={() => router.push('/dashboard/inventory/alerts')}
                   >
                     {t('dashboard.viewAllProducts')}
                   </Button>
