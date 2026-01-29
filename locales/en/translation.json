@@ -250,7 +250,9 @@
     },
     "types": {
       "RAW_MATERIAL": "Raw Material",
-      "FINISHED_PRODUCT": "Finished Product"
+      "FINISHED_PRODUCT": "Finished Product",
+      "finished_product": "Finished Product",
+      "raw_material":"Raw Material"
     }
   },
   "inventory": {
@@ -274,6 +276,11 @@
     "lowStockDescription": "Products below minimum stock threshold requiring attention",
     "stockOverview": "Stock Overview",
     "stockOverviewDescription": "Current stock levels for all products",
+    "alerts": "Inventory Alerts",
+    "alertsError": "Failed to load inventory alerts",
+    "noAlerts": "No Low Stock Alerts",
+    "noAlertsDescription": "All products have adequate stock levels",
+    "addStockMovement": "Add Stock Movement",
     "stats": {
       "totalProducts": "Total Products",
       "rawMaterials": "raw materials",
@@ -286,7 +293,9 @@
     "status": {
       "ok": "Good",
       "low": "Low Stock",
-      "out": "Out of Stock"
+      "out": "Out of Stock",
+      "low_stock": "Low Stock",
+      "out_of_stock": "Out of Stock"
     },
     "table": {
       "product": "Product",
@@ -346,9 +355,10 @@
     "recordOutgoing": "Record outgoing stock from inventory",
     "stockAdded": "Stock added successfully",
     "stockRemoved": "Stock removed successfully",
-    "searchProduct": "Search product...",
-    "noProductsFound": "No products found.",
+    "searchProduct": "Search for a product...",
+    "noProductsFound": "No products found",
     "startTypingToSearch": "Start typing to search for products",
+    "loadingProduct": "Loading product...",
     "confirmDelete": "Are you sure you want to delete this stock movement? This action cannot be undone.",
     "deleteSuccess": "Stock movement deleted successfully",
     "editMovement": "Edit Stock Movement",

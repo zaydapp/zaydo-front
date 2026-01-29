@@ -286,13 +286,37 @@
     },
     "types": {
       "RAW_MATERIAL": "Matière Première",
-      "FINISHED_PRODUCT": "Produit Fini"
+      "FINISHED_PRODUCT": "Produit Fini",
+      "raw_material": "Matière Première",
+      "finished_product": "Produit Fini"
     }
   },
   "inventory": {
     "title": "Inventaire",
     "description": "Surveillez et gérez vos niveaux de stock en temps réel",
     "subtitle": "Surveillez et gérez vos niveaux de stock",
+    "addMovement": "Ajouter Mouvement",
+    "exportReport": "Exporter Rapport",
+    "viewAll": "Voir Tous les Mouvements",
+    "viewAllAlerts": "Voir Toutes les Alertes",
+    "viewAllProducts": "Voir Tous les Produits",
+    "noProducts": "Aucun produit trouvé. Ajoutez votre premier produit pour commencer.",
+    "addStock": "Ajouter Stock",
+    "stockIn": "Entrée Stock",
+    "stockOut": "Sortie Stock",
+    "removeStock": "Retirer Stock",
+    "currentStock": "Stock Actuel",
+    "minStock": "Stock Minimum",
+    "shortage": "Manque",
+    "lowStockAlerts": "Alertes de Stock Faible",
+    "lowStockDescription": "Produits sous le seuil de stock minimum nécessitant une attention",
+    "stockOverview": "Aperçu du Stock",
+    "stockOverviewDescription": "Niveaux de stock actuels pour tous les produits",
+    "alerts": "Alertes d'Inventaire",
+    "alertsError": "Échec du chargement des alertes d'inventaire",
+    "noAlerts": "Aucune Alerte de Stock Faible",
+    "noAlertsDescription": "Tous les produits ont des niveaux de stock adéquats",
+    "addStockMovement": "Ajouter Mouvement de Stock",
     "addMovement": "Ajouter un mouvement",
     "exportReport": "Exporter le rapport",
     "viewAll": "Voir tous les mouvements",
@@ -322,7 +346,9 @@
     "status": {
       "ok": "Bon",
       "low": "Stock faible",
-      "out": "Rupture de stock"
+      "out": "Rupture de stock",
+      "low_stock": "Stock Faible",
+      "out_of_stock": "Rupture de Stock"
     },
     "table": {
       "product": "Produit",
@@ -369,6 +395,7 @@
       "searchProduct": "Rechercher un produit...",
       "noProductsFound": "Aucun produit trouvé.",
       "startTypingToSearch": "Commencez à taper pour rechercher des produits",
+      "loadingProduct": "Chargement du produit...",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce mouvement de stock ? Cette action ne peut pas être annulée.",
       "deleteSuccess": "Mouvement de stock supprimé avec succès",
       "editMovement": "Modifier le mouvement de stock",

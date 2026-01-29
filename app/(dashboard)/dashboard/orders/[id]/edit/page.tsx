@@ -58,8 +58,8 @@ export default function EditOrderPage() {
   });
 
   const { data: products } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => productsApi.getAll(),
+    queryKey: ['products-all'],
+    queryFn: () => productsApi.getAll({ take: 1000 }), // Fetch all products without pagination
   });
 
   // Initialize editable items when order data changes
