@@ -218,7 +218,7 @@ export default function NewStockMovementPage() {
                         </div>
                       ) : (
                         <div className="py-1">
-                          {filteredProducts.slice(0, 8).map((product) => (
+                          {filteredProducts.slice(0, 999).map((product) => (
                             <button
                               key={product.id}
                               type="button"
@@ -248,9 +248,9 @@ export default function NewStockMovementPage() {
                               </div>
                             </button>
                           ))}
-                          {filteredProducts.length > 8 && (
+                          {filteredProducts.length > 999 && (
                             <div className="px-4 py-2 text-xs text-muted-foreground text-center">
-                              {t('common.showing')} 8 {t('common.of')} {filteredProducts.length}{' '}
+                              {t('common.showing')} 999 {t('common.of')} {filteredProducts.length}{' '}
                               {t('common.results')}
                             </div>
                           )}

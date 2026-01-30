@@ -97,17 +97,17 @@ export default function NewOrderPage() {
   // Fetch clients, suppliers, and products
   const { data: clientsData } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => clientsApi.getAll({ take: 100 }),
+    queryFn: () => clientsApi.getAll({ take: 999 }),
   });
 
   const { data: suppliersData } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => suppliersApi.getAll({ take: 100 }),
+    queryFn: () => suppliersApi.getAll({ take: 999 }),
   });
 
   const { data: productsData } = useQuery({
     queryKey: ['products'],
-    queryFn: () => productsApi.getAll({ take: 200 }),
+    queryFn: () => productsApi.getAll({ take: 999 }),
   });
 
   const { data: statusesData = [] } = useQuery({
