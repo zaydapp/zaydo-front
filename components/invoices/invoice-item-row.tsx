@@ -12,19 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import { Trash2, Check } from 'lucide-react';
 import { InvoiceLineInput } from '@/hooks/useInvoiceEditor';
 import { useCurrency } from '@/hooks/use-currency';
 import { cn } from '@/lib/utils';
+import { ProductSelect } from '@/components/ui/product-select';
 
 interface InvoiceItemRowProps {
   item: InvoiceLineInput;
@@ -50,8 +42,6 @@ export function InvoiceItemRow({
   const { t } = useTranslation();
   const { format } = useCurrency();
   const [isNew, setIsNew] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
 
   const lineSubtotal = item.quantity * item.unitPrice;
   const lineDiscount = item.discount || 0;
@@ -64,51 +54,13 @@ export function InvoiceItemRow({
     return () => clearTimeout(timer);
   }, []);
 
-  // Initialize search value from item
-  useEffect(() => {
-    if (item.productId) {
-      const product = products.find((p) => p.id === item.productId);
-      setSearchValue(product?.name || item.description || '');
-    } else {
-      setSearchValue(item.description || '');
-    }
-  }, [item.productId, item.description, products]);
-
   const selectedProduct = item.productId ? products.find((p) => p.id === item.productId) : null;
-
-  // Handle input change - allow free text
-  const handleInputChange = (value: string) => {
-    setSearchValue(value);
-
-    // If user is typing and there's a product selected, clear the product selection
-    if (item.productId && value !== selectedProduct?.name) {
-      // User is typing something different from the selected product, treat as free text
-      onUpdate(index, {
-        productId: undefined,
-        description: value,
-      });
-    } else if (!item.productId) {
-      // No product selected, update description as user types
-      onUpdate(index, { description: value });
-    }
-  };
 
   // Handle product selection from dropdown
   const handleProductSelect = (productId: string) => {
     const product = products.find((p) => p.id === productId);
     if (product) {
-      setSearchValue(product.name);
-      setOpen(false);
       onProductSelect(index, productId);
-    }
-  };
-
-  // Handle when popover closes - if no product selected, keep as free text
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (!isOpen && !item.productId && searchValue) {
-      // Popover closed without selecting, keep the free text
-      onUpdate(index, { description: searchValue });
     }
   };
 
@@ -129,65 +81,24 @@ export function InvoiceItemRow({
       {/* Product Column - Flexible */}
       <div className="min-w-0 flex items-start w-full">
         <div className="w-full">
-          <Popover open={open} onOpenChange={handleOpenChange}>
-            <PopoverTrigger asChild>
-              <Input
-                value={searchValue}
-                onChange={(e) => handleInputChange(e.target.value)}
-                onFocus={() => setOpen(true)}
-                placeholder={
-                  item.productId
-                    ? t('orders.chooseProduct') || 'Search or type product...'
-                    : t('invoices.productDescription') || 'Search product or enter description...'
-                }
-                className="text-sm h-9 w-full"
-                autoComplete="off"
-              />
-            </PopoverTrigger>
-            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-              <Command>
-                <CommandInput
-                  placeholder={t('common.search') || 'Search products...'}
-                  value={searchValue}
-                  onValueChange={handleInputChange}
-                />
-                <CommandList>
-                  <CommandEmpty>
-                    {t('invoices.continueTypingForFreeText') ||
-                      'Continue typing for free text entry'}
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {products
-                      .filter(
-                        (product) =>
-                          !searchValue ||
-                          product.name.toLowerCase().includes(searchValue.toLowerCase())
-                      )
-                      .map((product) => (
-                        <CommandItem
-                          key={product.id}
-                          value={product.name}
-                          onSelect={() => handleProductSelect(product.id)}
-                        >
-                          <Check
-                            className={cn(
-                              'mr-2 h-4 w-4',
-                              item.productId === product.id ? 'opacity-100' : 'opacity-0'
-                            )}
-                          />
-                          <span className="truncate">{product.name}</span>
-                          {product.sku && (
-                            <span className="ml-auto text-xs text-muted-foreground">
-                              SKU: {product.sku}
-                            </span>
-                          )}
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <ProductSelect
+            value={item.productId || ''}
+            onValueChange={(productId) => {
+              if (productId) {
+                handleProductSelect(productId);
+              } else {
+                // Allow clearing selection
+                onUpdate(index, { productId: undefined, description: '' });
+              }
+            }}
+            products={products}
+            placeholder={
+              item.productId
+                ? t('orders.chooseProduct') || 'Search or type product...'
+                : t('invoices.productDescription') || 'Search product or enter description...'
+            }
+            className="text-sm"
+          />
           {selectedProduct?.sku && item.productId && (
             <p className="text-xs text-muted-foreground/70 mt-0.5 leading-tight">
               {t('products.sku') || 'SKU'}: {selectedProduct.sku}
