@@ -47,7 +47,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { ProductSelect } from '@/components/ui/product-select';
 
 type OrderType = 'CLIENT_ORDER' | 'SUPPLIER_ORDER';
 
@@ -170,18 +170,14 @@ export default function NewOrderPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validation
-    if (!statusId) {
-      toast.error(t('orders.selectStatus') || 'Please select a status');
-      return;
-    }
-    if (orderType === 'CLIENT_ORDER' && !clientId) {
-      toast.error(t('orders.selectClient'));
-      return;
-    }
-    if (orderType === 'SUPPLIER_ORDER' && !supplierId) {
-      toast.error(t('orders.selectSupplier'));
+    
+    if (
+      !orderDate ||
+      (orderType === 'CLIENT_ORDER' && !clientId) ||
+      (orderType === 'SUPPLIER_ORDER' && !supplierId) ||
+      !statusId
+    ) {
+      toast.error(t('orders.requiredFields'));
       return;
     }
     if (
@@ -192,7 +188,7 @@ export default function NewOrderPage() {
       return;
     }
 
-    createMutation.mutate({
+    const orderData = {
       type: orderType,
       clientId: orderType === 'CLIENT_ORDER' ? clientId : undefined,
       supplierId: orderType === 'SUPPLIER_ORDER' ? supplierId : undefined,
@@ -204,10 +200,14 @@ export default function NewOrderPage() {
         productName: item.productName,
         quantity: item.quantity,
         unit: item.unit,
-        unitPrice: item.unitPrice,
+        unitPrice: item.unitPrice, // Use 'unitPrice' as backend expects
         notes: item.notes,
       })),
-    });
+    };
+
+    console.log('Sending order data:', JSON.stringify(orderData, null, 2));
+
+    createMutation.mutate(orderData);
   };
 
   const addItem = () => {
@@ -501,18 +501,21 @@ export default function NewOrderPage() {
                   <div className="space-y-2">
                     <Label htmlFor="clientId">{t('orders.selectClient')} *</Label>
                     <div className="flex gap-2">
-                      <SearchableSelect
+                      <Select
                         value={clientId}
                         onValueChange={setClientId}
-                        options={clients.map((client: Client) => ({
-                          value: client.id,
-                          label: client.name,
-                        }))}
-                        placeholder={t('orders.chooseClient')}
-                        searchPlaceholder={t('common.search')}
-                        emptyText={t('clients.noClients')}
-                        className="flex-1"
-                      />
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder={t('orders.chooseClient')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map((client: Client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <Button
                         type="button"
                         variant="outline"
@@ -529,18 +532,21 @@ export default function NewOrderPage() {
                   <div className="space-y-2">
                     <Label htmlFor="supplierId">{t('orders.selectSupplier')} *</Label>
                     <div className="flex gap-2">
-                      <SearchableSelect
+                      <Select
                         value={supplierId}
                         onValueChange={setSupplierId}
-                        options={suppliers.map((supplier: Supplier) => ({
-                          value: supplier.id,
-                          label: supplier.name,
-                        }))}
-                        placeholder={t('orders.chooseSupplier')}
-                        searchPlaceholder={t('common.search')}
-                        emptyText={t('suppliers.noSuppliers')}
-                        className="flex-1"
-                      />
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder={t('orders.chooseSupplier')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {suppliers.map((supplier: Supplier) => (
+                            <SelectItem key={supplier.id} value={supplier.id}>
+                              {supplier.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <Button
                         type="button"
                         variant="outline"
@@ -557,21 +563,25 @@ export default function NewOrderPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="statusId">{t('orders.statusLabel')} *</Label>
-                  <SearchableSelect
+                  <Select
                     value={statusId}
                     onValueChange={setStatusId}
-                    options={statuses.map(
-                      (status: { id: string; isSystem?: boolean; slug: string; name: string }) => ({
-                        value: status.id,
-                        label: status.isSystem
-                          ? t(`orderStatuses.systemStatuses.${status.slug}`)
-                          : status.name,
-                      })
-                    )}
-                    placeholder={t('orders.selectStatus')}
-                    searchPlaceholder={t('common.search')}
-                    emptyText={t('orderStatuses.noStatuses')}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('orders.selectStatus')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.map(
+                        (status: { id: string; isSystem?: boolean; slug: string; name: string }) => (
+                          <SelectItem key={status.id} value={status.id}>
+                            {status.isSystem
+                              ? t(`orderStatuses.systemStatuses.${status.slug}`)
+                              : status.name}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -650,19 +660,18 @@ export default function NewOrderPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2 md:col-span-2">
                       <Label>{t('orders.product')} *</Label>
-                      <SearchableSelect
+                      <ProductSelect
                         value={item.productId}
                         onValueChange={(value) => {
                           console.log('Product selected:', value);
                           handleProductSelect(index, value);
                         }}
-                        options={products.map((product: Product) => ({
-                          value: product.id,
-                          label: `${product.name} (${product.unit})`,
+                        products={products.map((product: Product) => ({
+                          id: product.id,
+                          name: product.name,
+                          sku: product.sku,
                         }))}
                         placeholder={t('orders.chooseProduct')}
-                        searchPlaceholder={t('common.search')}
-                        emptyText={t('products.noProducts')}
                       />
                       {item.productName && (
                         <p className="text-sm text-muted-foreground">

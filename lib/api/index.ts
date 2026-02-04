@@ -468,7 +468,7 @@ export const ordersApi = {
       productName: string;
       quantity: number;
       unit: string;
-      unitPrice: number;
+      unitPrice: number; // Reverted to unitPrice to match backend
       notes?: string;
     }>;
   }): Promise<Order> => {

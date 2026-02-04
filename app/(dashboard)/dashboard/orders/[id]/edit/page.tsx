@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { ordersApi, orderStatusesApi, productsApi } from '@/lib/api';
 import { Order, OrderItem } from '@/types';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { ProductSelect } from '@/components/ui/product-select';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -145,7 +145,7 @@ export default function EditOrderPage() {
         productName: string;
         quantity: number;
         unit: string;
-        price: number;
+        unitPrice: number; // Use unitPrice to match backend
       }>;
     }) => ordersApi.update(orderId, data as any), // eslint-disable-line @typescript-eslint/no-explicit-any
     onSuccess: () => {
@@ -183,7 +183,7 @@ export default function EditOrderPage() {
           productName: item.productName,
           quantity: Number(item.quantity),
           unit: item.unit,
-          price: Number(item.unitPrice),
+          unitPrice: Number(item.unitPrice), // Use unitPrice to match backend
         })),
       });
     } catch (error) {
@@ -432,18 +432,17 @@ export default function EditOrderPage() {
                       <TableRow key={item.id}>
                         <TableCell>
                           <div className="space-y-2">
-                            <SearchableSelect
+                            <ProductSelect
                               value={item.productId}
                               onValueChange={(value) => handleProductSelect(index, value)}
-                              options={
+                              products={
                                 products?.data?.map((product) => ({
-                                  value: product.id,
-                                  label: `${product.name} (${product.unit})`,
+                                  id: product.id,
+                                  name: product.name,
+                                  sku: product.sku,
                                 })) || []
                               }
                               placeholder="Rechercher un produit..."
-                              searchPlaceholder="Rechercher..."
-                              emptyText="Aucun produit trouvé"
                             />
                             {/* {item.productName && (
                               <p className="text-sm text-muted-foreground">
