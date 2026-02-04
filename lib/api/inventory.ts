@@ -73,6 +73,8 @@ const inventoryApi = {
   getStockMovements: async (params?: {
     productId?: string;
     productType?: 'RAW_MATERIAL' | 'FINISHED_PRODUCT';
+    search?: string;
+    type?: string;
     skip?: number;
     take?: number;
   }) => {
@@ -128,6 +130,8 @@ export const useStockSummary = () => {
 export const useStockMovements = (params?: {
   productId?: string;
   productType?: 'RAW_MATERIAL' | 'FINISHED_PRODUCT';
+  search?: string;
+  type?: string;
   skip?: number;
   take?: number;
 }) => {
@@ -136,6 +140,8 @@ export const useStockMovements = (params?: {
       'stock-movements',
       params?.productId,
       params?.productType,
+      params?.search,
+      params?.type,
       params?.skip,
       params?.take,
     ],

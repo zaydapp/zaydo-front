@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { useDebounce } from '@/hooks/use-debounce';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -38,6 +39,7 @@ export default function StockMovementsPage() {
   const { t } = useTranslation();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [activeTab, setActiveTab] = useState<'RAW_MATERIAL' | 'FINISHED_PRODUCT' | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -61,6 +63,8 @@ export default function StockMovementsPage() {
   // Build params object - explicitly include productType only when not 'ALL'
   const stockMovementsParams = {
     ...(activeTab !== 'ALL' && { productType: activeTab as 'RAW_MATERIAL' | 'FINISHED_PRODUCT' }),
+    ...(debouncedSearchQuery && { search: debouncedSearchQuery }),
+    ...(typeFilter !== 'all' && { type: typeFilter }),
     skip: (currentPage - 1) * ITEMS_PER_PAGE,
     take: ITEMS_PER_PAGE,
   };
@@ -125,21 +129,8 @@ export default function StockMovementsPage() {
   };
 
   const movements: StockMovement[] = data?.data || [];
-  const totalMovements = data?.pagination?.total || movements.length;
+  const totalMovements = data?.pagination?.total || 0;
   const totalPages = Math.ceil(totalMovements / ITEMS_PER_PAGE);
-
-  // Filter by movement type and search (product type is already filtered by API)
-  const filteredMovements = movements.filter((movement: StockMovement) => {
-    const matchesType = typeFilter === 'all' || movement.type === typeFilter;
-    const matchesSearch =
-      !searchQuery ||
-      movement.product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      movement.product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      movement.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      movement.reference?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesType && matchesSearch;
-  });
 
   const handleTabChange = (value: string) => {
     setActiveTab(value as typeof activeTab);
@@ -251,8 +242,7 @@ export default function StockMovementsPage() {
               <CardHeader>
                 <CardTitle>{t('inventory.movements.list')}</CardTitle>
                 <CardDescription>
-                  {t('inventory.movements.total')}: {filteredMovements.length}
-                  {totalMovements > filteredMovements.length && ` / ${totalMovements}`}
+                  {t('inventory.movements.total')}: {totalMovements}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -262,9 +252,9 @@ export default function StockMovementsPage() {
                       <Skeleton key={i} className="h-20 w-full" />
                     ))}
                   </div>
-                ) : filteredMovements.length > 0 ? (
+                ) : movements.length > 0 ? (
                   <div className="space-y-3">
-                    {filteredMovements.map((movement) => (
+                    {movements.map((movement) => (
                       <div
                         key={movement.id}
                         className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
@@ -339,7 +329,7 @@ export default function StockMovementsPage() {
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground mb-4">
-                      {searchQuery || typeFilter !== 'all'
+                      {debouncedSearchQuery || typeFilter !== 'all' || activeTab !== 'ALL'
                         ? t('inventory.movements.noResults')
                         : t('inventory.movements.noMovements')}
                     </p>
@@ -353,7 +343,7 @@ export default function StockMovementsPage() {
                 )}
 
                 {/* Pagination */}
-                {!isLoading && filteredMovements.length > 0 && totalPages > 1 && (
+                {!isLoading && movements.length > 0 && totalPages > 1 && (
                   <div className="flex items-center justify-between px-6 py-4 border-t">
                     <div className="text-sm text-muted-foreground">
                       {t('common.showing')} {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
