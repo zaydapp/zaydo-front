@@ -705,6 +705,10 @@ export const invoicesApi = {
     const response = await apiClient.post<Invoice>(`/invoices/${invoiceId}/credit-note`, data);
     return response.data;
   },
+  updateNumber: async (invoiceId: string, data: { invoiceNumber: string }): Promise<Invoice> => {
+    const response = await apiClient.patch<Invoice>(`/invoices/${invoiceId}/number`, data);
+    return response.data;
+  },
 };
 
 // Employees API (HR Module)
