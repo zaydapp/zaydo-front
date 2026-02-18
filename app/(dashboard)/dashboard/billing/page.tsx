@@ -53,6 +53,8 @@ import { useCurrency } from '@/hooks/use-currency';
 import { useInvoices, useInvoiceStats } from '@/hooks/useInvoices';
 import { Invoice, InvoiceStatus } from '@/types';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { invoicesApi } from '@/lib/api';
 
 // Stat Card Component
 function StatCard({
@@ -217,6 +219,10 @@ export default function InvoicesPage() {
   const [clientFilter, setClientFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
+  const [tempInvoiceNumber, setTempInvoiceNumber] = useState<string>('');
+  // local overrides for invoice numbers (frontend-only)
+  const [invoiceNumberOverrides, setInvoiceNumberOverrides] = useState<Record<string, string>>({});
 
   // API calls
   const {
@@ -593,7 +599,103 @@ export default function InvoicesPage() {
                   ) : (
                     paginatedInvoices.map((invoice) => (
                       <TableRow key={invoice.id} className="hover:bg-muted/30 transition-colors">
-                        <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+                        <TableCell className="font-medium">
+                          {editingInvoiceId === invoice.id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                className="border rounded px-2 py-1 text-sm"
+                                value={tempInvoiceNumber}
+                                onChange={(e) => setTempInvoiceNumber(e.target.value)}
+                              />
+                              <Button
+                                size="sm"
+                                onClick={async () => {
+                                  const newNumber = tempInvoiceNumber.trim();
+                                  if (!newNumber) {
+                                    toast.error(
+                                      t('invoices.numberRequired') || 'Invoice number is required'
+                                    );
+                                    return;
+                                  }
+                                  // Check uniqueness against invoices and overrides (excluding current invoice)
+                                  const existingNumbers = new Set<string>();
+                                  invoices.forEach((inv) => {
+                                    if (inv.id !== invoice.id) {
+                                      existingNumbers.add(
+                                        invoiceNumberOverrides[inv.id] ?? inv.invoiceNumber
+                                      );
+                                    }
+                                  });
+                                  // also include overrides
+                                  Object.entries(invoiceNumberOverrides).forEach(([id, num]) => {
+                                    if (id !== invoice.id) existingNumbers.add(num);
+                                  });
+                                  if (existingNumbers.has(newNumber)) {
+                                    toast.error(
+                                      t('invoices.numberExists') || 'Invoice number already exists'
+                                    );
+                                    return;
+                                  }
+                                  // Persist change to backend
+                                  try {
+                                    const updated = await invoicesApi.updateNumber(invoice.id, {
+                                      invoiceNumber: newNumber,
+                                    });
+                                    // Update local override/display with confirmed value
+                                    setInvoiceNumberOverrides((prev) => ({
+                                      ...prev,
+                                      [invoice.id]: updated.invoiceNumber,
+                                    }));
+                                    setEditingInvoiceId(null);
+                                    setTempInvoiceNumber('');
+                                    toast.success(
+                                      t('invoices.numberUpdated') || 'Invoice number updated'
+                                    );
+                                  } catch (error: unknown) {
+                                    const err = error as { response?: { data?: { message?: string } } };
+                                    const msg =
+                                      err?.response?.data?.message ||
+                                      t('invoices.numberUpdateFailed') ||
+                                      'Failed to update invoice number';
+                                    toast.error(msg);
+                                  }
+                                }}
+                              >
+                                {t('common.save') || 'Save'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingInvoiceId(null);
+                                  setTempInvoiceNumber('');
+                                }}
+                              >
+                                {t('common.cancel') || 'Cancel'}
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span>
+                                {invoiceNumberOverrides[invoice.id] ?? invoice.invoiceNumber}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => {
+                                  setEditingInvoiceId(invoice.id);
+                                  setTempInvoiceNumber(
+                                    invoiceNumberOverrides[invoice.id] ?? invoice.invoiceNumber
+                                  );
+                                }}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell>{invoice.client?.name || 'N/A'}</TableCell>
                         <TableCell>{format(new Date(invoice.issueDate), 'dd MMM yyyy')}</TableCell>
                         <TableCell>{format(new Date(invoice.dueDate), 'dd MMM yyyy')}</TableCell>
