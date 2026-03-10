@@ -94,6 +94,7 @@
     "clients": "Clients",
     "suppliers": "Fournisseurs",
     "orders": "Commandes",
+    "divers": "Divers",
     "templates": "Modèles",
     "priceLists": "Tarifs",
     "billing": "Facturation",
@@ -136,7 +137,37 @@
     "title": "Tableau de bord",
     "subtitle": "Bienvenue ! Voici ce qui se passe avec votre entreprise aujourd'hui.",
     "totalSales": "Ventes totales",
+    "revenue": "Chiffre d'affaires",
     "totalOrders": "Commandes totales",
+    "expenses": "Dépenses",
+    "netProfit": "Bénéfices Net",
+    "revenueMinusExpenses": "Chiffre d'affaires - Dépenses ce mois-ci",
+    "period": {
+      "thisMonth": "Ce mois-ci",
+      "previousMonth": "Mois précédent",
+      "custom": "Période personnalisée",
+      "from": "Du",
+      "to": "Au"
+    },
+    "chartPeriod": {
+      "thisYear": "Cette année",
+      "pastYear": "Année précédente",
+      "custom": "Période personnalisée"
+    },
+    "chartType": {
+      "bar": "Barres",
+      "line": "Ligne",
+      "area": "Aire",
+      "pie": "Camembert"
+    },
+    "revenueChartDescription": "Chiffre d'affaires par mois (commandes clients)",
+    "noRevenueData": "Aucune donnée de chiffre d'affaires",
+    "expensesChartDescription": "Dépenses par mois (commandes fournisseur + divers)",
+    "noExpensesData": "Aucune donnée de dépenses",
+    "expensesChart": {
+      "supplier": "Commandes fournisseur",
+      "divers": "Divers"
+    },
     "inventoryValue": "Valeur de l'inventaire",
     "activeClients": "Clients actifs",
     "fromLastMonth": "par rapport au mois dernier",
@@ -544,6 +575,28 @@
     "updateSupplier": "Mettre À  Jour le Fournisseur",
     "nameRequired": "Le nom du fournisseur est requis",
     "nameMinLength": "Le nom doit contenir au moins 2 caractères"
+  },
+  "divers": {
+    "title": "Divers",
+    "subtitle": "Dépenses diverses (Salaires, Gazoil, etc.) hors commandes",
+    "add": "Ajouter une dépense",
+    "name": "Nom",
+    "amount": "Montant",
+    "date": "Date",
+    "description": "Description",
+    "searchPlaceholder": "Rechercher par nom...",
+    "empty": "Aucune dépense divers",
+    "emptyDescription": "Ajoutez des dépenses comme Salaires, Gazoil, etc.",
+    "deleted": "Dépense supprimée",
+    "deleteError": "Échec de la suppression",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette dépense ?",
+    "created": "Dépense créée",
+    "updated": "Dépense mise à jour",
+    "createError": "Échec de la création",
+    "updateError": "Échec de la mise à jour",
+    "edit": "Modifier la dépense",
+    "invalidAmount": "Le montant doit être supérieur à 0",
+    "descriptionPlaceholder": "Notes ou détails optionnels"
   },
   "orders": {
     "title": "Commandes",

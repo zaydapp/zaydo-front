@@ -435,7 +435,11 @@ export const ordersApi = {
     return response.data;
   },
 
-  getStats: async (): Promise<{
+  getStats: async (params?: {
+    period?: 'current_month' | 'previous_month' | 'custom';
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{
     totalOrders: number;
     clientOrders: number;
     supplierOrders: number;
@@ -444,14 +448,50 @@ export const ordersApi = {
     completedOrders: number;
     totalRevenue: number;
     totalExpenses: number;
+    monthlyRevenue: number;
+    monthlyClientOrders: number;
+    lastMonthRevenue: number;
+    revenueChangePercent: number;
+    monthlySupplierOrders: number;
+    monthlySupplierExpenses: number;
+    monthlyDivers: number;
+    totalMonthlyExpenses: number;
   }> => {
-    const response = await apiClient.get('/tenant/orders/stats');
+    const response = await apiClient.get('/tenant/orders/stats', { params });
     return response.data;
   },
 
   getRecent: async (limit?: number): Promise<Order[]> => {
     const response = await apiClient.get<Order[]>('/tenant/orders/recent', {
       params: { limit },
+    });
+    return response.data;
+  },
+
+  getRevenueChart: async (params?: {
+    period?: 'this_year' | 'past_year' | 'custom';
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{ month: string; revenue: number; label: string }[]> => {
+    const response = await apiClient.get('/tenant/orders/revenue-chart', {
+      params,
+    });
+    return response.data;
+  },
+
+  getExpensesChart: async (params?: {
+    period?: 'this_year' | 'past_year' | 'custom';
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{
+    month: string;
+    label: string;
+    supplierExpenses: number;
+    divers: number;
+    total: number;
+  }[]> => {
+    const response = await apiClient.get('/tenant/orders/expenses-chart', {
+      params,
     });
     return response.data;
   },
@@ -483,6 +523,61 @@ export const ordersApi = {
 
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/tenant/orders/${id}`);
+  },
+};
+
+// Divers API (miscellaneous expenses: Salaries, Gazoil, etc.)
+export interface DiversExpense {
+  id: string;
+  tenantId: string;
+  name: string;
+  amount: number;
+  expenseDate: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const diversApi = {
+  getAll: async (params?: {
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<{
+    data: DiversExpense[];
+    pagination: { total: number; skip: number; take: number };
+  }> => {
+    const response = await apiClient.get('/tenant/divers', { params });
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<DiversExpense> => {
+    const response = await apiClient.get<DiversExpense>(`/tenant/divers/${id}`);
+    return response.data;
+  },
+
+  create: async (data: {
+    name: string;
+    amount: number;
+    expenseDate?: string;
+    description?: string;
+  }): Promise<DiversExpense> => {
+    const response = await apiClient.post<DiversExpense>('/tenant/divers', data);
+    return response.data;
+  },
+
+  update: async (
+    id: string,
+    data: { name?: string; amount?: number; expenseDate?: string; description?: string }
+  ): Promise<DiversExpense> => {
+    const response = await apiClient.patch<DiversExpense>(`/tenant/divers/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await apiClient.delete(`/tenant/divers/${id}`);
   },
 };
 

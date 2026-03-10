@@ -34,9 +34,10 @@ export function SearchableSelect({
 
   const filteredOptions = React.useMemo(() => {
     if (!search) return options;
-    return options.filter((option) => 
-      option.label.toLowerCase().includes(search.toLowerCase()) ||
-      (option.sku && option.sku.toLowerCase().includes(search.toLowerCase()))
+    return options.filter(
+      (option) =>
+        option.label.toLowerCase().includes(search.toLowerCase()) ||
+        (option.sku && option.sku.toLowerCase().includes(search.toLowerCase()))
     );
   }, [options, search]);
 
@@ -45,7 +46,7 @@ export function SearchableSelect({
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dropdownRef.current && 
+        dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
@@ -63,7 +64,7 @@ export function SearchableSelect({
     if (open) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
-      
+
       // Calculate dropdown position
       if (inputRef.current) {
         const rect = inputRef.current.getBoundingClientRect();
@@ -99,62 +100,62 @@ export function SearchableSelect({
     setSearch('');
   };
 
-  const dropdown = open ? createPortal(
-    <div
-      ref={dropdownRef}
-      className="fixed z-9999 bg-popover border rounded-md shadow-md animate-in fade-in-0 zoom-in-95"
-      style={{
-        top: `${dropdownPosition.top}px`,
-        left: `${dropdownPosition.left}px`,
-        width: `${dropdownPosition.width}px`,
-        maxHeight: '300px',
-      }}
-    >
-      <div className="p-2 border-b">
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-9"
-            autoFocus
-          />
-        </div>
-      </div>
-      <div className="max-h-[300px] overflow-y-auto p-1">
-        {filteredOptions.length === 0 ? (
-          <div className="py-6 text-center text-sm text-muted-foreground">{emptyText}</div>
-        ) : (
-          filteredOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={cn(
-                'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground',
-                value === option.value && 'bg-accent'
-              )}
-              onClick={() => handleSelect(option.value)}
-            >
-              <Check
-                className={cn(
-                  'mr-2 h-4 w-4',
-                  value === option.value ? 'opacity-100' : 'opacity-0'
-                )}
+  const dropdown = open
+    ? createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-9999 bg-popover border rounded-md shadow-md animate-in fade-in-0 zoom-in-95"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+            maxHeight: '300px',
+          }}
+        >
+          <div className="p-2 border-b">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 h-9"
+                autoFocus
               />
-              <span className="truncate flex-1">{option.label}</span>
-              {option.sku && (
-                <span className="ml-auto text-xs text-muted-foreground">
-                  SKU: {option.sku}
-                </span>
-              )}
-            </button>
-          ))
-        )}
-      </div>
-    </div>,
-    document.body
-  ) : null;
+            </div>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto p-1">
+            {filteredOptions.length === 0 ? (
+              <div className="py-6 text-center text-sm text-muted-foreground">{emptyText}</div>
+            ) : (
+              filteredOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={cn(
+                    'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground',
+                    value === option.value && 'bg-accent'
+                  )}
+                  onClick={() => handleSelect(option.value)}
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      value === option.value ? 'opacity-100' : 'opacity-0'
+                    )}
+                  />
+                  <span className="truncate flex-1">{option.label}</span>
+                  {option.sku && (
+                    <span className="ml-auto text-xs text-muted-foreground">SKU: {option.sku}</span>
+                  )}
+                </button>
+              ))
+            )}
+          </div>
+        </div>,
+        document.body
+      )
+    : null;
 
   return (
     <div className="relative">
@@ -168,8 +169,8 @@ export function SearchableSelect({
               onValueChange('');
             } else {
               // Check if this matches any product
-              const matchedProduct = options.find(option => 
-                option.label.toLowerCase() === value.toLowerCase()
+              const matchedProduct = options.find(
+                (option) => option.label.toLowerCase() === value.toLowerCase()
               );
               if (matchedProduct) {
                 onValueChange(matchedProduct.value);

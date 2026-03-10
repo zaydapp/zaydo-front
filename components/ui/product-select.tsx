@@ -54,21 +54,14 @@ export function ProductSelect({
 
   return (
     <div className="relative">
-      <Select
-        value={value}
-        onValueChange={handleSelect}
-        open={isOpen}
-        onOpenChange={setIsOpen}
-      >
+      <Select value={value} onValueChange={handleSelect} open={isOpen} onOpenChange={setIsOpen}>
         <SelectTrigger className={cn('w-full h-9', className)}>
           <SelectValue placeholder={placeholder}>
             {selectedProduct ? (
               <div className="flex items-center gap-2">
                 <span className="truncate">{selectedProduct.name}</span>
                 {selectedProduct.sku && (
-                  <span className="text-xs text-muted-foreground">
-                    ({selectedProduct.sku})
-                  </span>
+                  <span className="text-xs text-muted-foreground">({selectedProduct.sku})</span>
                 )}
               </div>
             ) : (
@@ -99,16 +92,11 @@ export function ProductSelect({
                 <SelectItem key={product.id} value={product.id}>
                   <div className="flex items-center gap-2">
                     <Check
-                      className={cn(
-                        'h-4 w-4',
-                        value === product.id ? 'opacity-100' : 'opacity-0'
-                      )}
+                      className={cn('h-4 w-4', value === product.id ? 'opacity-100' : 'opacity-0')}
                     />
                     <span className="truncate flex-1">{product.name}</span>
                     {product.sku && (
-                      <span className="text-xs text-muted-foreground">
-                        SKU: {product.sku}
-                      </span>
+                      <span className="text-xs text-muted-foreground">SKU: {product.sku}</span>
                     )}
                   </div>
                 </SelectItem>

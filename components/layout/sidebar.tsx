@@ -16,6 +16,8 @@ import {
   Settings,
   Tag,
   Receipt,
+  FileText,
+  Wallet,
 } from 'lucide-react';
 import {
   Sidebar as SidebarPrimitive,
@@ -76,6 +78,18 @@ const navItems: NavItem[] = [
     href: '/dashboard/orders',
     icon: ShoppingCart,
     requiredModules: ['orders-invoices'],
+  },
+  {
+    titleKey: 'navigation.divers',
+    href: '/dashboard/divers',
+    icon: Wallet,
+    requiredModules: ['orders-invoices'],
+  },
+  {
+    titleKey: 'navigation.templates',
+    href: '/dashboard/templates',
+    icon: FileText,
+    requiredModules: ['document-templating'],
   },
   {
     titleKey: 'navigation.priceLists',

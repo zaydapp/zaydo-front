@@ -1,6 +1,6 @@
-'use client';
+ 'use client';
 
-import { Bell, Search, Moon, Sun, User, LogOut, Settings } from 'lucide-react';
+import { Bell, Moon, Sun, User, LogOut, Settings } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/contexts/auth-context';
 import { useTenant } from '@/contexts/tenant-context';
@@ -15,16 +15,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { LanguageSwitcher } from './language-switcher';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
 
 export function Header() {
   const { theme, setTheme } = useTheme();
   const { user, logout } = useAuth();
   const { tenant } = useTenant();
-  const { t } = useTranslation();
 
   const getInitials = (firstName?: string, lastName?: string) => {
     if (!firstName || !lastName) return 'U';
@@ -37,18 +34,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 backdrop-blur px-6">
-      {/* Search Bar with Sidebar Toggle */}
-      <div className="flex flex-1 items-center space-x-4">
-        <div className="relative w-full max-w-md flex items-center gap-2">
-          {/* Sidebar Toggle Button */}
-          <SidebarTrigger />
-          <Search className="absolute left-12 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="search"
-            placeholder={t('header.searchPlaceholder')}
-            className="h-10 w-full rounded-lg border bg-background pl-14 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
+      {/* Left side: sidebar toggle only */}
+      <div className="flex flex-1 items-center">
+        <SidebarTrigger />
       </div>
 
       {/* Right Side Actions */}
@@ -73,9 +61,6 @@ export function Header() {
             </div>
           </div>
         )} */}
-
-        {/* Language Switcher */}
-        <LanguageSwitcher />
 
         {/* Theme Toggle */}
         <Button
