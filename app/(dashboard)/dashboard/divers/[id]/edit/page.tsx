@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useParams } from 'next/navigation';
 import { diversApi } from '@/lib/api';
@@ -13,40 +13,31 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 
-export default function EditDiversPage() {
+function EditDiversForm({
+  id,
+  expense,
+}: {
+  id: string;
+  expense: { name: string; amount: number; expenseDate: string; description?: string | null };
+}) {
   const { t } = useTranslation();
   const router = useRouter();
-  const params = useParams();
   const queryClient = useQueryClient();
-  const id = params.id as string;
 
   const [formData, setFormData] = useState({
-    name: '',
-    amount: '',
-    expenseDate: '',
-    description: '',
+    name: expense.name,
+    amount: String(expense.amount),
+    expenseDate: expense.expenseDate.split('T')[0],
+    description: expense.description || '',
   });
-
-  const { data: expense, isLoading } = useQuery({
-    queryKey: ['divers', id],
-    queryFn: () => diversApi.getById(id),
-    enabled: !!id,
-  });
-
-  useEffect(() => {
-    if (expense) {
-      setFormData({
-        name: expense.name,
-        amount: String(expense.amount),
-        expenseDate: expense.expenseDate.split('T')[0],
-        description: expense.description || '',
-      });
-    }
-  }, [expense]);
 
   const updateMutation = useMutation({
-    mutationFn: (data: { name: string; amount: number; expenseDate: string; description?: string }) =>
-      diversApi.update(id, data),
+    mutationFn: (data: {
+      name: string;
+      amount: number;
+      expenseDate: string;
+      description?: string;
+    }) => diversApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['divers'] });
       queryClient.invalidateQueries({ queryKey: ['orders-stats'] });
@@ -72,14 +63,6 @@ export default function EditDiversPage() {
       description: formData.description || undefined,
     });
   };
-
-  if (isLoading || !expense) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -159,4 +142,25 @@ export default function EditDiversPage() {
       </form>
     </div>
   );
+}
+
+export default function EditDiversPage() {
+  const params = useParams();
+  const id = params.id as string;
+
+  const { data: expense, isLoading } = useQuery({
+    queryKey: ['divers', id],
+    queryFn: () => diversApi.getById(id),
+    enabled: !!id,
+  });
+
+  if (isLoading || !expense) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  return <EditDiversForm key={expense.id} id={id} expense={expense} />;
 }

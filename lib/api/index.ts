@@ -483,13 +483,15 @@ export const ordersApi = {
     period?: 'this_year' | 'past_year' | 'custom';
     startDate?: string;
     endDate?: string;
-  }): Promise<{
-    month: string;
-    label: string;
-    supplierExpenses: number;
-    divers: number;
-    total: number;
-  }[]> => {
+  }): Promise<
+    {
+      month: string;
+      label: string;
+      supplierExpenses: number;
+      divers: number;
+      total: number;
+    }[]
+  > => {
     const response = await apiClient.get('/tenant/orders/expenses-chart', {
       params,
     });

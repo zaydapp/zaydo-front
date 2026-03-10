@@ -328,14 +328,14 @@ export default function DashboardPage() {
               <>
                 <div
                   className={`text-3xl font-bold ${
-                    (ordersStats?.monthlyRevenue ?? 0) - (ordersStats?.totalMonthlyExpenses ?? 0) >= 0
+                    (ordersStats?.monthlyRevenue ?? 0) - (ordersStats?.totalMonthlyExpenses ?? 0) >=
+                    0
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-red-600 dark:text-red-400'
                   }`}
                 >
                   {formatCurrency(
-                    (ordersStats?.monthlyRevenue ?? 0) -
-                      (ordersStats?.totalMonthlyExpenses ?? 0)
+                    (ordersStats?.monthlyRevenue ?? 0) - (ordersStats?.totalMonthlyExpenses ?? 0)
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -357,9 +357,13 @@ export default function DashboardPage() {
             <span className="text-sm">
               <span className="font-medium">Commandes Clients</span>
               {' — '}
-              <span className="text-blue-700 dark:text-blue-400 font-semibold">{ordersStats?.monthlyClientOrders ?? 0}</span>
+              <span className="text-blue-700 dark:text-blue-400 font-semibold">
+                {ordersStats?.monthlyClientOrders ?? 0}
+              </span>
               {' commandes · '}
-              <span className="text-muted-foreground">{formatCurrency(ordersStats?.monthlyRevenue ?? 0)} générés ({periodLabel})</span>
+              <span className="text-muted-foreground">
+                {formatCurrency(ordersStats?.monthlyRevenue ?? 0)} générés ({periodLabel})
+              </span>
             </span>
           )}
         </Card>
@@ -372,9 +376,13 @@ export default function DashboardPage() {
             <span className="text-sm">
               <span className="font-medium">Commandes Fournisseurs</span>
               {' — '}
-              <span className="text-green-700 dark:text-green-400 font-semibold">{ordersStats?.monthlySupplierOrders ?? 0}</span>
+              <span className="text-green-700 dark:text-green-400 font-semibold">
+                {ordersStats?.monthlySupplierOrders ?? 0}
+              </span>
               {' commandes · '}
-              <span className="text-muted-foreground">{formatCurrency(ordersStats?.monthlySupplierExpenses ?? 0)} dépensés ({periodLabel})</span>
+              <span className="text-muted-foreground">
+                {formatCurrency(ordersStats?.monthlySupplierExpenses ?? 0)} dépensés ({periodLabel})
+              </span>
             </span>
           )}
         </Card>
@@ -574,7 +582,10 @@ export default function DashboardPage() {
                     />
                   </PieChart>
                 ) : chartType === 'line' ? (
-                  <LineChart data={revenueChartData} margin={{ top: 16, right: 16, left: 8, bottom: 24 }}>
+                  <LineChart
+                    data={revenueChartData}
+                    margin={{ top: 16, right: 16, left: 8, bottom: 24 }}
+                  >
                     <defs>
                       <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#14b8a6" stopOpacity={1} />
@@ -582,13 +593,44 @@ export default function DashboardPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="label" interval={0} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
-                    <YAxis width={72} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisTick} />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number) => [formatCurrency(value), t('dashboard.revenue')]} labelFormatter={(label) => label} cursor={{ fill: 'var(--muted)' }} />
-                    <Line type="monotone" dataKey="revenue" stroke="#14b8a6" strokeWidth={2} dot={{ fill: '#14b8a6', r: 4 }} />
+                    <XAxis
+                      dataKey="label"
+                      interval={0}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={{ stroke: 'var(--border)' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      width={72}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={formatAxisTick}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      }}
+                      formatter={(value: number) => [formatCurrency(value), t('dashboard.revenue')]}
+                      labelFormatter={(label) => label}
+                      cursor={{ fill: 'var(--muted)' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#14b8a6"
+                      strokeWidth={2}
+                      dot={{ fill: '#14b8a6', r: 4 }}
+                    />
                   </LineChart>
                 ) : chartType === 'area' ? (
-                  <AreaChart data={revenueChartData} margin={{ top: 16, right: 16, left: 8, bottom: 24 }}>
+                  <AreaChart
+                    data={revenueChartData}
+                    margin={{ top: 16, right: 16, left: 8, bottom: 24 }}
+                  >
                     <defs>
                       <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.4} />
@@ -596,13 +638,44 @@ export default function DashboardPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="label" interval={0} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
-                    <YAxis width={72} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisTick} />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number) => [formatCurrency(value), t('dashboard.revenue')]} labelFormatter={(label) => label} cursor={{ fill: 'var(--muted)' }} />
-                    <Area type="monotone" dataKey="revenue" fill="url(#revenueGradient)" stroke="#14b8a6" strokeWidth={2} />
+                    <XAxis
+                      dataKey="label"
+                      interval={0}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={{ stroke: 'var(--border)' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      width={72}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={formatAxisTick}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      }}
+                      formatter={(value: number) => [formatCurrency(value), t('dashboard.revenue')]}
+                      labelFormatter={(label) => label}
+                      cursor={{ fill: 'var(--muted)' }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      fill="url(#revenueGradient)"
+                      stroke="#14b8a6"
+                      strokeWidth={2}
+                    />
                   </AreaChart>
                 ) : (
-                  <BarChart data={revenueChartData} margin={{ top: 16, right: 16, left: 8, bottom: 24 }}>
+                  <BarChart
+                    data={revenueChartData}
+                    margin={{ top: 16, right: 16, left: 8, bottom: 24 }}
+                  >
                     <defs>
                       <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#14b8a6" stopOpacity={1} />
@@ -610,10 +683,37 @@ export default function DashboardPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="label" interval={0} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
-                    <YAxis width={72} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisTick} />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number) => [formatCurrency(value), t('dashboard.revenue')]} labelFormatter={(label) => label} cursor={{ fill: 'var(--muted)' }} />
-                    <Bar dataKey="revenue" fill="url(#revenueGradient)" radius={[6, 6, 0, 0]} maxBarSize={48} />
+                    <XAxis
+                      dataKey="label"
+                      interval={0}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={{ stroke: 'var(--border)' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      width={72}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={formatAxisTick}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      }}
+                      formatter={(value: number) => [formatCurrency(value), t('dashboard.revenue')]}
+                      labelFormatter={(label) => label}
+                      cursor={{ fill: 'var(--muted)' }}
+                    />
+                    <Bar
+                      dataKey="revenue"
+                      fill="url(#revenueGradient)"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={48}
+                    />
                   </BarChart>
                 )}
               </ResponsiveContainer>
@@ -698,37 +798,119 @@ export default function DashboardPage() {
               </div>
             ) : expensesChartData && expensesChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                {chartType === 'pie' ? (() => {
-                  const supplierTotal = expensesChartData.reduce((s, d) => s + (d.supplierExpenses ?? 0), 0);
-                  const diversTotal = expensesChartData.reduce((s, d) => s + (d.divers ?? 0), 0);
-                  const pieData = [
-                    { name: t('dashboard.expensesChart.supplier'), value: supplierTotal, color: '#0ea5e9' },
-                    { name: t('dashboard.expensesChart.divers'), value: diversTotal, color: '#8b5cf6' },
-                  ].filter((d) => d.value > 0);
-                  return pieData.length > 0 ? (
-                    <PieChart>
-                      <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
-                        {pieData.map((d, i) => (
-                          <Cell key={i} fill={d.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number, name: string) => [formatCurrency(value), name]} />
-                    </PieChart>
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-muted-foreground">{t('dashboard.noExpensesData')}</div>
-                  );
-                })() : chartType === 'line' ? (
-                  <LineChart data={expensesChartData} margin={{ top: 16, right: 16, left: 8, bottom: 24 }}>
+                {chartType === 'pie' ? (
+                  (() => {
+                    const supplierTotal = expensesChartData.reduce(
+                      (s, d) => s + (d.supplierExpenses ?? 0),
+                      0
+                    );
+                    const diversTotal = expensesChartData.reduce((s, d) => s + (d.divers ?? 0), 0);
+                    const pieData = [
+                      {
+                        name: t('dashboard.expensesChart.supplier'),
+                        value: supplierTotal,
+                        color: '#0ea5e9',
+                      },
+                      {
+                        name: t('dashboard.expensesChart.divers'),
+                        value: diversTotal,
+                        color: '#8b5cf6',
+                      },
+                    ].filter((d) => d.value > 0);
+                    return pieData.length > 0 ? (
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          label={({ name, percent }) =>
+                            `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                          }
+                        >
+                          {pieData.map((d, i) => (
+                            <Cell key={i} fill={d.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'var(--card)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                          }}
+                          formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                        />
+                      </PieChart>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-muted-foreground">
+                        {t('dashboard.noExpensesData')}
+                      </div>
+                    );
+                  })()
+                ) : chartType === 'line' ? (
+                  <LineChart
+                    data={expensesChartData}
+                    margin={{ top: 16, right: 16, left: 8, bottom: 24 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="label" interval={0} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
-                    <YAxis width={72} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisTick} />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number, name: string) => [formatCurrency(value), name]} labelFormatter={(label) => label} cursor={{ fill: 'var(--muted)' }} />
-                    <Legend wrapperStyle={{ paddingTop: 16 }} formatter={(value) => <span style={{ color: 'var(--foreground)', fontSize: 12 }}>{value}</span>} iconType="square" iconSize={10} />
-                    <Line type="monotone" dataKey="supplierExpenses" name={t('dashboard.expensesChart.supplier')} stroke="#0ea5e9" strokeWidth={2} dot={{ fill: '#0ea5e9', r: 4 }} />
-                    <Line type="monotone" dataKey="divers" name={t('dashboard.expensesChart.divers')} stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 4 }} />
+                    <XAxis
+                      dataKey="label"
+                      interval={0}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={{ stroke: 'var(--border)' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      width={72}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={formatAxisTick}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      }}
+                      formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                      labelFormatter={(label) => label}
+                      cursor={{ fill: 'var(--muted)' }}
+                    />
+                    <Legend
+                      wrapperStyle={{ paddingTop: 16 }}
+                      formatter={(value) => (
+                        <span style={{ color: 'var(--foreground)', fontSize: 12 }}>{value}</span>
+                      )}
+                      iconType="square"
+                      iconSize={10}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="supplierExpenses"
+                      name={t('dashboard.expensesChart.supplier')}
+                      stroke="#0ea5e9"
+                      strokeWidth={2}
+                      dot={{ fill: '#0ea5e9', r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="divers"
+                      name={t('dashboard.expensesChart.divers')}
+                      stroke="#8b5cf6"
+                      strokeWidth={2}
+                      dot={{ fill: '#8b5cf6', r: 4 }}
+                    />
                   </LineChart>
                 ) : chartType === 'area' ? (
-                  <AreaChart data={expensesChartData} margin={{ top: 16, right: 16, left: 8, bottom: 24 }}>
+                  <AreaChart
+                    data={expensesChartData}
+                    margin={{ top: 16, right: 16, left: 8, bottom: 24 }}
+                  >
                     <defs>
                       <linearGradient id="supplierGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.4} />
@@ -740,15 +922,63 @@ export default function DashboardPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="label" interval={0} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
-                    <YAxis width={72} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisTick} />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number, name: string) => [formatCurrency(value), name]} labelFormatter={(label) => label} cursor={{ fill: 'var(--muted)' }} />
-                    <Legend wrapperStyle={{ paddingTop: 16 }} formatter={(value) => <span style={{ color: 'var(--foreground)', fontSize: 12 }}>{value}</span>} iconType="square" iconSize={10} />
-                    <Area type="monotone" dataKey="supplierExpenses" name={t('dashboard.expensesChart.supplier')} stackId="a" fill="url(#supplierGradient)" stroke="#0ea5e9" strokeWidth={2} />
-                    <Area type="monotone" dataKey="divers" name={t('dashboard.expensesChart.divers')} stackId="a" fill="url(#diversGradient)" stroke="#8b5cf6" strokeWidth={2} />
+                    <XAxis
+                      dataKey="label"
+                      interval={0}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={{ stroke: 'var(--border)' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      width={72}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={formatAxisTick}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      }}
+                      formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                      labelFormatter={(label) => label}
+                      cursor={{ fill: 'var(--muted)' }}
+                    />
+                    <Legend
+                      wrapperStyle={{ paddingTop: 16 }}
+                      formatter={(value) => (
+                        <span style={{ color: 'var(--foreground)', fontSize: 12 }}>{value}</span>
+                      )}
+                      iconType="square"
+                      iconSize={10}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="supplierExpenses"
+                      name={t('dashboard.expensesChart.supplier')}
+                      stackId="a"
+                      fill="url(#supplierGradient)"
+                      stroke="#0ea5e9"
+                      strokeWidth={2}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="divers"
+                      name={t('dashboard.expensesChart.divers')}
+                      stackId="a"
+                      fill="url(#diversGradient)"
+                      stroke="#8b5cf6"
+                      strokeWidth={2}
+                    />
                   </AreaChart>
                 ) : (
-                  <BarChart data={expensesChartData} margin={{ top: 16, right: 16, left: 8, bottom: 24 }}>
+                  <BarChart
+                    data={expensesChartData}
+                    margin={{ top: 16, right: 16, left: 8, bottom: 24 }}
+                  >
                     <defs>
                       <linearGradient id="supplierGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#0ea5e9" stopOpacity={1} />
@@ -760,12 +990,55 @@ export default function DashboardPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="label" interval={0} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
-                    <YAxis width={72} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatAxisTick} />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number, name: string) => [formatCurrency(value), name]} labelFormatter={(label) => label} cursor={{ fill: 'var(--muted)' }} />
-                    <Legend wrapperStyle={{ paddingTop: 16 }} formatter={(value) => <span style={{ color: 'var(--foreground)', fontSize: 12 }}>{value}</span>} iconType="square" iconSize={10} />
-                    <Bar dataKey="supplierExpenses" stackId="a" fill="url(#supplierGradient)" radius={[0, 0, 0, 0]} maxBarSize={48} name={t('dashboard.expensesChart.supplier')} />
-                    <Bar dataKey="divers" stackId="a" fill="url(#diversGradient)" radius={[6, 6, 0, 0]} maxBarSize={48} name={t('dashboard.expensesChart.divers')} />
+                    <XAxis
+                      dataKey="label"
+                      interval={0}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={{ stroke: 'var(--border)' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      width={72}
+                      tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={formatAxisTick}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      }}
+                      formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                      labelFormatter={(label) => label}
+                      cursor={{ fill: 'var(--muted)' }}
+                    />
+                    <Legend
+                      wrapperStyle={{ paddingTop: 16 }}
+                      formatter={(value) => (
+                        <span style={{ color: 'var(--foreground)', fontSize: 12 }}>{value}</span>
+                      )}
+                      iconType="square"
+                      iconSize={10}
+                    />
+                    <Bar
+                      dataKey="supplierExpenses"
+                      stackId="a"
+                      fill="url(#supplierGradient)"
+                      radius={[0, 0, 0, 0]}
+                      maxBarSize={48}
+                      name={t('dashboard.expensesChart.supplier')}
+                    />
+                    <Bar
+                      dataKey="divers"
+                      stackId="a"
+                      fill="url(#diversGradient)"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={48}
+                      name={t('dashboard.expensesChart.divers')}
+                    />
                   </BarChart>
                 )}
               </ResponsiveContainer>

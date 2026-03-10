@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import { Bell, Moon, Sun, User, LogOut, Settings } from 'lucide-react';
 import { useTheme } from 'next-themes';

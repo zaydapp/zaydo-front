@@ -85,7 +85,8 @@ export default function DiversPage() {
           />
         </div>
         <div className="text-sm text-muted-foreground">
-          {data?.pagination.total || 0} {t('common.results', { count: data?.pagination.total || 0 })}
+          {data?.pagination.total || 0}{' '}
+          {t('common.results', { count: data?.pagination.total || 0 })}
         </div>
       </div>
 
@@ -119,7 +120,9 @@ export default function DiversPage() {
                     </div>
                     <div>
                       <p className="font-medium text-foreground">{t('divers.empty')}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{t('divers.emptyDescription')}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {t('divers.emptyDescription')}
+                      </p>
                     </div>
                     <Button onClick={() => router.push('/dashboard/divers/new')} variant="outline">
                       <Plus className="mr-2 h-4 w-4" />

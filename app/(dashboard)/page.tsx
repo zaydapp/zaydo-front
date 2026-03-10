@@ -189,7 +189,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground mt-2">
                   {ordersStats?.monthlySupplierOrders ?? 0} cmd. fournisseur
                   {(ordersStats?.monthlyDivers ?? 0) > 0 && (
-                    <> + {formatCurrency(ordersStats.monthlyDivers)} divers</>
+                    <> + {formatCurrency(ordersStats?.monthlyDivers ?? 0)} divers</>
                   )}{' '}
                   ce mois-ci
                 </p>
@@ -215,14 +215,14 @@ export default function DashboardPage() {
               <>
                 <div
                   className={`text-3xl font-bold ${
-                    (ordersStats?.monthlyRevenue ?? 0) - (ordersStats?.totalMonthlyExpenses ?? 0) >= 0
+                    (ordersStats?.monthlyRevenue ?? 0) - (ordersStats?.totalMonthlyExpenses ?? 0) >=
+                    0
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-red-600 dark:text-red-400'
                   }`}
                 >
                   {formatCurrency(
-                    (ordersStats?.monthlyRevenue ?? 0) -
-                      (ordersStats?.totalMonthlyExpenses ?? 0)
+                    (ordersStats?.monthlyRevenue ?? 0) - (ordersStats?.totalMonthlyExpenses ?? 0)
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -377,7 +377,6 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-
       </div>
 
       {/* Active Orders Section */}

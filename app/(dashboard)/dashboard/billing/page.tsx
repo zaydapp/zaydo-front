@@ -652,7 +652,9 @@ export default function InvoicesPage() {
                                       t('invoices.numberUpdated') || 'Invoice number updated'
                                     );
                                   } catch (error: unknown) {
-                                    const err = error as { response?: { data?: { message?: string } } };
+                                    const err = error as {
+                                      response?: { data?: { message?: string } };
+                                    };
                                     const msg =
                                       err?.response?.data?.message ||
                                       t('invoices.numberUpdateFailed') ||
