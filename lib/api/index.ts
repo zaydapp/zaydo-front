@@ -344,6 +344,17 @@ export const clientsApi = {
     return response.data;
   },
 
+  getMonthlyRevenue: async (
+    id: string,
+    year: number,
+  ): Promise<{ month: string; revenue: number; label: string }[]> => {
+    const response = await apiClient.get(
+      `/tenant/clients/${id}/monthly-revenue`,
+      { params: { year } },
+    );
+    return response.data;
+  },
+
   create: async (data: Partial<Client>): Promise<Client> => {
     const response = await apiClient.post<Client>('/tenant/clients', data);
     return response.data;

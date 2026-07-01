@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, LoginCredentials, AuthResponse } from '@/types';
 import { authApi } from '@/lib/api';
+import { scheduleProactiveRefresh, cancelProactiveRefresh } from '@/lib/api/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -44,6 +45,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const parsedUser = JSON.parse(storedUser);
           console.log('Loaded user:', parsedUser);
           setUser(parsedUser);
+
+          // Arm the silent refresh timer for the stored access token
+          const storedToken =
+            sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken');
+          if (storedToken) scheduleProactiveRefresh(storedToken);
         }
       } catch (error) {
         console.error('Failed to restore user:', error);
@@ -82,6 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (response.user.tenantId) {
           localStorage.setItem('tenantId', response.user.tenantId);
         }
+
+        // Arm the silent refresh timer immediately after login
+        scheduleProactiveRefresh(response.accessToken);
       }
 
       setUser(response.user);
@@ -98,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    cancelProactiveRefresh();
     try {
       // Demo mode: Just clear storage without API call
       // await authApi.logout();
