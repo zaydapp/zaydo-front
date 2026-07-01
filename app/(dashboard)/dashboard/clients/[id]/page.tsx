@@ -2,11 +2,19 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { clientsApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   ArrowLeft,
   Mail,
@@ -32,10 +40,24 @@ export default function ClientDetailsPage() {
   const clientId = params.id as string;
   const { format: formatCurrency } = useCurrency();
 
+  const currentYear = new Date().getFullYear();
+  const [year, setYear] = useState(currentYear);
+  const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
     queryFn: () => clientsApi.getById(clientId),
   });
+
+  const { data: monthlyRevenue, isLoading: isMonthlyLoading } = useQuery({
+    queryKey: ['client-monthly-revenue', clientId, year],
+    queryFn: () => clientsApi.getMonthlyRevenue(clientId, year),
+  });
+
+  const monthlyTotal = (monthlyRevenue ?? []).reduce(
+    (sum, row) => sum + Number(row.revenue),
+    0,
+  );
 
   if (isLoading) {
     return (
@@ -193,6 +215,54 @@ export default function ClientDetailsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Monthly Revenue */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>{t('clients.monthlyRevenue')}</CardTitle>
+          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map((y) => (
+                <SelectItem key={y} value={String(y)}>
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardHeader>
+        <CardContent>
+          {isMonthlyLoading ? (
+            <p className="text-muted-foreground py-8 text-center">
+              {t('common.loading')}
+            </p>
+          ) : (
+            <div className="divide-y">
+              <div className="flex items-center justify-between pb-2 text-sm font-medium text-muted-foreground">
+                <span>{t('clients.month')}</span>
+                <span>{t('clients.revenue')}</span>
+              </div>
+              {(monthlyRevenue ?? []).map((row) => (
+                <div
+                  key={row.month}
+                  className="flex items-center justify-between py-2"
+                >
+                  <span>{row.label}</span>
+                  <span className="font-medium">
+                    {formatCurrency(Number(row.revenue))}
+                  </span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between pt-3 text-base font-bold">
+                <span>{t('clients.monthlyRevenueTotal')}</span>
+                <span>{formatCurrency(monthlyTotal)}</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Notes */}
       {client.notes && (
