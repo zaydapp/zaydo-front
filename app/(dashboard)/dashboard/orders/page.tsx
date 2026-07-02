@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { ordersApi, orderStatusesApi } from '@/lib/api';
-import { Order, OrderType, OrderStatusItem } from '@/types';
+import { Order, OrderType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Eye, Trash2, Package, TrendingUp, TrendingDown } from 'lucide-react';
@@ -38,6 +38,13 @@ export default function OrdersPage() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'CLIENT_ORDER' | 'SUPPLIER_ORDER'>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
+  // Reset to first page whenever the filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, activeTab, selectedStatus]);
 
   // Fetch order statuses dynamically
   const { data: orderStatuses } = useQuery({
@@ -46,15 +53,19 @@ export default function OrdersPage() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['orders', search, activeTab, selectedStatus],
+    queryKey: ['orders', search, activeTab, selectedStatus, page],
     queryFn: () =>
       ordersApi.getAll({
         search,
         type: activeTab !== 'ALL' ? (activeTab as OrderType) : undefined,
         status: selectedStatus || undefined,
-        take: 50,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
       }),
   });
+
+  const total = data?.pagination.total || 0;
+  const totalPages = Math.ceil(total / pageSize);
 
   const { data: stats } = useQuery({
     queryKey: ['orders', 'stats'],
@@ -213,6 +224,59 @@ export default function OrdersPage() {
               onDelete={handleDelete}
               deleteMutation={deleteMutation}
             />
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {t('common.showing') || 'Affichage'} {(page - 1) * pageSize + 1} -{' '}
+                  {Math.min(page * pageSize, total)} {t('common.of') || 'sur'} {total}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    {t('common.previous') || 'Précédent'}
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (page <= 3) {
+                        pageNum = i + 1;
+                      } else if (page >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = page - 2 + i;
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setPage(pageNum)}
+                          className="w-10"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                  >
+                    {t('common.next') || 'Suivant'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
         ))}
       </Tabs>
@@ -242,7 +306,7 @@ function OrdersTable({ orders, isLoading, onView, onDelete, deleteMutation }: Or
             <TableHead className="font-semibold">{t('orders.customer')}</TableHead>
             <TableHead className="font-semibold">{t('orders.orderDate')}</TableHead>
             <TableHead className="font-semibold">{t('orders.totalAmount')}</TableHead>
-            <TableHead className="font-semibold">{t('orders.status')}</TableHead>
+            <TableHead className="font-semibold">{t('orders.statusLabel')}</TableHead>
             <TableHead className="text-right font-semibold">{t('common.actions')}</TableHead>
           </TableRow>
         </TableHeader>
