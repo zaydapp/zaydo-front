@@ -190,6 +190,7 @@ export default function NewOrderPage() {
 
     const orderData = {
       type: orderType,
+      statusId,
       clientId: orderType === 'CLIENT_ORDER' ? clientId : undefined,
       supplierId: orderType === 'SUPPLIER_ORDER' ? supplierId : undefined,
       orderDate,

@@ -511,6 +511,7 @@ export const ordersApi = {
 
   create: async (data: {
     type: 'CLIENT_ORDER' | 'SUPPLIER_ORDER';
+    statusId?: string;
     clientId?: string;
     supplierId?: string;
     orderDate?: string;
