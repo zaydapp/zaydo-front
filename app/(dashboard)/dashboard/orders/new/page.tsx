@@ -723,6 +723,7 @@ export default function NewOrderPage() {
           </Card>
         )}
 
+
         {/* Step 4: Review */}
         {currentStep === 4 && (
           <div className="space-y-6">
